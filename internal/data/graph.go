@@ -26,8 +26,14 @@ func (gr *Graph[T, V]) InsertVertex(val T) {
 }
 
 func (gr *Graph[T, V]) InsertEdge(firstVertex T, secondVertex T, weight V) error {
-	fIdx := gr.hash[gr.hashFunction(firstVertex)]
-	sIdx := gr.hash[gr.hashFunction(secondVertex)]
+	fIdx, ok := gr.hash[gr.hashFunction(firstVertex)]
+	if !ok {
+		return errors.New("The first vertex does not exists on the graph.")
+	}
+	sIdx, ok := gr.hash[gr.hashFunction(secondVertex)]
+	if !ok {
+		return errors.New("The second vertex does not exists on the graph.")
+	}
 
 	err := gr.edges[fIdx].Insert(NodeValue[V]{
 		idx: sIdx,
@@ -48,5 +54,8 @@ func (gr *Graph[T, V]) InsertEdge(firstVertex T, secondVertex T, weight V) error
 }
 
 func (gr *Graph[T, V]) GetEdges(v T) error {
-	return nil
+	idx := gr.hash[gr.hashFunction(v)]
+
+	edges := gr.edges[idx].GetNodesValues()
+	return edges
 }
