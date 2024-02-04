@@ -303,9 +303,17 @@ func TestGetNodesValue(t *testing.T) {
 		}
 	}
 
-	vals := *tree.GetNodesValues()
-	t.Log(vals)
+	vals := tree.GetNodesValues()
 	if len(vals) != 30 {
 		t.Fatalf("Expected 30 nodes but got %v", len(vals))
+	}
+}
+
+func TestGetNodesEmpty(t *testing.T) {
+	tree := NewTree[int]()
+
+	vals := tree.GetNodesValues()
+	if len(vals) != 0 {
+		t.Fatalf("Expected 0 nodes but got %v", len(vals))
 	}
 }

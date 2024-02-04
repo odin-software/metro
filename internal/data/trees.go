@@ -185,13 +185,15 @@ func (rbt *RBTree[V]) GetValue(idx int) (NodeValue[V], error) {
 	return current.value, nil
 }
 
-func (rbt *RBTree[V]) GetNodesValues() *[]NodeValue[V] {
-	return rbt.root.preorder(&[]NodeValue[V]{})
+func (rbt *RBTree[V]) GetNodesValues() []NodeValue[V] {
+	return *rbt.root.preorder(&[]NodeValue[V]{})
 }
 
 func (rbn *RBNode[V]) preorder(visited *[]NodeValue[V]) *[]NodeValue[V] {
 	if rbn != nil {
-		*visited = append(*visited, rbn.value)
+		if !reflect.DeepEqual(rbn, &RBNode[V]{}) {
+			*visited = append(*visited, rbn.value)
+		}
 	}
 	if rbn.left != nil {
 		if !reflect.DeepEqual(rbn.left, &RBNode[V]{}) {
