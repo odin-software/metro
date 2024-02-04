@@ -80,6 +80,93 @@ func TestInsertEdge(t *testing.T) {
 
 	errEdge := g.InsertEdge(ts1, ts2, 3)
 	if errEdge == nil {
-		t.Fatal("This should error!")
+		t.Fatal("This should error because the edge should exist already.")
+	}
+}
+
+func TestNonExistingVertexInsertEdge(t *testing.T) {
+	g := NewGraph[TestStruct, int](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+
+	err := g.InsertEdge(ts1, ts2, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	nonExistingErr := g.InsertEdge(ts2, ts3, 8)
+	if nonExistingErr == nil {
+		t.Fatal("This should error because the vertex does not exists.")
+	}
+}
+
+func TestGetEdges(t *testing.T) {
+	g := NewGraph[TestStruct, int](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+
+	// emptyEdges, errEmpty := g.GetEdges(ts1)
+	// if errEmpty != nil {
+	// 	t.Fatal(errEmpty)
+	// }
+	// if len(emptyEdges) != 0 {
+	// 	t.Fatal("There should be no edges.")
+	// }
+
+	err := g.InsertEdge(ts1, ts2, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err2 := g.InsertEdge(ts1, ts3, 7)
+	if err2 != nil {
+		t.Fatal(err2)
+	}
+	err3 := g.InsertEdge(ts2, ts3, 9)
+	if err3 != nil {
+		t.Fatal(err3)
+	}
+
+	edges, err := g.GetEdges(ts1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(edges) != 2 {
+		t.Fatal("Ts1 should have two edges connected.")
+	}
+	edgests2, errts2 := g.GetEdges(ts2)
+	if errts2 != nil {
+		t.Fatal(errts2)
+	}
+	if len(edgests2) != 2 {
+		t.Fatal("Ts2 should have two edges connected.")
 	}
 }
