@@ -61,6 +61,8 @@ func (rbt *RBTree[T]) Insert(val NodeValue[T]) error {
 		parent.right = &newNode
 	}
 
+	rbt.fix_insert(&newNode)
+
 	return nil
 }
 
@@ -110,4 +112,55 @@ func (rbt *RBTree[T]) rotate_right(x *RBNode[T]) {
 
 	y.right = x
 	x.parent = y
+}
+
+func (rbt *RBTree[V]) fix_insert(newNode *RBNode[V]) {
+	for newNode != rbt.root && newNode.parent.red {
+		if newNode.parent == newNode.parent.parent.right {
+			uncle := newNode.parent.parent.left
+			if uncle.red {
+				uncle.red = false
+				newNode.parent.red = false
+				newNode.parent.parent.red = true
+				newNode = newNode.parent.parent
+			} else {
+				if newNode == newNode.parent.left {
+					newNode = newNode.parent
+					rbt.rotate_right(newNode)
+				}
+				newNode.parent.red = false
+				newNode.parent.parent.red = true
+				rbt.rotate_left(newNode.parent.parent)
+			}
+		} else {
+			uncle := newNode.parent.parent.right
+			if uncle.red {
+				uncle.red = false
+				newNode.parent.red = false
+				newNode.parent.parent.red = true
+				newNode = newNode.parent.parent
+			} else {
+				if newNode == newNode.parent.right {
+					newNode = newNode.parent
+					rbt.rotate_left(newNode)
+				}
+				newNode.parent.red = false
+				newNode.parent.parent.red = true
+				rbt.rotate_right(newNode.parent.parent)
+			}
+		}
+	}
+	rbt.root.red = false
+}
+
+func (rbt *RBTree[V]) exists(idx int) (*RBNode[V], error) {
+	current := rbt.root
+	for current != rbt.leaf && idx != current.value.idx {
+		if idx < current.value.idx {
+			current = current.left
+		} else {
+			current = current.right
+		}
+	}
+	return current, nil
 }
