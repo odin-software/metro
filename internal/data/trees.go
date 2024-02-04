@@ -169,12 +169,49 @@ func (rbt *RBTree[V]) Get(idx int) (*RBNode[V], error) {
 	return current, nil
 }
 
+func (rbt *RBTree[V]) GetValue(idx int) (NodeValue[V], error) {
+	current := rbt.root
+	for current != rbt.leaf && idx != current.value.idx {
+		if idx < current.value.idx {
+			current = current.left
+		} else {
+			current = current.right
+		}
+	}
+
+	if reflect.DeepEqual(current, &RBNode[V]{}) {
+		return NodeValue[V]{}, errors.New("This value is not in this tree.")
+	}
+	return current.value, nil
+}
+
+func (rbt *RBTree[V]) GetNodesValues() *[]NodeValue[V] {
+	return rbt.root.preorder(&[]NodeValue[V]{})
+}
+
+func (rbn *RBNode[V]) preorder(visited *[]NodeValue[V]) *[]NodeValue[V] {
+	if rbn != nil {
+		*visited = append(*visited, rbn.value)
+	}
+	if rbn.left != nil {
+		if !reflect.DeepEqual(rbn.left, &RBNode[V]{}) {
+			rbn.left.preorder(visited)
+		}
+	}
+	if rbn.right != nil {
+		if !reflect.DeepEqual(rbn.right, &RBNode[V]{}) {
+			rbn.right.preorder(visited)
+		}
+	}
+	return visited
+}
+
 func (rbt *RBTree[V]) Count() int {
 	return countNodes[V](rbt.root)
 }
 
 func countNodes[V any](root *RBNode[V]) int {
-	if reflect.DeepEqual(root, &RBNode[V]{}) {
+	if reflect.DeepEqual(root, &RBNode[V]{}) || root == nil {
 		return 0
 	}
 

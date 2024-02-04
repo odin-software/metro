@@ -260,3 +260,52 @@ func TestCount(t *testing.T) {
 		t.Fatal("The count should be 49.")
 	}
 }
+
+func TestSmallCount(t *testing.T) {
+	tree := NewTree[int]()
+
+	count := tree.Count()
+	if count != 0 {
+		t.Fatal("The count should be zero.")
+	}
+
+	err := tree.Insert(NodeValue[int]{0, 0})
+	if err != nil {
+		t.Fatal(err)
+	}
+	partialCount := tree.Count()
+	if partialCount != 1 {
+		t.Fatal("The count should be 1.")
+	}
+
+	// Inserting testing data
+	for i := 1; i < 3; i++ {
+		err := tree.Insert(NodeValue[int]{i, 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	fullCount := tree.Count()
+	if fullCount != 3 {
+		t.Fatal("The count should be 3.")
+	}
+}
+
+func TestGetNodesValue(t *testing.T) {
+	tree := NewTree[int]()
+
+	// Inserting testing data
+	for i := 0; i < 30; i++ {
+		err := tree.Insert(NodeValue[int]{i, 9})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	vals := *tree.GetNodesValues()
+	t.Log(vals)
+	if len(vals) != 30 {
+		t.Fatalf("Expected 30 nodes but got %v", len(vals))
+	}
+}
