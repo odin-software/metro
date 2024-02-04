@@ -1,6 +1,9 @@
 package data
 
-import "errors"
+import (
+	"errors"
+	"reflect"
+)
 
 type NodeValue[T any] struct {
 	idx int
@@ -59,4 +62,52 @@ func (rbt *RBTree[T]) Insert(val NodeValue[T]) error {
 	}
 
 	return nil
+}
+
+func (rbt *RBTree[T]) rotate_left(x *RBNode[T]) {
+	if x == rbt.leaf || x.right == rbt.leaf {
+		return
+	}
+
+	y := x.right
+	x.right = y.left
+	if y.left != rbt.leaf {
+		y.left.parent = x
+	}
+
+	y.parent = x.parent
+	if reflect.DeepEqual(x.parent, RBNode[T]{}) {
+		rbt.root = y
+	} else if x == x.parent.left {
+		x.parent.left = y
+	} else {
+		x.parent.right = y
+	}
+
+	y.left = x
+	x.parent = y
+}
+
+func (rbt *RBTree[T]) rotate_right(x *RBNode[T]) {
+	if x == rbt.leaf || x.left == rbt.leaf {
+		return
+	}
+
+	y := x.left
+	x.left = y.right
+	if y.right != rbt.leaf {
+		y.right.parent = x
+	}
+
+	y.parent = x.parent
+	if reflect.DeepEqual(x.parent, RBNode[T]{}) {
+		rbt.root = y
+	} else if x == x.parent.right {
+		x.parent.right = y
+	} else {
+		x.parent.left = y
+	}
+
+	y.right = x
+	x.parent = y
 }
