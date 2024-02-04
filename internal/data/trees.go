@@ -2,6 +2,7 @@ package data
 
 import (
 	"errors"
+	"reflect"
 )
 
 type NodeValue[T any] struct {
@@ -152,7 +153,7 @@ func (rbt *RBTree[V]) fix_insert(newNode *RBNode[V]) {
 	rbt.root.red = false
 }
 
-func (rbt *RBTree[V]) exists(idx int) (*RBNode[V], error) {
+func (rbt *RBTree[V]) Get(idx int) (*RBNode[V], error) {
 	current := rbt.root
 	for current != rbt.leaf && idx != current.value.idx {
 		if idx < current.value.idx {
@@ -161,5 +162,21 @@ func (rbt *RBTree[V]) exists(idx int) (*RBNode[V], error) {
 			current = current.right
 		}
 	}
+
+	if reflect.DeepEqual(current, &RBNode[V]{}) {
+		return nil, errors.New("This value is not in this tree.")
+	}
 	return current, nil
+}
+
+func (rbt *RBTree[V]) Count() int {
+	return countNodes[V](rbt.root)
+}
+
+func countNodes[V any](root *RBNode[V]) int {
+	if reflect.DeepEqual(root, &RBNode[V]{}) {
+		return 0
+	}
+
+	return 1 + countNodes(root.left) + countNodes(root.right)
 }

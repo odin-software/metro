@@ -212,3 +212,51 @@ func TestFixedInsertInverse(t *testing.T) {
 		t.Fatal("A balanced tree should not have this number as a root")
 	}
 }
+
+func TestGetFromIndex(t *testing.T) {
+	tree := NewTree[int]()
+
+	// Inserting testing data
+	for i := 1; i < 50; i++ {
+		err := tree.Insert(NodeValue[int]{i, 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	_, err := tree.Get(448)
+	if err == nil {
+		t.Fatal("The value 448 should return an error.")
+	}
+
+	val, err := tree.Get(22)
+	if err != nil {
+		t.Fatal("The value 22 should be found in the tree.")
+	}
+
+	if val.value.idx != 22 {
+		t.Fatal("The wrong value was returned.")
+	}
+}
+
+func TestCount(t *testing.T) {
+	tree := NewTree[int]()
+
+	count := tree.Count()
+	if count != 0 {
+		t.Fatal("The count should be zero.")
+	}
+
+	// Inserting testing data
+	for i := 1; i < 50; i++ {
+		err := tree.Insert(NodeValue[int]{i, 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	fullCount := tree.Count()
+	if fullCount != 49 {
+		t.Fatal("The count should be 49.")
+	}
+}
