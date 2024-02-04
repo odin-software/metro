@@ -180,3 +180,35 @@ func TestRotateRight(t *testing.T) {
 		t.Fatal("The inserted value 9 is not on the right place.")
 	}
 }
+
+func TestFixedInsert(t *testing.T) {
+	tree := NewTree[int]()
+
+	// Inserting testing data
+	for i := 1; i < 50; i++ {
+		err := tree.Insert(NodeValue[int]{i, 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if tree.root.right.value.idx == 1 {
+		t.Fatal("A balanced tree should not have this number as a root")
+	}
+}
+
+func TestFixedInsertInverse(t *testing.T) {
+	tree := NewTree[int]()
+
+	// Inserting testing data
+	for i := 40; i > 0; i-- {
+		err := tree.Insert(NodeValue[int]{i, 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if tree.root.right.value.idx == 40 {
+		t.Fatal("A balanced tree should not have this number as a root")
+	}
+}

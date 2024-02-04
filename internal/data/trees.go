@@ -2,7 +2,6 @@ package data
 
 import (
 	"errors"
-	"reflect"
 )
 
 type NodeValue[T any] struct {
@@ -78,7 +77,7 @@ func (rbt *RBTree[T]) rotate_left(x *RBNode[T]) {
 	}
 
 	y.parent = x.parent
-	if reflect.DeepEqual(x.parent, RBNode[T]{}) {
+	if x.parent == nil {
 		rbt.root = y
 	} else if x == x.parent.left {
 		x.parent.left = y
@@ -102,7 +101,7 @@ func (rbt *RBTree[T]) rotate_right(x *RBNode[T]) {
 	}
 
 	y.parent = x.parent
-	if reflect.DeepEqual(x.parent, RBNode[T]{}) {
+	if x.parent == nil {
 		rbt.root = y
 	} else if x == x.parent.right {
 		x.parent.right = y
