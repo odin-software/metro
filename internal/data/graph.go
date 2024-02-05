@@ -1,6 +1,8 @@
 package data
 
-import "errors"
+import (
+	"errors"
+)
 
 type Graph[T any, V any] struct {
 	vertices     []T

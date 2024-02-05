@@ -186,6 +186,9 @@ func (rbt *RBTree[V]) GetValue(idx int) (NodeValue[V], error) {
 }
 
 func (rbt *RBTree[V]) GetNodesValues() []NodeValue[V] {
+	if rbt.root == nil {
+		return []NodeValue[V]{}
+	}
 	return *rbt.root.preorder(&[]NodeValue[V]{})
 }
 

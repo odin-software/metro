@@ -134,13 +134,13 @@ func TestGetEdges(t *testing.T) {
 	g.InsertVertex(ts2)
 	g.InsertVertex(ts3)
 
-	// emptyEdges, errEmpty := g.GetEdges(ts1)
-	// if errEmpty != nil {
-	// 	t.Fatal(errEmpty)
-	// }
-	// if len(emptyEdges) != 0 {
-	// 	t.Fatal("There should be no edges.")
-	// }
+	emptyEdges, errEmpty := g.GetEdges(ts2)
+	if errEmpty != nil {
+		t.Fatal(errEmpty)
+	}
+	if len(emptyEdges) != 0 {
+		t.Fatal("There should be no edges.")
+	}
 
 	err := g.InsertEdge(ts1, ts2, 4)
 	if err != nil {

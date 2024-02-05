@@ -239,6 +239,32 @@ func TestGetFromIndex(t *testing.T) {
 	}
 }
 
+func TestGetValueFromIndex(t *testing.T) {
+	tree := NewTree[int]()
+
+	// Inserting testing data
+	for i := 1; i < 50; i++ {
+		err := tree.Insert(NodeValue[int]{i, 0})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	_, err := tree.GetValue(448)
+	if err == nil {
+		t.Fatal("The value 448 should return an error.")
+	}
+
+	val, err := tree.GetValue(41)
+	if err != nil {
+		t.Fatal("The value 22 should be found in the tree.")
+	}
+
+	if val.idx != 41 {
+		t.Fatal("The wrong value was returned.")
+	}
+}
+
 func TestCount(t *testing.T) {
 	tree := NewTree[int]()
 
