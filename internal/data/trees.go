@@ -164,7 +164,7 @@ func (rbt *RBTree[V]) Get(idx int) (*RBNode[V], error) {
 	}
 
 	if reflect.DeepEqual(current, &RBNode[V]{}) {
-		return nil, errors.New("This value is not in this tree.")
+		return nil, errors.New("this value is not in this tree")
 	}
 	return current, nil
 }
@@ -180,7 +180,7 @@ func (rbt *RBTree[V]) GetValue(idx int) (NodeValue[V], error) {
 	}
 
 	if reflect.DeepEqual(current, &RBNode[V]{}) {
-		return NodeValue[V]{}, errors.New("This value is not in this tree.")
+		return NodeValue[V]{}, errors.New("this value is not in this tree")
 	}
 	return current.value, nil
 }
@@ -221,4 +221,55 @@ func countNodes[V any](root *RBNode[V]) int {
 	}
 
 	return 1 + countNodes(root.left) + countNodes(root.right)
+}
+
+func (rbt *RBTree[V]) Delete(idx int) bool {
+	node, err := rbt.Get(idx)
+	if err != nil {
+		return false
+	}
+
+	// In the case it does not have any children
+	if reflect.DeepEqual(node.left, &RBNode[V]{}) && reflect.DeepEqual(node.right, &RBNode[V]{}) {
+		*node = *rbt.leaf
+		return true
+	}
+
+	// Case when it has one child, right
+	if !reflect.DeepEqual(node.right, &RBNode[V]{}) && reflect.DeepEqual(node.left, &RBNode[V]{}) {
+		if node.parent == nil {
+			*node = *node.right
+			return true
+		}
+		*node.parent.right = *node.right
+		return true
+	}
+	// Case when it has one child, left
+	if !reflect.DeepEqual(node.left, &RBNode[V]{}) && reflect.DeepEqual(node.right, &RBNode[V]{}) {
+		if node.parent == nil {
+			*node = *node.left
+			return true
+		}
+		*node.parent.left = *node.left
+		return true
+	}
+
+	// Case it has two children
+	if !reflect.DeepEqual(node.left, &RBNode[V]{}) && !reflect.DeepEqual(node.right, &RBNode[V]{}) {
+		// getting the inorder successor
+		temp := node.right
+		for !reflect.DeepEqual(temp.left, &RBNode[V]{}) {
+			temp = temp.left
+		}
+		if temp.parent.value.idx == node.value.idx {
+			temp.parent.right = temp.right
+			node.value = temp.value
+		} else {
+			node.value = temp.value
+			*temp.parent.left = *rbt.leaf
+		}
+		return true
+	}
+
+	return false
 }

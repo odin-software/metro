@@ -343,3 +343,102 @@ func TestGetNodesEmpty(t *testing.T) {
 		t.Fatalf("Expected 0 nodes but got %v", len(vals))
 	}
 }
+
+func TestDeleteNodeWithNoChild(t *testing.T) {
+	tree := NewTree[int]()
+
+	// Inserting testing data
+	for i := 0; i < 3; i++ {
+		err := tree.Insert(NodeValue[int]{i, 9})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if tree.Count() != 3 {
+		t.Fatal("The count should be 3.")
+	}
+	ok := tree.Delete(3)
+	if ok {
+		t.Fatal("This should have errored because that idx does not exists.")
+	}
+	ok = tree.Delete(2)
+	if !ok {
+		t.Fatal("This should not throw an error, since 2 exists and doesn't have children.")
+	}
+	if tree.Count() != 2 {
+		t.Fatal("The deleted node is still being counted.")
+	}
+}
+
+func TestDeleteNodeWithOneChild(t *testing.T) {
+	tree := NewTree[int]()
+
+	// Inserting testing data
+	for i := 0; i < 4; i++ {
+		err := tree.Insert(NodeValue[int]{i, 9})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if tree.Count() != 4 {
+		t.Fatal("The count should be 4.")
+	}
+
+	// testing one child, right
+	ok := tree.Delete(2)
+	if !ok {
+		t.Fatal("This should not throw an error, since 2 exists and only has one child.")
+	}
+	if tree.Count() != 3 {
+		t.Fatal("The deleted node is still being counted.")
+	}
+
+	// testing one child, left
+	tree.Insert(NodeValue[int]{-1, 9})
+	ok = tree.Delete(0)
+	if !ok {
+		t.Fatal("This should not throw an error, since 0 exists and only has one child.")
+	}
+	if tree.Count() != 3 {
+		t.Fatal("The deleted node is still being counted.")
+	}
+}
+
+func TestDeleteNodeWithTwoChildren(t *testing.T) {
+	tree := NewTree[int]()
+	nodes := 20
+
+	// Inserting testing data
+	for i := 0; i < nodes; i++ {
+		err := tree.Insert(NodeValue[int]{i, 9})
+		if err != nil {
+			t.Fatal(err)
+		}
+	}
+
+	if tree.Count() != nodes {
+		t.Fatalf("The count should be %v.", nodes)
+	}
+
+	// testing both children
+	ok := tree.Delete(17)
+	if !ok {
+		t.Fatal("This should not throw an error, since 17 exists and has two child.")
+	}
+	t.Log(tree.Count())
+	if tree.Count() != nodes-1 {
+		t.Fatal("The deleted node is still being counted.")
+	}
+
+	// testing both children
+	ok = tree.Delete(3)
+	if !ok {
+		t.Fatal("This should not throw an error, since 3 exists and has two child.")
+	}
+	t.Log(tree.Count())
+	if tree.Count() != nodes-2 {
+		t.Fatal("The deleted node is still being counted.")
+	}
+}

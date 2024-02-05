@@ -30,11 +30,11 @@ func (gr *Graph[T, V]) InsertVertex(val T) {
 func (gr *Graph[T, V]) InsertEdge(firstVertex T, secondVertex T, weight V) error {
 	fIdx, ok := gr.hash[gr.hashFunction(firstVertex)]
 	if !ok {
-		return errors.New("The first vertex does not exists on the graph.")
+		return errors.New("the first vertex does not exists on the graph")
 	}
 	sIdx, ok := gr.hash[gr.hashFunction(secondVertex)]
 	if !ok {
-		return errors.New("The second vertex does not exists on the graph.")
+		return errors.New("the second vertex does not exists on the graph")
 	}
 
 	err := gr.edges[fIdx].Insert(NodeValue[V]{
@@ -42,14 +42,14 @@ func (gr *Graph[T, V]) InsertEdge(firstVertex T, secondVertex T, weight V) error
 		val: weight,
 	})
 	if err != nil {
-		return errors.New("This edge already exists")
+		return errors.New("this edge already exists")
 	}
 	err2 := gr.edges[sIdx].Insert(NodeValue[V]{
 		idx: fIdx,
 		val: weight,
 	})
 	if err2 != nil {
-		return errors.New("This edge already exists")
+		return errors.New("this edge already exists")
 	}
 
 	return nil
@@ -58,7 +58,7 @@ func (gr *Graph[T, V]) InsertEdge(firstVertex T, secondVertex T, weight V) error
 func (gr *Graph[T, V]) GetEdges(v T) ([]NodeValue[V], error) {
 	idx, ok := gr.hash[gr.hashFunction(v)]
 	if !ok {
-		return nil, errors.New("This vertex does not exists on the graph.")
+		return nil, errors.New("this vertex does not exists on the graph")
 	}
 
 	edges := gr.edges[idx].GetNodesValues()
@@ -69,10 +69,10 @@ func (gr *Graph[T, V]) GetVertices() []T {
 	return gr.vertices
 }
 
-func (gr *Graph[T, V]) GetVertex (v T) (*T, error) {
+func (gr *Graph[T, V]) GetVertex(v T) (*T, error) {
 	idx, ok := gr.hash[gr.hashFunction(v)]
 	if !ok {
-		return nil, errors.New("This vertex does not exists on the graph.")
+		return nil, errors.New("this vertex does not exists on the graph")
 	}
 	return &gr.vertices[idx], nil
 }
