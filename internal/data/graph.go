@@ -64,3 +64,15 @@ func (gr *Graph[T, V]) GetEdges(v T) ([]NodeValue[V], error) {
 	edges := gr.edges[idx].GetNodesValues()
 	return edges, nil
 }
+
+func (gr *Graph[T, V]) GetVertices() []T {
+	return gr.vertices
+}
+
+func (gr *Graph[T, V]) GetVertex (v T) (*T, error) {
+	idx, ok := gr.hash[gr.hashFunction(v)]
+	if !ok {
+		return nil, errors.New("This vertex does not exists on the graph.")
+	}
+	return &gr.vertices[idx], nil
+}

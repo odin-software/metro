@@ -170,3 +170,67 @@ func TestGetEdges(t *testing.T) {
 		t.Fatal("Ts2 should have two edges connected.")
 	}
 }
+
+func TestGetVertices(t *testing.T) {
+	g := NewGraph[TestStruct, int](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+
+	vertices := g.GetVertices()
+	if len(vertices) != 3 {
+		t.Fatal("The vertices list was not returned.")
+	}
+	if vertices[0].name != ts1.name {
+		t.Fatal("The vertices list was not returned.")
+	}
+	if vertices[1].name != ts2.name {
+		t.Fatal("The vertices list was not returned.")
+	}
+	if vertices[2].name != ts3.name {
+		t.Fatal("The vertices list was not returned.")
+	}
+}
+
+func TestGetVertex(t *testing.T) {
+	g := NewGraph[TestStruct, int](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+
+	v, err := g.GetVertex(ts2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v.name != ts2.name {
+		t.Fatal("The vertex was not returned.")
+	}
+}
