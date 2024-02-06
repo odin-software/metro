@@ -158,3 +158,15 @@ func (gr *Graph[T, V]) UpdateEdgeValue(firstVertex T, secondVertex T, weight V) 
 
 	return nil
 }
+
+func (gr *Graph[T, V]) DeleteVertex(v T) error {
+	idx, ok := gr.hash[gr.hashFunction(v)]
+	if !ok {
+		return errors.New("this vertex does not exists on the graph")
+	}
+
+	// Delete from vertices array and update their indices
+	copy(gr.vertices[idx:], gr.vertices[idx+1:])
+
+	return nil
+}
