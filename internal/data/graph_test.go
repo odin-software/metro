@@ -1,6 +1,8 @@
 package data
 
-import "testing"
+import (
+	"testing"
+)
 
 type TestStruct struct {
 	name  string
@@ -46,11 +48,16 @@ func TestInsertVertex(t *testing.T) {
 	if g.vertices[0].name != ts1.name {
 		t.Fatal("The vertex was added with wrong information.")
 	}
-	if g.edges[1].root != nil {
+	if g.edges[1].root == nil {
 		t.Fatal("Failed on edgelist creation.")
 	}
 	if g.hash[ts2.name] != 1 {
 		t.Fatal("Hash is returning wrong index.")
+	}
+
+	err := g.InsertVertex(ts1)
+	if err == nil {
+		t.Fatal("It should error on duplicated vertex insertion.")
 	}
 }
 
@@ -232,5 +239,157 @@ func TestGetVertex(t *testing.T) {
 	}
 	if v.name != ts2.name {
 		t.Fatal("The vertex was not returned.")
+	}
+
+	_, err = g.GetVertex(TestStruct{
+		name:  "johnson",
+		color: "azul",
+	})
+	if err == nil {
+		t.Fatal("Searching for a vertex that does not exists should give an error.")
+	}
+}
+
+func TestUpdateEdgeValue(t *testing.T) {
+	g := NewGraph[TestStruct, int](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+
+	err := g.InsertEdge(ts1, ts2, 8)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts2, ts3, 8)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	values, err := g.GetEdges(ts2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if values[0].val != 8 {
+		t.Fatal("the value is not correct")
+	}
+
+	g.UpdateEdgeValue(ts1, ts2, 3)
+	values, err = g.GetEdges(ts2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if values[0].val != 3 {
+		t.Fatal("the value is not correct")
+	}
+}
+
+func TestAreConnected(t *testing.T) {
+	g := NewGraph[TestStruct, int](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+
+	err := g.InsertEdge(ts1, ts2, 8)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts2, ts3, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	val, ok := g.AreConnected(ts1, ts2)
+	if !ok {
+		t.Fatal("These two vertices are connected.")
+	}
+	if val.val != 8 {
+		t.Fatal("Wrong value in the connection.")
+	}
+	val, ok = g.AreConnected(ts2, ts3)
+	if !ok {
+		t.Fatal("These two vertices are connected.")
+	}
+	if val.val != 3 {
+		t.Fatal("Wrong value in the connection.")
+	}
+	// opposite way should work too
+	val, ok = g.AreConnected(ts3, ts2)
+	if !ok {
+		t.Fatal("These two vertices are connected.")
+	}
+	if val.val != 3 {
+		t.Fatal("Wrong value in the connection.")
+	}
+	// testing unconnected
+	val, ok = g.AreConnected(ts1, ts3)
+	if ok {
+		t.Fatal("These two vertices are not connected.")
+	}
+}
+
+func TestDeleteEdge(t *testing.T) {
+	g := NewGraph[TestStruct, int](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+
+	g.InsertEdge(ts1, ts3, 4)
+	g.InsertEdge(ts1, ts2, 4)
+
+	_, ok := g.AreConnected(ts1, ts2)
+	if !ok {
+		t.Fatal("Expected this to to be connected.")
+	}
+
+	err := g.DeleteEdge(ts1, ts2)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	_, ok = g.AreConnected(ts1, ts2)
+	if ok {
+		t.Fatal("The vertices should not be connected.")
 	}
 }

@@ -185,6 +185,15 @@ func (rbt *RBTree[V]) GetValue(idx int) (NodeValue[V], error) {
 	return current.value, nil
 }
 
+func (rbt *RBTree[V]) UpdateValue(idx int, val V) error {
+	node, err := rbt.Get(idx)
+	if err != nil {
+		return errors.New("this node is not on the tree")
+	}
+	node.value.val = val
+	return nil
+}
+
 func (rbt *RBTree[V]) GetNodesValues() []NodeValue[V] {
 	if rbt.root == nil {
 		return []NodeValue[V]{}
@@ -230,7 +239,7 @@ func (rbt *RBTree[V]) Delete(idx int) bool {
 	}
 
 	// In the case it does not have any children
-	if reflect.DeepEqual(node.left, &RBNode[V]{}) && reflect.DeepEqual(node.right, &RBNode[V]{}) {
+	if (reflect.DeepEqual(node.left, &RBNode[V]{}) && reflect.DeepEqual(node.right, &RBNode[V]{})) || (node.right == nil && node.left == nil) {
 		*node = *rbt.leaf
 		return true
 	}

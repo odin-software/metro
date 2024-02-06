@@ -442,3 +442,27 @@ func TestDeleteNodeWithTwoChildren(t *testing.T) {
 		t.Fatal("The deleted node is still being counted.")
 	}
 }
+
+func TestUpdateValue(t *testing.T) {
+	tree := NewTree[int]()
+
+	tree.Insert(NodeValue[int]{
+		idx: 2,
+		val: 4,
+	})
+	node, err := tree.Get(2)
+	if err != nil {
+		t.Fatal("This value is inside the tree.")
+	}
+	if node.value.val != 4 {
+		t.Fatal("The value was saved incorrectly.")
+	}
+
+	err = tree.UpdateValue(node.value.idx, 9)
+	if err != nil {
+		t.Fatal("The value should be in the tree.")
+	}
+	if node.value.val != 9 {
+		t.Fatal("The value was not updated.")
+	}
+}
