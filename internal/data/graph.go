@@ -4,169 +4,179 @@ import (
 	"errors"
 )
 
-type Graph[T comparable, V any] struct {
-	vertices     []T
-	edges        []RBTree[V]
-	hash         map[string]int
+type Graph[T comparable] struct {
+	vertices     map[string]T
+	edges        map[string]map[string]float64
 	hashFunction func(T) string
 }
 
-func NewGraph[T comparable, V any](hashF func(T) string) Graph[T, V] {
-	return Graph[T, V]{
-		vertices:     []T{},
-		edges:        []RBTree[V]{},
-		hash:         map[string]int{},
+func NewGraph[T comparable](hashF func(T) string) Graph[T] {
+	return Graph[T]{
+		vertices:     make(map[string]T),
+		edges:        make(map[string]map[string]float64),
 		hashFunction: hashF,
 	}
 }
 
-func (gr *Graph[T, V]) InsertVertex(val T) error {
+func (gr *Graph[T]) InsertVertex(vertex T) error {
+	key := gr.hashFunction(vertex)
+	if _, ok := gr.vertices[key]; ok {
+		return errors.New("this vertex already exists in the graph")
+	}
+
+	gr.vertices[key] = vertex
+	gr.edges[key] = make(map[string]float64)
+	return nil
+}
+
+func (gr *Graph[T]) InsertEdge(firstVertex T, secondVertex T, weight float64) error {
+	firstKey := gr.hashFunction(firstVertex)
+	secondKey := gr.hashFunction(secondVertex)
+
+	if weight <= 0 {
+		return errors.New("the weight should be greater than zero")
+	}
+
+	if _, ok := gr.edges[firstKey]; !ok {
+		return errors.New("the first vertex does not exists in the graph")
+	}
+	if _, ok := gr.edges[secondKey]; !ok {
+		return errors.New("the first vertex does not exists in the graph")
+	}
+	gr.edges[firstKey][secondKey] = weight
+	gr.edges[secondKey][firstKey] = weight
+
+	return nil
+}
+
+func (gr *Graph[T]) GetVertexFromKey(key string) (T, error) {
+	if _, ok := gr.vertices[key]; !ok {
+		return *new(T), errors.New("this vertex doesnt exists in the graph")
+	}
+	return gr.vertices[key], nil
+}
+
+func (gr *Graph[T]) GetVertexFromValue(value T) (T, error) {
+	key := gr.hashFunction(value)
+	vertex, ok := gr.vertices[key]
+	if !ok {
+		return *new(T), errors.New("this vertex is not on the graph")
+	}
+
+	return vertex, nil
+}
+
+func (gr *Graph[T]) GetVertices() []T {
+	values := make([]T, 0, len(gr.vertices))
 	for _, v := range gr.vertices {
-		if v == val {
-			return errors.New("duplicated vertex")
-		}
+		values = append(values, v)
 	}
+	return values
+}
 
-	gr.vertices = append(gr.vertices, val)
-	gr.edges = append(gr.edges, *NewTree[V]())
-	gr.hash[gr.hashFunction(val)] = len(gr.vertices) - 1
+func (gr *Graph[T]) UpdateVertex(vertex T) error {
+	key := gr.hashFunction(vertex)
+
+	if _, ok := gr.vertices[key]; !ok {
+		return errors.New("this vertex is not on the graph")
+	}
+	gr.vertices[key] = vertex
+
 	return nil
 }
 
-func (gr *Graph[T, V]) InsertEdge(firstVertex T, secondVertex T, weight V) error {
-	fIdx, ok := gr.hash[gr.hashFunction(firstVertex)]
-	if !ok {
-		return errors.New("the first vertex does not exists on the graph")
-	}
-	sIdx, ok := gr.hash[gr.hashFunction(secondVertex)]
-	if !ok {
-		return errors.New("the second vertex does not exists on the graph")
+func (gr *Graph[T]) DeleteVertex(vertex T) error {
+	key := gr.hashFunction(vertex)
+	if _, ok := gr.vertices[key]; !ok {
+		return errors.New("this vertex does not exists")
 	}
 
-	err := gr.edges[fIdx].Insert(NodeValue[V]{
-		idx: sIdx,
-		val: weight,
-	})
-	if err != nil {
-		return errors.New("this edge already exists")
-	}
-	err2 := gr.edges[sIdx].Insert(NodeValue[V]{
-		idx: fIdx,
-		val: weight,
-	})
-	if err2 != nil {
-		return errors.New("this edge already exists")
+	delete(gr.vertices, key)
+	delete(gr.edges, key)
+
+	// Update other edges
+	for _, v := range gr.edges {
+		delete(v, key)
 	}
 
 	return nil
 }
 
-func (gr *Graph[T, V]) GetEdges(v T) ([]NodeValue[V], error) {
-	idx, ok := gr.hash[gr.hashFunction(v)]
+func (gr *Graph[T]) GetEdges(vertex T) (map[string]float64, error) {
+	key := gr.hashFunction(vertex)
+	v, ok := gr.edges[key]
 	if !ok {
-		return nil, errors.New("this vertex does not exists on the graph")
+		return nil, errors.New("this vertex does not exists in the graph")
 	}
-
-	edges := gr.edges[idx].GetNodesValues()
-	return edges, nil
+	return v, nil
 }
 
-func (gr *Graph[T, V]) AreConnected(firstVertex T, secondVertex T) (NodeValue[V], bool) {
-	idx, ok := gr.hash[gr.hashFunction(secondVertex)]
+func (gr *Graph[T]) AreConnected(firstVertex T, secondVertex T) (float64, error) {
+	firstKey := gr.hashFunction(firstVertex)
+	secondKey := gr.hashFunction(secondVertex)
+
+	firstMap, ok := gr.edges[firstKey]
 	if !ok {
-		return NodeValue[V]{}, false
+		return 0, errors.New("the first vertex does not exists")
 	}
-	values, err := gr.GetEdges(firstVertex)
-	if err != nil {
-		return NodeValue[V]{}, false
-	}
-
-	for _, v := range values {
-		if v.idx == idx {
-			return v, true
-		}
+	if _, ok := gr.edges[secondKey]; !ok {
+		return 0, errors.New("the second vertex does not exists")
 	}
 
-	return NodeValue[V]{}, false
+	weight, ok := firstMap[secondKey]
+	if !ok {
+		return 0, errors.New("these vertices are not connected")
+	}
+
+	return weight, nil
 }
 
-func (gr *Graph[T, V]) UpdateVertexId(v T, f T) bool {
-	key := gr.hashFunction(v)
-	newKey := gr.hashFunction(f)
-	idx, ok := gr.hash[key]
+func (gr *Graph[T]) UpdateEdgeValue(firstVertex T, secondVertex T, weight float64) error {
+	firstKey := gr.hashFunction(firstVertex)
+	secondKey := gr.hashFunction(secondVertex)
+
+	firstMap, ok := gr.edges[firstKey]
 	if !ok {
-		return false
+		return errors.New("the first vertex does not exists")
+	}
+	secondMap, ok := gr.edges[secondKey]
+	if !ok {
+		return errors.New("the second vertex does not exists")
 	}
 
-	gr.hash[newKey] = idx
-	gr.vertices[idx] = f
-	delete(gr.hash, key)
-	return true
-}
+	_, ok = firstMap[secondKey]
+	if !ok {
+		return errors.New("these vertices are not connected")
+	}
+	_, ok = secondMap[firstKey]
+	if !ok {
+		return errors.New("these vertices are not connected")
+	}
 
-func (gr *Graph[T, V]) DeleteEdge(firstVertex T, secondVertex T) error {
-	fIdx, ok := gr.hash[gr.hashFunction(firstVertex)]
-	if !ok {
-		return errors.New("the first vertex does not exists on the graph")
-	}
-	sIdx, ok := gr.hash[gr.hashFunction(secondVertex)]
-	if !ok {
-		return errors.New("the second vertex does not exists on the graph")
-	}
-	ok = gr.edges[fIdx].Delete(sIdx)
-	if !ok {
-		return errors.New("this connection does not exists")
-	}
-	ok = gr.edges[sIdx].Delete(fIdx)
-	if !ok {
-		return errors.New("this connection does not exists")
-	}
+	firstMap[secondKey] = weight
+	secondMap[firstKey] = weight
 
 	return nil
 }
 
-func (gr *Graph[T, V]) GetVertices() []T {
-	return gr.vertices
-}
+func (gr *Graph[T]) DeleteEdge(firstVertex T, secondVertex T) error {
+	firstKey := gr.hashFunction(firstVertex)
+	secondKey := gr.hashFunction(secondVertex)
 
-func (gr *Graph[T, V]) GetVertex(v T) (*T, error) {
-	idx, ok := gr.hash[gr.hashFunction(v)]
+	firstMap, ok := gr.edges[firstKey]
 	if !ok {
-		return nil, errors.New("this vertex does not exists on the graph")
+		return errors.New("the first vertex does not exists")
 	}
-	return &gr.vertices[idx], nil
-}
-
-func (gr *Graph[T, V]) UpdateEdgeValue(firstVertex T, secondVertex T, weight V) error {
-	fIdx, ok := gr.hash[gr.hashFunction(firstVertex)]
+	secondMap, ok := gr.edges[secondKey]
 	if !ok {
-		return errors.New("the first vertex does not exists on the graph")
-	}
-	sIdx, ok := gr.hash[gr.hashFunction(secondVertex)]
-	if !ok {
-		return errors.New("the second vertex does not exists on the graph")
+		return errors.New("the second vertex does not exists")
 	}
 
-	err := gr.edges[fIdx].UpdateValue(sIdx, weight)
-	if err != nil {
-		return errors.New("this connection does not exists")
+	if _, ok = firstMap[secondKey]; !ok {
+		return errors.New("these vertices are not connected")
 	}
-	err = gr.edges[sIdx].UpdateValue(fIdx, weight)
-	if err != nil {
-		return errors.New("this connection does not exists")
-	}
-
-	return nil
-}
-
-func (gr *Graph[T, V]) DeleteVertex(v T) error {
-	idx, ok := gr.hash[gr.hashFunction(v)]
-	if !ok {
-		return errors.New("this vertex does not exists on the graph")
-	}
-
-	// Delete from vertices array and update their indices
-	copy(gr.vertices[idx:], gr.vertices[idx+1:])
+	delete(firstMap, secondKey)
+	delete(secondMap, secondKey)
 
 	return nil
 }
