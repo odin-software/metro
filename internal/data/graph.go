@@ -90,6 +90,20 @@ func (gr *Graph[T, V]) AreConnected(firstVertex T, secondVertex T) (NodeValue[V]
 	return NodeValue[V]{}, false
 }
 
+func (gr *Graph[T, V]) UpdateVertexId(v T, f T) bool {
+	key := gr.hashFunction(v)
+	newKey := gr.hashFunction(f)
+	idx, ok := gr.hash[key]
+	if !ok {
+		return false
+	}
+
+	gr.hash[newKey] = idx
+	gr.vertices[idx] = f
+	delete(gr.hash, key)
+	return true
+}
+
 func (gr *Graph[T, V]) DeleteEdge(firstVertex T, secondVertex T) error {
 	fIdx, ok := gr.hash[gr.hashFunction(firstVertex)]
 	if !ok {

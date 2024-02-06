@@ -393,3 +393,54 @@ func TestDeleteEdge(t *testing.T) {
 		t.Fatal("The vertices should not be connected.")
 	}
 }
+
+func TestUpdateVertexId(t *testing.T) {
+	g := NewGraph[TestStruct, int](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+	ts4 := TestStruct{
+		name:  "Ciudad Modelo",
+		color: "#199283",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+
+	v1, err := g.GetVertex(ts1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v1.name != ts1.name {
+		t.Fatal("Should retrieve the right name.")
+	}
+	oldHashIdx := g.hash[ts1.name]
+
+	ok := g.UpdateVertexId(ts1, ts4)
+	if !ok {
+		t.Fatal("Should find the value.")
+	}
+	v1, err = g.GetVertex(ts4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if v1.name != ts4.name {
+		t.Fatal("It didn't update the vertex value.")
+	}
+	newHashIdx := g.hash[ts4.name]
+
+	if oldHashIdx != newHashIdx {
+		t.Fatal("It did not change the right value.")
+	}
+}
