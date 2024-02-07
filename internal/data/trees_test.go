@@ -427,7 +427,6 @@ func TestDeleteNodeWithTwoChildren(t *testing.T) {
 	if !ok {
 		t.Fatal("This should not throw an error, since 17 exists and has two child.")
 	}
-	t.Log(tree.Count())
 	if tree.Count() != nodes-1 {
 		t.Fatal("The deleted node is still being counted.")
 	}
@@ -437,7 +436,6 @@ func TestDeleteNodeWithTwoChildren(t *testing.T) {
 	if !ok {
 		t.Fatal("This should not throw an error, since 3 exists and has two child.")
 	}
-	t.Log(tree.Count())
 	if tree.Count() != nodes-2 {
 		t.Fatal("The deleted node is still being counted.")
 	}
