@@ -2,6 +2,8 @@ package data
 
 import (
 	"errors"
+	"math"
+	"slices"
 )
 
 type Graph[T comparable] struct {
@@ -179,4 +181,84 @@ func (gr *Graph[T]) DeleteEdge(firstVertex T, secondVertex T) error {
 	delete(secondMap, secondKey)
 
 	return nil
+}
+
+// Finding shortest path to destination.
+
+func getMinDistVertex(distances map[string]float64, unvisited map[string]bool) string {
+	minDist := math.Inf(1)
+	minDistVertex := ""
+
+	for k := range unvisited {
+		distSoFar := distances[k]
+		if distSoFar < minDist {
+			minDist = distSoFar
+			minDistVertex = k
+		}
+	}
+
+	return minDistVertex
+}
+
+func getPath(destination string, predecessors map[string]string) []string {
+	path := []string{}
+	pred := destination
+
+	for pred != "" {
+		path = append(path, pred)
+		pred = predecessors[pred]
+	}
+	slices.Reverse(path)
+
+	return path
+}
+
+func (gr *Graph[T]) ShortestPath(src T, destination T) ([]string, error) {
+	srcKey := gr.hashFunction(src)
+	destKey := gr.hashFunction(destination)
+
+	unvisited := make(map[string]bool)
+	predecessors := map[string]string{}
+	distances := map[string]float64{}
+
+	for k := range gr.vertices {
+		unvisited[k] = true
+		if k == srcKey {
+			distances[k] = 0
+		} else {
+			distances[k] = math.Inf(1)
+		}
+	}
+
+	for len(unvisited) > 0 {
+		minDistNode := getMinDistVertex(distances, unvisited)
+		delete(unvisited, minDistNode)
+
+		if minDistNode == destKey {
+			return getPath(destKey, predecessors), nil
+		}
+		vertex, err := gr.GetVertexFromKey(minDistNode)
+		if err != nil {
+			return nil, err
+		}
+		edges, err := gr.GetEdges(vertex)
+		if err != nil {
+			return nil, err
+		}
+		for neighbor := range edges {
+			if _, ok := unvisited[neighbor]; !ok {
+				continue
+			}
+
+			distanceSoFar := distances[minDistNode]
+			distanceToNeighbor := gr.edges[minDistNode][neighbor]
+			totalDistToNeighbor := distanceSoFar + distanceToNeighbor
+			if totalDistToNeighbor < distances[neighbor] {
+				distances[neighbor] = totalDistToNeighbor
+				predecessors[neighbor] = minDistNode
+			}
+		}
+	}
+
+	return nil, nil
 }

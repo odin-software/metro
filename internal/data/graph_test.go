@@ -500,3 +500,180 @@ func TestDeleteEdge(t *testing.T) {
 		t.Fatal("The vertices should not be connected.")
 	}
 }
+
+// Finding shortest path tests
+
+func TestGetMinDistVertex(t *testing.T) {
+	testData := map[string]float64{
+		"ciudad 1": 39.22,
+		"ciudad 2": 42.11,
+		"ciudad 3": 12.22,
+		"ciudad 4": 23.22,
+		"ciudad 5": 11.22,
+		"ciudad 6": 28.42,
+		"ciudad 7": 12.19,
+	}
+
+	unvisited := map[string]bool{
+		"ciudad 3": true,
+		"ciudad 7": true,
+		"ciudad 2": true,
+	}
+	unvisited2 := map[string]bool{
+		"ciudad 1": true,
+		"ciudad 6": true,
+		"ciudad 2": true,
+	}
+
+	minDistVertex := getMinDistVertex(testData, unvisited)
+	if minDistVertex != "ciudad 7" {
+		t.Fatal("Did not get the shortest distance.")
+	}
+	minDistVertex = getMinDistVertex(testData, unvisited2)
+	if minDistVertex != "ciudad 6" {
+		t.Fatal("Did not get the shortest distance.")
+	}
+}
+
+func TestGetPath(t *testing.T) {
+	destination := "el seibo"
+	predecessors := map[string]string{
+		"santiago": "moca",
+		"san juan": "higuey",
+		"higuey":   "santiago",
+		"el seibo": "san juan",
+	}
+
+	path := getPath(destination, predecessors)
+	if len(path) != 5 {
+		t.Fatal("The list is wrong.")
+	}
+	if path[len(path)-1] != destination {
+		t.Fatal("Destination is not in the right place.")
+	}
+}
+
+func TestShortestPath(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+	ts4 := TestStruct{
+		name:  "Ciudad 4",
+		color: "#223332",
+	}
+	ts5 := TestStruct{
+		name:  "Ciudad 5",
+		color: "#225332",
+	}
+	ts6 := TestStruct{
+		name:  "Ciudad 6",
+		color: "#299123",
+	}
+	ts7 := TestStruct{
+		name:  "Ciudad 7",
+		color: "#299123",
+	}
+	ts8 := TestStruct{
+		name:  "Ciudad 8",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+	g.InsertVertex(ts4)
+	g.InsertVertex(ts5)
+	g.InsertVertex(ts6)
+	g.InsertVertex(ts7)
+	g.InsertVertex(ts8)
+
+	// Creating testing graph
+	err := g.InsertEdge(ts1, ts4, 6)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts1, ts3, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts2, ts3, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts4, ts3, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts4, ts5, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts3, ts6, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts5, ts6, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts5, ts3, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts8, ts5, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts7, ts5, 8)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	path, err := g.ShortestPath(ts1, ts4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(path) != 2 {
+		t.Fatal("The path is incorrect.")
+	}
+
+	path, err = g.ShortestPath(ts1, ts8)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(path) != 4 {
+		t.Fatal("The path is incorrect.")
+	}
+
+	path, err = g.ShortestPath(ts7, ts2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(path) != 4 {
+		t.Fatal("The path is incorrect.")
+	}
+
+	path, err = g.ShortestPath(ts6, ts4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(path) != 3 {
+		t.Fatal("The path is incorrect.")
+	}
+	for _, v := range path {
+		if v == "Ciudad 3" {
+			t.Fatal("The path is incorrect.")
+		}
+	}
+}
