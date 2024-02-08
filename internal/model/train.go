@@ -25,14 +25,14 @@ type Train struct {
 	central      *data.Graph[Station]
 }
 
-func NewTrain(name string, make Make, pos Vector, central *data.Graph[Station]) Train {
+func NewTrain(name string, make Make, pos Vector, initialStation Station, central *data.Graph[Station]) Train {
 	return Train{
 		name:         name,
 		make:         make,
 		Position:     pos,
 		velocity:     NewVector(0.0, 0.0),
 		acceleration: NewVector(0.0, 0.0),
-		current:      Station{},
+		current:      initialStation,
 		next:         Station{},
 		destinations: data.Queue[Station]{},
 		q:            data.Queue[Station]{},
@@ -68,7 +68,7 @@ func (tr *Train) Update() {
 
 	direction := reach.Location.SoftSub(tr.Position)
 	mag := direction.Magnitude()
-	where := tr.current.Location.Dist(tr.next.Location) / 10
+	where := tr.current.Location.Dist(reach.Location) / 10
 
 	if mag < where {
 		m := Map(mag, 0, where, 0, tr.make.accMag)
@@ -81,13 +81,15 @@ func (tr *Train) Update() {
 	tr.velocity.Add(direction)
 	tr.velocity.Limit(tr.make.topSpeed)
 	tr.Position.Add(tr.velocity)
+	distance := tr.Position.Dist(reach.Location)
 
-	if tr.Position.Dist(reach.Location) < 0.02 {
+	if distance <= 1 {
 		st, err := tr.q.DQ()
 		if err != nil {
 			fmt.Println("Something wrong with the next q value.")
 		}
 		tr.current = st
+		tr.velocity.Scale(0)
 		if st == tr.next {
 			tr.destinations.DQ()
 			tr.next = Station{}
