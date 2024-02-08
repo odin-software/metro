@@ -200,12 +200,12 @@ func getMinDistVertex(distances map[string]float64, unvisited map[string]bool) s
 	return minDistVertex
 }
 
-func getPath(destination string, predecessors map[string]string) []string {
-	path := []string{}
+func (gr *Graph[T]) GetPath(destination string, predecessors map[string]string) []T {
+	path := []T{}
 	pred := destination
 
 	for pred != "" {
-		path = append(path, pred)
+		path = append(path, gr.vertices[pred])
 		pred = predecessors[pred]
 	}
 	slices.Reverse(path)
@@ -213,7 +213,7 @@ func getPath(destination string, predecessors map[string]string) []string {
 	return path
 }
 
-func (gr *Graph[T]) ShortestPath(src T, destination T) ([]string, error) {
+func (gr *Graph[T]) ShortestPath(src T, destination T) ([]T, error) {
 	srcKey := gr.hashFunction(src)
 	destKey := gr.hashFunction(destination)
 
@@ -235,7 +235,7 @@ func (gr *Graph[T]) ShortestPath(src T, destination T) ([]string, error) {
 		delete(unvisited, minDistNode)
 
 		if minDistNode == destKey {
-			return getPath(destKey, predecessors), nil
+			return gr.GetPath(destKey, predecessors), nil
 		}
 		vertex, err := gr.GetVertexFromKey(minDistNode)
 		if err != nil {

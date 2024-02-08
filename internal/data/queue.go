@@ -31,6 +31,22 @@ func (q *Queue[T]) DQ() (T, error) {
 	return val, nil
 }
 
+func (q *Queue[T]) Peek() (T, error) {
+	if len(q.items) == 0 {
+		return *new(T), errors.New("there are no items in the queue")
+	}
+	return q.items[0], nil
+}
+
 func (q *Queue[T]) Size() int {
 	return len(q.items)
+}
+
+// Deletes all the items from the queue.
+func (q *Queue[T]) Clear() {
+	if len(q.items) == 0 {
+		return
+	}
+
+	q.items = []T{}
 }

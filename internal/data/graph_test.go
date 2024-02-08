@@ -536,6 +536,35 @@ func TestGetMinDistVertex(t *testing.T) {
 }
 
 func TestGetPath(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "el seibo",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "santiago",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "moca",
+		color: "#299123",
+	}
+	ts4 := TestStruct{
+		name:  "higuey",
+		color: "#299123",
+	}
+	ts5 := TestStruct{
+		name:  "san juan",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+	g.InsertVertex(ts4)
+	g.InsertVertex(ts5)
+
 	destination := "el seibo"
 	predecessors := map[string]string{
 		"santiago": "moca",
@@ -544,11 +573,11 @@ func TestGetPath(t *testing.T) {
 		"el seibo": "san juan",
 	}
 
-	path := getPath(destination, predecessors)
+	path := g.GetPath(destination, predecessors)
 	if len(path) != 5 {
 		t.Fatal("The list is wrong.")
 	}
-	if path[len(path)-1] != destination {
+	if path[len(path)-1] != ts1 {
 		t.Fatal("Destination is not in the right place.")
 	}
 }
@@ -672,7 +701,7 @@ func TestShortestPath(t *testing.T) {
 		t.Fatal("The path is incorrect.")
 	}
 	for _, v := range path {
-		if v == "Ciudad 3" {
+		if v == ts3 {
 			t.Fatal("The path is incorrect.")
 		}
 	}
