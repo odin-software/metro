@@ -3,8 +3,8 @@ package model
 import "math"
 
 type Vector struct {
-	x float64
-	y float64
+	X float64
+	Y float64
 }
 
 func NewVector(x, y float64) Vector {
@@ -13,23 +13,23 @@ func NewVector(x, y float64) Vector {
 
 // modification methods.
 func (v *Vector) Add(v2 Vector) {
-	v.x += v2.x
-	v.y += v2.y
+	v.X += v2.X
+	v.Y += v2.Y
 }
 
 func (v *Vector) Sub(v2 Vector) {
-	v.x -= v2.x
-	v.y -= v2.y
+	v.X -= v2.X
+	v.Y -= v2.Y
 }
 
 func (v *Vector) Scale(s float64) {
-	v.x *= s
-	v.y *= s
+	v.X *= s
+	v.Y *= s
 }
 
 func (v *Vector) Div(d float64) {
-	v.x /= d
-	v.y /= d
+	v.X /= d
+	v.Y /= d
 }
 
 func (v *Vector) Limit(max float64) {
@@ -53,27 +53,27 @@ func (v *Vector) SetMag(mag float64) {
 
 // non-modifier methods.
 func (v *Vector) SoftAdd(v2 Vector) Vector {
-	return NewVector(v.x+v2.x, v.y+v2.y)
+	return NewVector(v.X+v2.X, v.Y+v2.Y)
 }
 
 func (v *Vector) SoftSub(v2 Vector) Vector {
-	return NewVector(v.x-v2.x, v.y-v2.y)
+	return NewVector(v.X-v2.X, v.Y-v2.Y)
 }
 
 func (v *Vector) SoftScale(s float64) Vector {
-	return NewVector(v.x*s, v.y*s)
+	return NewVector(v.X*s, v.Y*s)
 }
 
 func (v *Vector) SoftDiv(d float64) Vector {
-	return NewVector(v.x/d, v.y/d)
+	return NewVector(v.X/d, v.Y/d)
 }
 
 func (v *Vector) Magnitude() float64 {
-	return math.Sqrt(v.x*v.x + v.y*v.y)
+	return math.Sqrt(v.X*v.X + v.Y*v.Y)
 }
 
 func (v *Vector) Dist(v2 Vector) float64 {
-	x := v.x - v2.x
-	y := v.y - v2.y
-	return math.Sqrt(x*x + y*y)
+	X := v.X - v2.X
+	Y := v.Y - v2.Y
+	return math.Sqrt(X*X + Y*Y)
 }

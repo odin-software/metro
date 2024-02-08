@@ -1,8 +1,8 @@
 package main
 
-import "internal/model"
+import "model"
 
-func generateStationsData() []model.Station {
+func GenerateStationsData() []model.Station {
 	sts := []model.Station{
 		model.NewStation("station-1", "Station 1", model.NewVector(100.0, 250.0)),
 		model.NewStation("station-2", "Station 2", model.NewVector(150.0, 600.0)),

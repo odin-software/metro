@@ -31,6 +31,16 @@ func (gr *Graph[T]) InsertVertex(vertex T) error {
 	return nil
 }
 
+func (gr *Graph[T]) InsertVertices(vertices []T) error {
+	for _, v := range vertices {
+		err := gr.InsertVertex(v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func (gr *Graph[T]) InsertEdge(firstVertex T, secondVertex T, weight float64) error {
 	firstKey := gr.hashFunction(firstVertex)
 	secondKey := gr.hashFunction(secondVertex)

@@ -15,7 +15,7 @@ type Make struct {
 type Train struct {
 	name         string
 	make         Make
-	position     Vector
+	Position     Vector
 	velocity     Vector
 	acceleration Vector
 	current      Station
@@ -29,7 +29,7 @@ func NewTrain(name string, make Make, pos Vector, central *data.Graph[Station]) 
 	return Train{
 		name:         name,
 		make:         make,
-		position:     pos,
+		Position:     pos,
 		velocity:     NewVector(0.0, 0.0),
 		acceleration: NewVector(0.0, 0.0),
 		current:      Station{},
@@ -66,9 +66,9 @@ func (tr *Train) Update() {
 		return
 	}
 
-	direction := reach.location.SoftSub(tr.position)
+	direction := reach.Location.SoftSub(tr.Position)
 	mag := direction.Magnitude()
-	where := tr.current.location.Dist(tr.next.location) / 10
+	where := tr.current.Location.Dist(tr.next.Location) / 10
 
 	if mag < where {
 		m := Map(mag, 0, where, 0, tr.make.accMag)
@@ -80,9 +80,9 @@ func (tr *Train) Update() {
 	// Update position based on velocity
 	tr.velocity.Add(direction)
 	tr.velocity.Limit(tr.make.topSpeed)
-	tr.position.Add(tr.velocity)
+	tr.Position.Add(tr.velocity)
 
-	if tr.position.Dist(reach.location) < 0.02 {
+	if tr.Position.Dist(reach.Location) < 0.02 {
 		st, err := tr.q.DQ()
 		if err != nil {
 			fmt.Println("Something wrong with the next q value.")
