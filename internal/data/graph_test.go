@@ -14,7 +14,7 @@ var tsHashFuncion = func(ts TestStruct) string {
 }
 
 func TestCreatingAGraph(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	if g.vertices == nil {
 		t.Fatal("The graph vertices have not been created.")
@@ -25,7 +25,7 @@ func TestCreatingAGraph(t *testing.T) {
 }
 
 func TestInsertVertex(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -45,14 +45,14 @@ func TestInsertVertex(t *testing.T) {
 	if len(g.edges) != 2 {
 		t.Fatal("The edges list was not updated.")
 	}
-	if g.vertices[0].name != ts1.name {
+	if g.vertices[ts1.name].name != ts1.name {
 		t.Fatal("The vertex was added with wrong information.")
 	}
-	if g.edges[1].root == nil {
+	if g.edges[ts2.name] == nil {
 		t.Fatal("Failed on edgelist creation.")
 	}
-	if g.hash[ts2.name] != 1 {
-		t.Fatal("Hash is returning wrong index.")
+	if g.edges[ts2.name] == nil {
+		t.Fatal("Failed on edgelist creation.")
 	}
 
 	err := g.InsertVertex(ts1)
@@ -62,7 +62,7 @@ func TestInsertVertex(t *testing.T) {
 }
 
 func TestInsertEdge(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -76,23 +76,22 @@ func TestInsertEdge(t *testing.T) {
 	g.InsertVertex(ts1)
 	g.InsertVertex(ts2)
 
-	err := g.InsertEdge(ts1, ts2, 4)
+	err := g.InsertEdge(ts1, ts2, 0)
+	if err == nil {
+		t.Fatal("You cannot insert a non-positive edge weight.")
+	}
+	err = g.InsertEdge(ts1, ts2, 4)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	if g.edges[0].Count() != 1 && g.edges[1].Count() != 1 {
+	if g.edges[g.hashFunction(ts1)][g.hashFunction(ts2)] != 4 {
 		t.Fatal("Edges have not been created.")
-	}
-
-	errEdge := g.InsertEdge(ts1, ts2, 3)
-	if errEdge == nil {
-		t.Fatal("This should error because the edge should exist already.")
 	}
 }
 
 func TestNonExistingVertexInsertEdge(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -121,8 +120,8 @@ func TestNonExistingVertexInsertEdge(t *testing.T) {
 	}
 }
 
-func TestGetEdges(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+func TestGetVertexFromKey(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -132,54 +131,52 @@ func TestGetEdges(t *testing.T) {
 		name:  "Ciudad 2",
 		color: "#225332",
 	}
-	ts3 := TestStruct{
-		name:  "Ciudad 3",
-		color: "#299123",
+
+	g.InsertVertex(ts1)
+
+	vertex, err := g.GetVertexFromKey(ts1.name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if vertex.color != "#223332" {
+		t.Fatal("Got the wrong value.")
+	}
+
+	vertex, err = g.GetVertexFromKey(ts2.name)
+	if err == nil {
+		t.Fatal("This key should not be in the graph.")
+	}
+}
+func TestGetVertexFromValue(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
 	}
 
 	g.InsertVertex(ts1)
-	g.InsertVertex(ts2)
-	g.InsertVertex(ts3)
 
-	emptyEdges, errEmpty := g.GetEdges(ts2)
-	if errEmpty != nil {
-		t.Fatal(errEmpty)
-	}
-	if len(emptyEdges) != 0 {
-		t.Fatal("There should be no edges.")
-	}
-
-	err := g.InsertEdge(ts1, ts2, 4)
+	vertex, err := g.GetVertexFromValue(ts1)
 	if err != nil {
 		t.Fatal(err)
 	}
-	err2 := g.InsertEdge(ts1, ts3, 7)
-	if err2 != nil {
-		t.Fatal(err2)
-	}
-	err3 := g.InsertEdge(ts2, ts3, 9)
-	if err3 != nil {
-		t.Fatal(err3)
+	if vertex.color != "#223332" {
+		t.Fatal("Got the wrong value.")
 	}
 
-	edges, err := g.GetEdges(ts1)
-	if err != nil {
-		t.Fatal(err)
-	}
-	if len(edges) != 2 {
-		t.Fatal("Ts1 should have two edges connected.")
-	}
-	edgests2, errts2 := g.GetEdges(ts2)
-	if errts2 != nil {
-		t.Fatal(errts2)
-	}
-	if len(edgests2) != 2 {
-		t.Fatal("Ts2 should have two edges connected.")
+	vertex, err = g.GetVertexFromValue(ts2)
+	if err == nil {
+		t.Fatal("This key should not be in the graph.")
 	}
 }
 
 func TestGetVertices(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -202,19 +199,43 @@ func TestGetVertices(t *testing.T) {
 	if len(vertices) != 3 {
 		t.Fatal("The vertices list was not returned.")
 	}
-	if vertices[0].name != ts1.name {
-		t.Fatal("The vertices list was not returned.")
+}
+
+func TestUpdateVertex(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
 	}
-	if vertices[1].name != ts2.name {
-		t.Fatal("The vertices list was not returned.")
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
 	}
-	if vertices[2].name != ts3.name {
-		t.Fatal("The vertices list was not returned.")
+
+	g.InsertVertex(ts1)
+
+	ts1.color = "#112112"
+	err := g.UpdateVertex(ts1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	ts1Updated, err := g.GetVertexFromKey(ts1.name)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ts1Updated.color != "#112112" {
+		t.Fatal("The color was not updated.")
+	}
+
+	err = g.UpdateVertex(ts2)
+	if err == nil {
+		t.Fatal("It should fail because the vertex does not exist.")
 	}
 }
 
-func TestGetVertex(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+func TestDeleteVertex(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -233,25 +254,101 @@ func TestGetVertex(t *testing.T) {
 	g.InsertVertex(ts2)
 	g.InsertVertex(ts3)
 
-	v, err := g.GetVertex(ts2)
+	vertices := g.GetVertices()
+	if len(vertices) != 3 {
+		t.Fatal("The vertices list was not returned.")
+	}
+
+	err := g.DeleteVertex(ts2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if v.name != ts2.name {
-		t.Fatal("The vertex was not returned.")
+
+	vertices = g.GetVertices()
+	if len(vertices) != 2 {
+		t.Fatal("The vertices list was not updated.")
 	}
 
-	_, err = g.GetVertex(TestStruct{
-		name:  "johnson",
-		color: "azul",
-	})
+	err = g.DeleteVertex(ts2)
 	if err == nil {
-		t.Fatal("Searching for a vertex that does not exists should give an error.")
+		t.Fatal("This should fail because the vertex was deleted.")
+	}
+}
+
+func TestGetEdges(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "Ciudad 1",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "Ciudad 2",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "Ciudad 3",
+		color: "#299123",
+	}
+	ts4 := TestStruct{
+		name:  "Ciudad Inexistente",
+		color: "#2e3a22",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+
+	emptyEdges, err := g.GetEdges(ts2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(emptyEdges) != 0 {
+		t.Fatal("There should be no edges.")
+	}
+
+	err = g.InsertEdge(ts1, ts2, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts1, ts3, 7)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts2, ts3, 9)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	edges, err := g.GetEdges(ts1)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(edges) != 2 {
+		t.Fatal("Ts1 should have two edges connected.")
+	}
+	if edges[g.hashFunction(ts2)] != 4 {
+		t.Fatal("The connection value is incorrect.")
+	}
+	edges, err = g.GetEdges(ts2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(edges) != 2 {
+		t.Fatal("Ts2 should have two edges connected.")
+	}
+	if edges[g.hashFunction(ts3)] != 9 {
+		t.Fatal("The connection value is incorrect.")
+	}
+
+	_, err = g.GetEdges(ts4)
+	if err == nil {
+		t.Fatal("This should error bacause the vertex does not exist.")
 	}
 }
 
 func TestUpdateEdgeValue(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -283,22 +380,30 @@ func TestUpdateEdgeValue(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if values[0].val != 8 {
+	if values[g.hashFunction(ts1)] != 8 {
 		t.Fatal("the value is not correct")
 	}
 
-	g.UpdateEdgeValue(ts1, ts2, 3)
+	err = g.UpdateEdgeValue(ts1, ts2, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
 	values, err = g.GetEdges(ts2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if values[0].val != 3 {
+	if values[g.hashFunction(ts1)] != 3 {
 		t.Fatal("the value is not correct")
+	}
+
+	err = g.UpdateEdgeValue(ts1, ts3, 4)
+	if err == nil {
+		t.Fatal("This should fail because these vertices are not connected.")
 	}
 }
 
 func TestAreConnected(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -326,37 +431,39 @@ func TestAreConnected(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	val, ok := g.AreConnected(ts1, ts2)
-	if !ok {
-		t.Fatal("These two vertices are connected.")
+	weight, err := g.AreConnected(ts1, ts2)
+	if err != nil {
+		t.Fatal("These two vertices should be connected.")
 	}
-	if val.val != 8 {
+	if weight != 8 {
 		t.Fatal("Wrong value in the connection.")
 	}
-	val, ok = g.AreConnected(ts2, ts3)
-	if !ok {
+	weight, err = g.AreConnected(ts2, ts3)
+	if err != nil {
 		t.Fatal("These two vertices are connected.")
 	}
-	if val.val != 3 {
+	if weight != 3 {
 		t.Fatal("Wrong value in the connection.")
 	}
+
 	// opposite way should work too
-	val, ok = g.AreConnected(ts3, ts2)
-	if !ok {
+	weight, err = g.AreConnected(ts3, ts2)
+	if err != nil {
 		t.Fatal("These two vertices are connected.")
 	}
-	if val.val != 3 {
+	if weight != 3 {
 		t.Fatal("Wrong value in the connection.")
 	}
+
 	// testing unconnected
-	val, ok = g.AreConnected(ts1, ts3)
-	if ok {
+	_, err = g.AreConnected(ts1, ts3)
+	if err == nil {
 		t.Fatal("These two vertices are not connected.")
 	}
 }
 
 func TestDeleteEdge(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -378,24 +485,105 @@ func TestDeleteEdge(t *testing.T) {
 	g.InsertEdge(ts1, ts3, 4)
 	g.InsertEdge(ts1, ts2, 4)
 
-	_, ok := g.AreConnected(ts1, ts2)
-	if !ok {
+	_, err := g.AreConnected(ts1, ts2)
+	if err != nil {
 		t.Fatal("Expected this to to be connected.")
 	}
 
-	err := g.DeleteEdge(ts1, ts2)
+	err = g.DeleteEdge(ts1, ts2)
 	if err != nil {
 		t.Fatal(err)
 	}
 
-	_, ok = g.AreConnected(ts1, ts2)
-	if ok {
+	_, err = g.AreConnected(ts1, ts2)
+	if err == nil {
 		t.Fatal("The vertices should not be connected.")
 	}
 }
 
-func TestUpdateVertexId(t *testing.T) {
-	g := NewGraph[TestStruct, int](tsHashFuncion)
+// Finding shortest path tests
+
+func TestGetMinDistVertex(t *testing.T) {
+	testData := map[string]float64{
+		"ciudad 1": 39.22,
+		"ciudad 2": 42.11,
+		"ciudad 3": 12.22,
+		"ciudad 4": 23.22,
+		"ciudad 5": 11.22,
+		"ciudad 6": 28.42,
+		"ciudad 7": 12.19,
+	}
+
+	unvisited := map[string]bool{
+		"ciudad 3": true,
+		"ciudad 7": true,
+		"ciudad 2": true,
+	}
+	unvisited2 := map[string]bool{
+		"ciudad 1": true,
+		"ciudad 6": true,
+		"ciudad 2": true,
+	}
+
+	minDistVertex := getMinDistVertex(testData, unvisited)
+	if minDistVertex != "ciudad 7" {
+		t.Fatal("Did not get the shortest distance.")
+	}
+	minDistVertex = getMinDistVertex(testData, unvisited2)
+	if minDistVertex != "ciudad 6" {
+		t.Fatal("Did not get the shortest distance.")
+	}
+}
+
+func TestGetPath(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
+
+	ts1 := TestStruct{
+		name:  "el seibo",
+		color: "#223332",
+	}
+	ts2 := TestStruct{
+		name:  "santiago",
+		color: "#225332",
+	}
+	ts3 := TestStruct{
+		name:  "moca",
+		color: "#299123",
+	}
+	ts4 := TestStruct{
+		name:  "higuey",
+		color: "#299123",
+	}
+	ts5 := TestStruct{
+		name:  "san juan",
+		color: "#299123",
+	}
+
+	g.InsertVertex(ts1)
+	g.InsertVertex(ts2)
+	g.InsertVertex(ts3)
+	g.InsertVertex(ts4)
+	g.InsertVertex(ts5)
+
+	destination := "el seibo"
+	predecessors := map[string]string{
+		"santiago": "moca",
+		"san juan": "higuey",
+		"higuey":   "santiago",
+		"el seibo": "san juan",
+	}
+
+	path := g.GetPath(destination, predecessors)
+	if len(path) != 5 {
+		t.Fatal("The list is wrong.")
+	}
+	if path[len(path)-1] != ts1 {
+		t.Fatal("Destination is not in the right place.")
+	}
+}
+
+func TestShortestPath(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
 
 	ts1 := TestStruct{
 		name:  "Ciudad 1",
@@ -410,37 +598,111 @@ func TestUpdateVertexId(t *testing.T) {
 		color: "#299123",
 	}
 	ts4 := TestStruct{
-		name:  "Ciudad Modelo",
-		color: "#199283",
+		name:  "Ciudad 4",
+		color: "#223332",
+	}
+	ts5 := TestStruct{
+		name:  "Ciudad 5",
+		color: "#225332",
+	}
+	ts6 := TestStruct{
+		name:  "Ciudad 6",
+		color: "#299123",
+	}
+	ts7 := TestStruct{
+		name:  "Ciudad 7",
+		color: "#299123",
+	}
+	ts8 := TestStruct{
+		name:  "Ciudad 8",
+		color: "#299123",
 	}
 
 	g.InsertVertex(ts1)
 	g.InsertVertex(ts2)
 	g.InsertVertex(ts3)
+	g.InsertVertex(ts4)
+	g.InsertVertex(ts5)
+	g.InsertVertex(ts6)
+	g.InsertVertex(ts7)
+	g.InsertVertex(ts8)
 
-	v1, err := g.GetVertex(ts1)
+	// Creating testing graph
+	err := g.InsertEdge(ts1, ts4, 6)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if v1.name != ts1.name {
-		t.Fatal("Should retrieve the right name.")
-	}
-	oldHashIdx := g.hash[ts1.name]
-
-	ok := g.UpdateVertexId(ts1, ts4)
-	if !ok {
-		t.Fatal("Should find the value.")
-	}
-	v1, err = g.GetVertex(ts4)
+	err = g.InsertEdge(ts1, ts3, 2)
 	if err != nil {
 		t.Fatal(err)
 	}
-	if v1.name != ts4.name {
-		t.Fatal("It didn't update the vertex value.")
+	err = g.InsertEdge(ts2, ts3, 4)
+	if err != nil {
+		t.Fatal(err)
 	}
-	newHashIdx := g.hash[ts4.name]
+	err = g.InsertEdge(ts4, ts3, 5)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts4, ts5, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts3, ts6, 4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts5, ts6, 3)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts5, ts3, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts8, ts5, 2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	err = g.InsertEdge(ts7, ts5, 8)
+	if err != nil {
+		t.Fatal(err)
+	}
 
-	if oldHashIdx != newHashIdx {
-		t.Fatal("It did not change the right value.")
+	path, err := g.ShortestPath(ts1, ts4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(path) != 2 {
+		t.Fatal("The path is incorrect.")
+	}
+
+	path, err = g.ShortestPath(ts1, ts8)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(path) != 4 {
+		t.Fatal("The path is incorrect.")
+	}
+
+	path, err = g.ShortestPath(ts7, ts2)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(path) != 4 {
+		t.Fatal("The path is incorrect.")
+	}
+
+	path, err = g.ShortestPath(ts6, ts4)
+	if err != nil {
+		t.Fatal(err)
+	}
+	if len(path) != 3 {
+		t.Fatal("The path is incorrect.")
+	}
+	for _, v := range path {
+		if v == ts3 {
+			t.Fatal("The path is incorrect.")
+		}
 	}
 }
