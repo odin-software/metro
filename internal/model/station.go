@@ -1,14 +1,14 @@
 package model
 
 type Station struct {
-	id       string
+	ID       string
 	name     string
 	location Vector
 }
 
 func NewStation(id string, name string, location Vector) Station {
 	return Station{
-		id:       id,
+		ID:       id,
 		name:     name,
 		location: location,
 	}

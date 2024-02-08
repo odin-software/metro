@@ -67,12 +67,32 @@ func (tr *Train) Update() {
 	}
 
 	direction := reach.location.SoftSub(tr.position)
-	direction.SetMag(tr.make.accMag)
+	mag := direction.Magnitude()
+	where := tr.current.location.Dist(tr.next.location) / 10
+
+	if mag < where {
+		m := Map(mag, 0, where, 0, tr.make.accMag)
+		direction.SetMag(m)
+	} else {
+		direction.SetMag(tr.make.accMag)
+	}
 
 	// Update position based on velocity
 	tr.velocity.Add(direction)
 	tr.velocity.Limit(tr.make.topSpeed)
 	tr.position.Add(tr.velocity)
+
+	if tr.position.Dist(reach.location) < 0.02 {
+		st, err := tr.q.DQ()
+		if err != nil {
+			fmt.Println("Something wrong with the next q value.")
+		}
+		tr.current = st
+		if st == tr.next {
+			tr.destinations.DQ()
+			tr.next = Station{}
+		}
+	}
 }
 
 func NewMake(name string, description string, accMag float64, topSpeed float64) Make {
