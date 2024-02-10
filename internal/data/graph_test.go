@@ -61,6 +61,44 @@ func TestInsertVertex(t *testing.T) {
 	}
 }
 
+func TestInsertVertices(t *testing.T) {
+	g := NewGraph[TestStruct](tsHashFuncion)
+
+	tss := []TestStruct{
+		{
+			name:  "Ciudad 1",
+			color: "#223332",
+		},
+		{
+			name:  "Ciudad 2",
+			color: "#225332",
+		},
+	}
+
+	g.InsertVertices(tss)
+
+	if len(g.vertices) != 2 {
+		t.Fatal("The vertices list was not updated.")
+	}
+	if len(g.edges) != 2 {
+		t.Fatal("The edges list was not updated.")
+	}
+	if g.vertices[tss[0].name].name != tss[0].name {
+		t.Fatal("The vertex was added with wrong information.")
+	}
+	if g.edges[tss[1].name] == nil {
+		t.Fatal("Failed on edgelist creation.")
+	}
+	if g.edges[tss[1].name] == nil {
+		t.Fatal("Failed on edgelist creation.")
+	}
+
+	err := g.InsertVertex(tss[0])
+	if err == nil {
+		t.Fatal("It should error on duplicated vertex insertion.")
+	}
+}
+
 func TestInsertEdge(t *testing.T) {
 	g := NewGraph[TestStruct](tsHashFuncion)
 

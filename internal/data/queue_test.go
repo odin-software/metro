@@ -64,6 +64,49 @@ func TestDequeue(t *testing.T) {
 	}
 }
 
+func TestQueueClear(t *testing.T) {
+	q := NewQueue[string]()
+	q.Q("Ciudad 1")
+	q.Q("Ciudad 2")
+	q.Q("Ciudad 3")
+
+	if q.Size() != 3 {
+		t.Fatal("The size is incorrect.")
+	}
+
+	q.Clear()
+	if q.Size() != 0 {
+		t.Fatal("The size is incorrect.")
+	}
+}
+
+func TestQueuePeek(t *testing.T) {
+	q := NewQueue[string]()
+	q.Q("Ciudad 1")
+	q.Q("Ciudad 2")
+	q.Q("Ciudad 3")
+	q.Q("Ciudad 4")
+
+	if q.Size() != 4 {
+		t.Fatal("The size is incorrect.")
+	}
+	p, err := q.Peek()
+	if err != nil {
+		t.Fatal("Should not error since it should have items.")
+	}
+	if p != "Ciudad 1" {
+		t.Fatal("Wrong peek.")
+	}
+	q.DQ()
+	p, err = q.Peek()
+	if err != nil {
+		t.Fatal("Should not error since it should have items.")
+	}
+	if p != "Ciudad 2" {
+		t.Fatal("Wrong peek.")
+	}
+}
+
 func TestQueueSize(t *testing.T) {
 	q := NewQueue[string]()
 	q.Q("Ciudad 1")
