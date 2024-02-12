@@ -1,8 +1,8 @@
 package model
 
 import (
-	"data"
 	"fmt"
+	"internal/data"
 )
 
 type Make struct {

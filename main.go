@@ -2,9 +2,9 @@ package main
 
 import (
 	"bufio"
-	"data"
 	"fmt"
-	"model"
+	"internal/data"
+	"internal/model"
 	"os"
 	"time"
 )

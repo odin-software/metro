@@ -1,6 +1,6 @@
 package main
 
-import "model"
+import "internal/model"
 
 func GenerateStationsData() []model.Station {
 	sts := []model.Station{
