@@ -1,11 +1,12 @@
 package main
 
 import (
-	"bufio"
-	"fmt"
+	// "bufio"
+
 	"internal/data"
 	"internal/model"
-	"os"
+
+	// "os"
 	"time"
 )
 
@@ -15,7 +16,7 @@ var stationHashFunction = func(station model.Station) string {
 
 func main() {
 	// Timing and configuration
-	scnr := bufio.NewScanner(os.Stdin)
+	// scnr := bufio.NewScanner(os.Stdin)
 	ticker := time.NewTicker(100 * time.Millisecond)
 	quit := make(chan struct{})
 
@@ -36,7 +37,7 @@ func main() {
 	g.InsertEdge(sts[5], sts[7], sts[5].Location.Dist(sts[7].Location))
 
 	// Creating the train and queing some destinations.
-	make := model.NewMake("4-Legged", "A type of fast train.", 0.01, 4)
+	make := model.NewMake("4-Legged-chu", "A type of fast train.", 0.01, 4)
 	train := model.NewTrain("Chu", make, sts[0].Location, sts[0], &g)
 	train.AddDestination(sts[2])
 	train.AddDestination(sts[7])
@@ -47,7 +48,7 @@ func main() {
 			select {
 			case <-ticker.C:
 				train.Update()
-				fmt.Println(train.Position.X, train.Position.Y)
+				// fmt.Println(train.Position.X, train.Position.Y)
 			case <-quit:
 				ticker.Stop()
 				return
@@ -55,12 +56,18 @@ func main() {
 		}
 	}()
 
-	for {
-		// getting input
-		fmt.Print("metro > ")
-		scnr.Scan()
-		if scnr.Text() == "exit" {
-			os.Exit(0)
-		}
-	}
+	// Adding the reporter server.
+	ReporterServer()
+
+	// for {
+	// 	// getting input
+	// 	fmt.Print("metro > ")
+	// 	scnr.Scan()
+	// 	if scnr.Text() == "stop" {
+	// 		quit <- struct{}{}
+	// 	}
+	// 	if scnr.Text() == "exit" {
+	// 		os.Exit(0)
+	// 	}
+	// }
 }
