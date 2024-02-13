@@ -47,7 +47,7 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				train.Update()
+				// train.Update()
 				// fmt.Println(train.Position.X, train.Position.Y)
 			case <-quit:
 				ticker.Stop()
