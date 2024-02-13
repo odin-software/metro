@@ -1,6 +1,6 @@
 module github.com/odin-software/metro
 
-go 1.21.6
+go 1.22
 
 replace internal/data => ./internal/data
 
