@@ -3,6 +3,7 @@ package main
 import (
 	// "bufio"
 
+	"fmt"
 	"internal/data"
 	"internal/model"
 
@@ -17,7 +18,7 @@ var stationHashFunction = func(station model.Station) string {
 func main() {
 	// Timing and configuration
 	// scnr := bufio.NewScanner(os.Stdin)
-	ticker := time.NewTicker(100 * time.Millisecond)
+	ticker := time.NewTicker(20 * time.Millisecond)
 	quit := make(chan struct{})
 
 	// Filling graph data.
@@ -47,8 +48,8 @@ func main() {
 		for {
 			select {
 			case <-ticker.C:
-				// train.Update()
-				// fmt.Println(train.Position.X, train.Position.Y)
+				train.Update()
+				fmt.Println(train.Position.X, train.Position.Y)
 			case <-quit:
 				ticker.Stop()
 				return

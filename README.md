@@ -33,6 +33,14 @@ We use [goose](https://github.com/pressly/goose) to manage the database migratio
 go get -u github.com/pressly/goose/cmd/goose
 ```
 
+In order to take advantage of the pre-configured goose options you can set up the following environment variables:
+
+```bash
+export GOOSE_DRIVER=sqlite3
+export GOOSE_DBSTRING=metro.db
+export GOOSE_MIGRATIONS_DIR=migrations
+```
+
 To run the migrations, you can use the following command:
 
 ```bash
