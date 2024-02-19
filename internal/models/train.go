@@ -2,7 +2,6 @@ package model
 
 import (
 	"fmt"
-	"internal/data"
 )
 
 type Make struct {
@@ -20,12 +19,13 @@ type Train struct {
 	acceleration Vector
 	current      Station
 	next         Station
-	destinations data.Queue[Station]
-	q            data.Queue[Station]
-	central      *data.Network[Station]
+	forward      bool
+	destinations Line
+	q            Queue[Station]
+	central      *Network[Station]
 }
 
-func NewTrain(name string, make Make, pos Vector, initialStation Station, central *data.Network[Station]) Train {
+func NewTrain(name string, make Make, pos Vector, initialStation Station, line Line, central *Network[Station]) Train {
 	return Train{
 		name:         name,
 		make:         make,
@@ -34,14 +34,11 @@ func NewTrain(name string, make Make, pos Vector, initialStation Station, centra
 		acceleration: NewVector(0.0, 0.0),
 		current:      initialStation,
 		next:         Station{},
-		destinations: data.Queue[Station]{},
-		q:            data.Queue[Station]{},
+		forward:      true,
+		destinations: line,
+		q:            Queue[Station]{},
 		central:      central,
 	}
-}
-
-func (tr *Train) AddDestination(st Station) {
-	tr.destinations.Q(st)
 }
 
 func (tr *Train) addToQueue(sts []Station) {
@@ -51,6 +48,17 @@ func (tr *Train) addToQueue(sts []Station) {
 func (tr *Train) Update() {
 	// If there is no next station, assign one from the destinations queue
 	if tr.next == (Station{}) {
+		if tr.forward {
+			for i, st := range tr.destinations.Stations {
+				if st == tr.current {
+					if i == len(tr.destinations.Stations)-1 {
+						tr.forward = false
+					}
+					tr.next = tr.destinations.Stations[i+1]
+					break
+				}
+			}
+		}
 		tr.next, _ = tr.destinations.DQ()
 		path, err := tr.central.ShortestPath(tr.current, tr.next)
 		if err != nil {

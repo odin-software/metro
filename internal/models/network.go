@@ -2,8 +2,6 @@ package model
 
 import (
 	"errors"
-	"math"
-	"slices"
 )
 
 type Network[T comparable] struct {
@@ -120,27 +118,27 @@ func (gr *Network[T]) GetEdges(vertex T) (map[string][]Vector, error) {
 	return v, nil
 }
 
-func (gr *Network[T]) AreConnected(firstVertex T, secondVertex T) (float64, error) {
+func (gr *Network[T]) AreConnected(firstVertex T, secondVertex T) (std []Vector, e error) {
 	firstKey := gr.hashFunction(firstVertex)
 	secondKey := gr.hashFunction(secondVertex)
 
 	firstMap, ok := gr.edges[firstKey]
 	if !ok {
-		return 0, errors.New("the first vertex does not exists")
+		return std, errors.New("the first vertex does not exists")
 	}
 	if _, ok := gr.edges[secondKey]; !ok {
-		return 0, errors.New("the second vertex does not exists")
+		return std, errors.New("the second vertex does not exists")
 	}
 
-	weight, ok := firstMap[secondKey]
+	connections, ok := firstMap[secondKey]
 	if !ok {
-		return 0, errors.New("these vertices are not connected")
+		return std, errors.New("these vertices are not connected")
 	}
 
-	return weight, nil
+	return connections, nil
 }
 
-func (gr *Network[T]) UpdateEdgeValue(firstVertex T, secondVertex T, weight float64) error {
+func (gr *Network[T]) UpdateEdgeValue(firstVertex T, secondVertex T, points []Vector) error {
 	firstKey := gr.hashFunction(firstVertex)
 	secondKey := gr.hashFunction(secondVertex)
 
@@ -162,8 +160,8 @@ func (gr *Network[T]) UpdateEdgeValue(firstVertex T, secondVertex T, weight floa
 		return errors.New("these vertices are not connected")
 	}
 
-	firstMap[secondKey] = weight
-	secondMap[firstKey] = weight
+	firstMap[secondKey] = points
+	secondMap[firstKey] = points
 
 	return nil
 }
@@ -192,80 +190,80 @@ func (gr *Network[T]) DeleteEdge(firstVertex T, secondVertex T) error {
 
 // Finding shortest path to destination.
 
-func getMinDistVertex(distances map[string]float64, unvisited map[string]bool) string {
-	minDist := math.Inf(1)
-	minDistVertex := ""
+// func getMinDistVertex(distances map[string]float64, unvisited map[string]bool) string {
+// 	minDist := math.Inf(1)
+// 	minDistVertex := ""
 
-	for k := range unvisited {
-		distSoFar := distances[k]
-		if distSoFar < minDist {
-			minDist = distSoFar
-			minDistVertex = k
-		}
-	}
+// 	for k := range unvisited {
+// 		distSoFar := distances[k]
+// 		if distSoFar < minDist {
+// 			minDist = distSoFar
+// 			minDistVertex = k
+// 		}
+// 	}
 
-	return minDistVertex
-}
+// 	return minDistVertex
+// }
 
-func (gr *Network[T]) GetPath(destination string, predecessors map[string]string) []T {
-	path := []T{}
-	pred := destination
+// func (gr *Network[T]) GetPath(destination string, predecessors map[string]string) []T {
+// 	path := []T{}
+// 	pred := destination
 
-	for pred != "" {
-		path = append(path, gr.vertices[pred])
-		pred = predecessors[pred]
-	}
-	slices.Reverse(path)
+// 	for pred != "" {
+// 		path = append(path, gr.vertices[pred])
+// 		pred = predecessors[pred]
+// 	}
+// 	slices.Reverse(path)
 
-	return path
-}
+// 	return path
+// }
 
-func (gr *Network[T]) ShortestPath(src T, destination T) ([]T, error) {
-	srcKey := gr.hashFunction(src)
-	destKey := gr.hashFunction(destination)
+// func (gr *Network[T]) ShortestPath(src T, destination T) ([]T, error) {
+// 	srcKey := gr.hashFunction(src)
+// 	destKey := gr.hashFunction(destination)
 
-	unvisited := make(map[string]bool)
-	predecessors := map[string]string{}
-	distances := map[string]float64{}
+// 	unvisited := make(map[string]bool)
+// 	predecessors := map[string]string{}
+// 	distances := map[string]float64{}
 
-	for k := range gr.vertices {
-		unvisited[k] = true
-		if k == srcKey {
-			distances[k] = 0
-		} else {
-			distances[k] = math.Inf(1)
-		}
-	}
+// 	for k := range gr.vertices {
+// 		unvisited[k] = true
+// 		if k == srcKey {
+// 			distances[k] = 0
+// 		} else {
+// 			distances[k] = math.Inf(1)
+// 		}
+// 	}
 
-	for len(unvisited) > 0 {
-		minDistNode := getMinDistVertex(distances, unvisited)
-		delete(unvisited, minDistNode)
+// 	for len(unvisited) > 0 {
+// 		minDistNode := getMinDistVertex(distances, unvisited)
+// 		delete(unvisited, minDistNode)
 
-		if minDistNode == destKey {
-			return gr.GetPath(destKey, predecessors), nil
-		}
-		vertex, err := gr.GetVertexFromKey(minDistNode)
-		if err != nil {
-			return nil, err
-		}
-		edges, err := gr.GetEdges(vertex)
-		if err != nil {
-			return nil, err
-		}
-		for neighbor := range edges {
-			if _, ok := unvisited[neighbor]; !ok {
-				continue
-			}
+// 		if minDistNode == destKey {
+// 			return gr.GetPath(destKey, predecessors), nil
+// 		}
+// 		vertex, err := gr.GetVertexFromKey(minDistNode)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		edges, err := gr.GetEdges(vertex)
+// 		if err != nil {
+// 			return nil, err
+// 		}
+// 		for neighbor := range edges {
+// 			if _, ok := unvisited[neighbor]; !ok {
+// 				continue
+// 			}
 
-			distanceSoFar := distances[minDistNode]
-			distanceToNeighbor := gr.edges[minDistNode][neighbor]
-			totalDistToNeighbor := distanceSoFar + distanceToNeighbor
-			if totalDistToNeighbor < distances[neighbor] {
-				distances[neighbor] = totalDistToNeighbor
-				predecessors[neighbor] = minDistNode
-			}
-		}
-	}
+// 			distanceSoFar := distances[minDistNode]
+// 			distanceToNeighbor := gr.edges[minDistNode][neighbor]
+// 			totalDistToNeighbor := distanceSoFar + distanceToNeighbor
+// 			if totalDistToNeighbor < distances[neighbor] {
+// 				distances[neighbor] = totalDistToNeighbor
+// 				predecessors[neighbor] = minDistNode
+// 			}
+// 		}
+// 	}
 
-	return nil, nil
-}
+// 	return nil, nil
+// }
