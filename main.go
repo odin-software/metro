@@ -1,10 +1,9 @@
-package main
+package metro
 
 import (
 	// "bufio"
 
 	"fmt"
-	"internal/data"
 	"internal/model"
 
 	// "os"
@@ -25,7 +24,7 @@ func main() {
 	g := data.NewGraph[model.Station](stationHashFunction)
 	sts := GenerateStationsData()
 	g.InsertVertices(sts)
-	g.InsertEdge(sts[0], sts[3], sts[0].Location.Dist(sts[3].Location))
+	g.InsertEdge(sts[0], sts[3], []model.Vector{sts[0].Location, sts[3].Location})
 	g.InsertEdge(sts[0], sts[4], sts[0].Location.Dist(sts[4].Location))
 	g.InsertEdge(sts[1], sts[2], sts[1].Location.Dist(sts[2].Location))
 	g.InsertEdge(sts[2], sts[3], sts[2].Location.Dist(sts[3].Location))
@@ -39,7 +38,7 @@ func main() {
 
 	// Creating the train and queing some destinations.
 	make := model.NewMake("4-Legged-chu", "A type of fast train.", 0.01, 4)
-	train := model.NewTrain("Chu", make, sts[0].Location, sts[0], &g)
+	train := model.NewTrain("Chu", make, sts[0].Location, sts[0], linea2)
 	train.AddDestination(sts[2])
 	train.AddDestination(sts[7])
 	train.AddDestination(sts[9])

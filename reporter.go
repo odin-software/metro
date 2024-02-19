@@ -1,4 +1,4 @@
-package main
+package metro
 
 import (
 	"html/template"

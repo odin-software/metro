@@ -2,13 +2,10 @@ module github.com/odin-software/metro
 
 go 1.22
 
-replace internal/data => ./internal/data
-
-replace internal/model => ./internal/model
+replace internal/model => ./internal/models
 
 require (
 	github.com/labstack/echo/v4 v4.11.4
-	internal/data v1.0.0
 	internal/model v1.0.0
 )
 

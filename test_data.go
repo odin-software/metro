@@ -1,4 +1,4 @@
-package main
+package metro
 
 import "internal/model"
 

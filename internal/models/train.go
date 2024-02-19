@@ -22,10 +22,10 @@ type Train struct {
 	next         Station
 	destinations data.Queue[Station]
 	q            data.Queue[Station]
-	central      *data.Graph[Station]
+	central      *data.Network[Station]
 }
 
-func NewTrain(name string, make Make, pos Vector, initialStation Station, central *data.Graph[Station]) Train {
+func NewTrain(name string, make Make, pos Vector, initialStation Station, central *data.Network[Station]) Train {
 	return Train{
 		name:         name,
 		make:         make,

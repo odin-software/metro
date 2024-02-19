@@ -1,4 +1,4 @@
-package data
+package model
 
 import (
 	"errors"
@@ -6,32 +6,32 @@ import (
 	"slices"
 )
 
-type Graph[T comparable] struct {
+type Network[T comparable] struct {
 	vertices     map[string]T
-	edges        map[string]map[string]float64
+	edges        map[string]map[string][]Vector
 	hashFunction func(T) string
 }
 
-func NewGraph[T comparable](hashF func(T) string) Graph[T] {
-	return Graph[T]{
+func NewNetwork[T comparable](hashF func(T) string) Network[T] {
+	return Network[T]{
 		vertices:     make(map[string]T),
-		edges:        make(map[string]map[string]float64),
+		edges:        make(map[string]map[string][]Vector),
 		hashFunction: hashF,
 	}
 }
 
-func (gr *Graph[T]) InsertVertex(vertex T) error {
+func (gr *Network[T]) InsertVertex(vertex T) error {
 	key := gr.hashFunction(vertex)
 	if _, ok := gr.vertices[key]; ok {
 		return errors.New("this vertex already exists in the graph")
 	}
 
 	gr.vertices[key] = vertex
-	gr.edges[key] = make(map[string]float64)
+	gr.edges[key] = make(map[string][]Vector)
 	return nil
 }
 
-func (gr *Graph[T]) InsertVertices(vertices []T) error {
+func (gr *Network[T]) InsertVertices(vertices []T) error {
 	for _, v := range vertices {
 		err := gr.InsertVertex(v)
 		if err != nil {
@@ -41,13 +41,9 @@ func (gr *Graph[T]) InsertVertices(vertices []T) error {
 	return nil
 }
 
-func (gr *Graph[T]) InsertEdge(firstVertex T, secondVertex T, weight float64) error {
+func (gr *Network[T]) InsertEdge(firstVertex T, secondVertex T, points []Vector) error {
 	firstKey := gr.hashFunction(firstVertex)
 	secondKey := gr.hashFunction(secondVertex)
-
-	if weight <= 0 {
-		return errors.New("the weight should be greater than zero")
-	}
 
 	if _, ok := gr.edges[firstKey]; !ok {
 		return errors.New("the first vertex does not exists in the graph")
@@ -55,20 +51,21 @@ func (gr *Graph[T]) InsertEdge(firstVertex T, secondVertex T, weight float64) er
 	if _, ok := gr.edges[secondKey]; !ok {
 		return errors.New("the first vertex does not exists in the graph")
 	}
-	gr.edges[firstKey][secondKey] = weight
-	gr.edges[secondKey][firstKey] = weight
+
+	gr.edges[firstKey][secondKey] = points
+	gr.edges[secondKey][firstKey] = points
 
 	return nil
 }
 
-func (gr *Graph[T]) GetVertexFromKey(key string) (T, error) {
+func (gr *Network[T]) GetVertexFromKey(key string) (T, error) {
 	if _, ok := gr.vertices[key]; !ok {
 		return *new(T), errors.New("this vertex doesnt exists in the graph")
 	}
 	return gr.vertices[key], nil
 }
 
-func (gr *Graph[T]) GetVertexFromValue(value T) (T, error) {
+func (gr *Network[T]) GetVertexFromValue(value T) (T, error) {
 	key := gr.hashFunction(value)
 	vertex, ok := gr.vertices[key]
 	if !ok {
@@ -78,7 +75,7 @@ func (gr *Graph[T]) GetVertexFromValue(value T) (T, error) {
 	return vertex, nil
 }
 
-func (gr *Graph[T]) GetVertices() []T {
+func (gr *Network[T]) GetVertices() []T {
 	values := make([]T, 0, len(gr.vertices))
 	for _, v := range gr.vertices {
 		values = append(values, v)
@@ -86,7 +83,7 @@ func (gr *Graph[T]) GetVertices() []T {
 	return values
 }
 
-func (gr *Graph[T]) UpdateVertex(vertex T) error {
+func (gr *Network[T]) UpdateVertex(vertex T) error {
 	key := gr.hashFunction(vertex)
 
 	if _, ok := gr.vertices[key]; !ok {
@@ -97,7 +94,7 @@ func (gr *Graph[T]) UpdateVertex(vertex T) error {
 	return nil
 }
 
-func (gr *Graph[T]) DeleteVertex(vertex T) error {
+func (gr *Network[T]) DeleteVertex(vertex T) error {
 	key := gr.hashFunction(vertex)
 	if _, ok := gr.vertices[key]; !ok {
 		return errors.New("this vertex does not exists")
@@ -114,7 +111,7 @@ func (gr *Graph[T]) DeleteVertex(vertex T) error {
 	return nil
 }
 
-func (gr *Graph[T]) GetEdges(vertex T) (map[string]float64, error) {
+func (gr *Network[T]) GetEdges(vertex T) (map[string][]Vector, error) {
 	key := gr.hashFunction(vertex)
 	v, ok := gr.edges[key]
 	if !ok {
@@ -123,7 +120,7 @@ func (gr *Graph[T]) GetEdges(vertex T) (map[string]float64, error) {
 	return v, nil
 }
 
-func (gr *Graph[T]) AreConnected(firstVertex T, secondVertex T) (float64, error) {
+func (gr *Network[T]) AreConnected(firstVertex T, secondVertex T) (float64, error) {
 	firstKey := gr.hashFunction(firstVertex)
 	secondKey := gr.hashFunction(secondVertex)
 
@@ -143,7 +140,7 @@ func (gr *Graph[T]) AreConnected(firstVertex T, secondVertex T) (float64, error)
 	return weight, nil
 }
 
-func (gr *Graph[T]) UpdateEdgeValue(firstVertex T, secondVertex T, weight float64) error {
+func (gr *Network[T]) UpdateEdgeValue(firstVertex T, secondVertex T, weight float64) error {
 	firstKey := gr.hashFunction(firstVertex)
 	secondKey := gr.hashFunction(secondVertex)
 
@@ -171,7 +168,7 @@ func (gr *Graph[T]) UpdateEdgeValue(firstVertex T, secondVertex T, weight float6
 	return nil
 }
 
-func (gr *Graph[T]) DeleteEdge(firstVertex T, secondVertex T) error {
+func (gr *Network[T]) DeleteEdge(firstVertex T, secondVertex T) error {
 	firstKey := gr.hashFunction(firstVertex)
 	secondKey := gr.hashFunction(secondVertex)
 
@@ -210,7 +207,7 @@ func getMinDistVertex(distances map[string]float64, unvisited map[string]bool) s
 	return minDistVertex
 }
 
-func (gr *Graph[T]) GetPath(destination string, predecessors map[string]string) []T {
+func (gr *Network[T]) GetPath(destination string, predecessors map[string]string) []T {
 	path := []T{}
 	pred := destination
 
@@ -223,7 +220,7 @@ func (gr *Graph[T]) GetPath(destination string, predecessors map[string]string) 
 	return path
 }
 
-func (gr *Graph[T]) ShortestPath(src T, destination T) ([]T, error) {
+func (gr *Network[T]) ShortestPath(src T, destination T) ([]T, error) {
 	srcKey := gr.hashFunction(src)
 	destKey := gr.hashFunction(destination)
 
