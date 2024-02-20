@@ -19,6 +19,9 @@ func NewNetwork[T comparable](hashF func(T) string) Network[T] {
 	}
 }
 
+// Inserts a vertex into the graph.
+// If the vertex already exists, it returns an error, otherwise it returns nil.
+// It also creates an empty map for the edges of the new vertex.
 func (gr *Network[T]) InsertVertex(vertex T) error {
 	key := gr.hashFunction(vertex)
 	if _, ok := gr.vertices[key]; ok {
@@ -30,6 +33,7 @@ func (gr *Network[T]) InsertVertex(vertex T) error {
 	return nil
 }
 
+// Works like InsertVertex, but for a slice of vertices.
 func (gr *Network[T]) InsertVertices(vertices []T) error {
 	for _, v := range vertices {
 		err := gr.InsertVertex(v)
@@ -40,6 +44,7 @@ func (gr *Network[T]) InsertVertices(vertices []T) error {
 	return nil
 }
 
+// Inserts an edge between two vertices, the points are positions in between the vertices.
 func (gr *Network[T]) InsertEdge(firstVertex T, secondVertex T, points []Vector) error {
 	firstKey := gr.hashFunction(firstVertex)
 	secondKey := gr.hashFunction(secondVertex)
@@ -193,6 +198,7 @@ func (gr *Network[T]) DeleteEdge(firstVertex T, secondVertex T) error {
 }
 
 // Finding shortest path to destination.
+// Not using it currently.
 
 // func getMinDistVertex(distances map[string]float64, unvisited map[string]bool) string {
 // 	minDist := math.Inf(1)
