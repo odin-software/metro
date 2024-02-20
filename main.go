@@ -7,6 +7,8 @@ import (
 
 	// "os"
 	"time"
+
+	"github.com/VividCortex/multitick"
 )
 
 var stationHashFunction = func(station model.Station) string {
@@ -16,9 +18,10 @@ var stationHashFunction = func(station model.Station) string {
 func main() {
 	// Timing and configuration
 	// scnr := bufio.NewScanner(os.Stdin)
-	ticker := time.NewTicker(15 * time.Millisecond)
-	tickerMap := time.NewTicker(30 * time.Millisecond)
-	quit := make(chan struct{})
+	// fmt.Println(trains[idx].Position.X, trains[idx].Position.Y)
+	tick := multitick.NewTicker(15*time.Millisecond, -1*time.Millisecond)
+	// ticker := time.NewTicker(15 * time.Millisecond)
+	tickerMap := time.NewTicker(1000 * time.Millisecond)
 
 	// Filling graph data.
 	g := model.NewNetwork[model.Station](stationHashFunction)
@@ -38,38 +41,29 @@ func main() {
 	// Creating the train and queing some destinations.
 	trainMake := model.NewMake("4-Legged-chu", "A type of fast train.", 0.01, 4)
 	trains := make([]model.Train, 0)
-	// train := model.NewTrain("Chu", trainMake, sts[1].Location, sts[1], lines[1], &g)
+	train := model.NewTrain("Chu", trainMake, sts[1].Location, sts[1], lines[1], &g)
 	train2 := model.NewTrain("Cha", trainMake, sts[0].Location, sts[0], lines[0], &g)
-	// train3 := model.NewTrain("Che", trainMake, sts[3].Location, sts[3], lines[3], &g)
-	// train4 := model.NewTrain("Chi", trainMake, sts[11].Location, sts[11], lines[0], &g)
-	// train5 := model.NewTrain("Cho", trainMake, sts[7].Location, sts[7], lines[2], &g)
-	// trains = append(trains, train, train2, train3, train4, train5)
-	trains = append(trains, train2)
+	train3 := model.NewTrain("Che", trainMake, sts[3].Location, sts[3], lines[3], &g)
+	train4 := model.NewTrain("Chi", trainMake, sts[11].Location, sts[11], lines[0], &g)
+	train5 := model.NewTrain("Cho", trainMake, sts[7].Location, sts[7], lines[2], &g)
+	trains = append(trains, train, train2, train3, train4, train5)
+	// trains = append(trains, train2)
 
 	for i := 0; i < len(trains); i++ {
 		go func(idx int) {
-			for {
-				select {
-				case <-ticker.C:
-					trains[idx].Update()
-					// fmt.Println(trains[idx].Position.X, trains[idx].Position.Y)
-				case <-quit:
-					ticker.Stop()
-					return
-				}
+			sub := tick.Subscribe()
+			for range sub {
+				trains[idx].Update()
 			}
 		}(i)
 	}
 
 	go func() {
-		for {
-			select {
-			case <-tickerMap.C:
-				PrintMap(800, 600, sts, trains)
-			case <-quit:
-				ticker.Stop()
-				return
-			}
+		// var i int
+		for range tickerMap.C {
+			// i++
+			// fmt.Println(i)
+			PrintMap(800, 600, sts, trains)
 		}
 	}()
 	// Adding the reporter server.
