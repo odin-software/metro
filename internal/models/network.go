@@ -52,8 +52,10 @@ func (gr *Network[T]) InsertEdge(firstVertex T, secondVertex T, points []Vector)
 	}
 
 	gr.edges[firstKey][secondKey] = points
-	slices.Reverse(points)
-	gr.edges[secondKey][firstKey] = points
+	rev := make([]Vector, len(points))
+	copy(rev, points)
+	slices.Reverse(rev)
+	gr.edges[secondKey][firstKey] = rev
 
 	return nil
 }
