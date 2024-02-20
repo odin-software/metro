@@ -2,6 +2,7 @@ package model
 
 import (
 	"fmt"
+	"time"
 )
 
 type Make struct {
@@ -12,7 +13,7 @@ type Make struct {
 }
 
 type Train struct {
-	name         string
+	Name         string
 	make         Make
 	Position     Vector
 	velocity     Vector
@@ -21,13 +22,13 @@ type Train struct {
 	next         Station
 	forward      bool
 	destinations Line
-	q            Queue[Station]
+	q            Queue[Vector]
 	central      *Network[Station]
 }
 
 func NewTrain(name string, make Make, pos Vector, initialStation Station, line Line, central *Network[Station]) Train {
 	return Train{
-		name:         name,
+		Name:         name,
 		make:         make,
 		Position:     pos,
 		velocity:     NewVector(0.0, 0.0),
@@ -36,12 +37,12 @@ func NewTrain(name string, make Make, pos Vector, initialStation Station, line L
 		next:         Station{},
 		forward:      true,
 		destinations: line,
-		q:            Queue[Station]{},
+		q:            Queue[Vector]{},
 		central:      central,
 	}
 }
 
-func (tr *Train) addToQueue(sts []Station) {
+func (tr *Train) addToQueue(sts []Vector) {
 	tr.q.QList(sts)
 }
 
@@ -53,14 +54,28 @@ func (tr *Train) Update() {
 				if st == tr.current {
 					if i == len(tr.destinations.Stations)-1 {
 						tr.forward = false
+						tr.next = tr.destinations.Stations[i-1]
+						break
 					}
 					tr.next = tr.destinations.Stations[i+1]
 					break
 				}
 			}
+		} else {
+			for i, st := range tr.destinations.Stations {
+				if st == tr.current {
+					if i == 0 {
+						tr.forward = true
+						tr.next = tr.destinations.Stations[i+1]
+						break
+					}
+					tr.next = tr.destinations.Stations[i-1]
+					break
+				}
+			}
 		}
-		tr.next, _ = tr.destinations.DQ()
-		path, err := tr.central.ShortestPath(tr.current, tr.next)
+		path, err := tr.central.AreConnected(tr.current, tr.next)
+		path = append(path, tr.next.Location)
 		if err != nil {
 			fmt.Println("Something went wrong")
 		}
@@ -74,9 +89,9 @@ func (tr *Train) Update() {
 		return
 	}
 
-	direction := reach.Location.SoftSub(tr.Position)
+	direction := reach.SoftSub(tr.Position)
 	mag := direction.Magnitude()
-	where := tr.current.Location.Dist(reach.Location) / 10
+	where := tr.current.Location.Dist(reach) / 8
 
 	if mag < where {
 		m := Map(mag, 0, where, 0, tr.make.accMag)
@@ -89,18 +104,17 @@ func (tr *Train) Update() {
 	tr.velocity.Add(direction)
 	tr.velocity.Limit(tr.make.topSpeed)
 	tr.Position.Add(tr.velocity)
-	distance := tr.Position.Dist(reach.Location)
+	distance := tr.Position.Dist(reach)
 
 	if distance <= 1 {
-		st, err := tr.q.DQ()
-		if err != nil {
-			fmt.Println("Something wrong with the next q value.")
-		}
-		tr.current = st
+		tr.q.DQ()
 		tr.velocity.Scale(0)
-		if st == tr.next {
-			tr.destinations.DQ()
+		if tr.q.Size() == 0 {
+			tr.current = tr.next
 			tr.next = Station{}
+			fmt.Printf("%s arrived at: %s\n", tr.Name, tr.current.Name)
+			time.Sleep(3 * time.Second)
+			return
 		}
 	}
 }

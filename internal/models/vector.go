@@ -83,3 +83,11 @@ func (v *Vector) Dist(v2 Vector) float64 {
 	Y := v.Y - v2.Y
 	return math.Sqrt(X*X + Y*Y)
 }
+
+func (v *Vector) Angle() float64 {
+	return math.Atan2(v.Y, v.X)
+}
+
+func (v *Vector) CloseTo(x, y float64, precision int) bool {
+	return v.Dist(NewVector(x, y)) <= float64(precision)
+}

@@ -1,4 +1,4 @@
-package metro
+package main
 
 import "internal/model"
 
@@ -20,7 +20,7 @@ func GenerateTestData() ([]model.Station, []model.Line) {
 	lines := []model.Line{
 		{
 			Name:     "Linea 1",
-			Stations: []model.Station{sts[0], sts[1], sts[3], sts[12]},
+			Stations: []model.Station{sts[0], sts[1], sts[3], sts[11]},
 		},
 		{
 			Name:     "Linea 2",
@@ -28,11 +28,11 @@ func GenerateTestData() ([]model.Station, []model.Line) {
 		},
 		{
 			Name:     "Linea 3",
-			Stations: []model.Station{sts[7], sts[8], sts[10]},
+			Stations: []model.Station{sts[7], sts[8], sts[9]},
 		},
 		{
 			Name:     "Linea 4",
-			Stations: []model.Station{sts[10], sts[4], sts[5]},
+			Stations: []model.Station{sts[10], sts[3], sts[4]},
 		},
 	}
 	return sts, lines

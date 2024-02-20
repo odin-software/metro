@@ -1,9 +1,8 @@
-package metro
+package main
 
 import (
 	// "bufio"
 
-	"fmt"
 	"internal/model"
 
 	// "os"
@@ -17,7 +16,8 @@ var stationHashFunction = func(station model.Station) string {
 func main() {
 	// Timing and configuration
 	// scnr := bufio.NewScanner(os.Stdin)
-	ticker := time.NewTicker(20 * time.Millisecond)
+	ticker := time.NewTicker(5 * time.Millisecond)
+	tickerMap := time.NewTicker(30 * time.Millisecond)
 	quit := make(chan struct{})
 
 	// Filling graph data.
@@ -36,22 +36,41 @@ func main() {
 	g.InsertEdge(sts[8], sts[9], []model.Vector{model.NewVector(500.0, 250.0), model.NewVector(550.0, 200.0)})
 
 	// Creating the train and queing some destinations.
-	make := model.NewMake("4-Legged-chu", "A type of fast train.", 0.01, 4)
-	train := model.NewTrain("Chu", make, sts[0].Location, sts[0], lines[0], &g)
+	trainMake := model.NewMake("4-Legged-chu", "A type of fast train.", 0.01, 4)
+	trains := make([]model.Train, 0)
+	train := model.NewTrain("Chu", trainMake, sts[1].Location, sts[1], lines[1], &g)
+	train2 := model.NewTrain("Cha", trainMake, sts[0].Location, sts[0], lines[0], &g)
+	train3 := model.NewTrain("Che", trainMake, sts[3].Location, sts[3], lines[3], &g)
+	train4 := model.NewTrain("Chi", trainMake, sts[11].Location, sts[11], lines[0], &g)
+	train5 := model.NewTrain("Cho", trainMake, sts[7].Location, sts[7], lines[2], &g)
+	trains = append(trains, train, train2, train3, train4, train5)
+
+	for i := 0; i < len(trains); i++ {
+		go func(idx int) {
+			for {
+				select {
+				case <-ticker.C:
+					trains[idx].Update()
+					// fmt.Println(train.Position.X, train.Position.Y)
+				case <-quit:
+					ticker.Stop()
+					return
+				}
+			}
+		}(i)
+	}
 
 	go func() {
 		for {
 			select {
-			case <-ticker.C:
-				train.Update()
-				fmt.Println(train.Position.X, train.Position.Y)
+			case <-tickerMap.C:
+				PrintMap(800, 600, sts, trains)
 			case <-quit:
 				ticker.Stop()
 				return
 			}
 		}
 	}()
-
 	// Adding the reporter server.
 	ReporterServer()
 

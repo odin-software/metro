@@ -2,6 +2,7 @@ package model
 
 import (
 	"errors"
+	"slices"
 )
 
 type Network[T comparable] struct {
@@ -51,6 +52,7 @@ func (gr *Network[T]) InsertEdge(firstVertex T, secondVertex T, points []Vector)
 	}
 
 	gr.edges[firstKey][secondKey] = points
+	slices.Reverse(points)
 	gr.edges[secondKey][firstKey] = points
 
 	return nil
