@@ -80,6 +80,22 @@ func (tr *Train) Update() {
 			fmt.Println("Something went wrong")
 		}
 		tr.addToQueue(path)
+
+		// Calculate time to the next station
+		var dist float64
+		for i := 0; i < len(path)-1; i++ {
+			if i == 0 {
+				d := path[i].SoftSub(tr.Position)
+				mag := d.Magnitude()
+				dist += mag
+				break
+			}
+			d := path[i].SoftSub(path[i+1])
+			mag := d.Magnitude()
+			dist += mag
+		}
+		timeToNext := dist / tr.make.topSpeed
+		fmt.Printf("%s is going to %s, it will arrive in %f seconds\n", tr.Name, tr.next.Name, timeToNext)
 	}
 
 	// Update velocity based of direction of next location

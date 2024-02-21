@@ -13,7 +13,7 @@ var stationHashFunction = func(station model.Station) string {
 
 func main() {
 	tick := multitick.NewTicker(15*time.Millisecond, -1*time.Millisecond)
-	tickerMap := time.NewTicker(1000 * time.Millisecond)
+	// tickerMap := time.NewTicker(1000 * time.Millisecond)
 
 	// Filling graph data.
 	g := model.NewNetwork[model.Station](stationHashFunction)
@@ -53,9 +53,9 @@ func main() {
 	}
 
 	// Drawing a map in the console of the trains and stations.
-	for range tickerMap.C {
-		go PrintMap(800, 600, sts, trains)
-	}
+	// for range tickerMap.C {
+	// 	go PrintMap(800, 600, sts, trains)
+	// }
 
 	// Starting the server for The New Metro Times.
 	ReporterServer()
