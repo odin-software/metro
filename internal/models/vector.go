@@ -91,3 +91,7 @@ func (v *Vector) Angle() float64 {
 func (v *Vector) CloseTo(x, y float64, precision int) bool {
 	return v.Dist(NewVector(x, y)) <= float64(precision)
 }
+
+func (v *Vector) Copy() Vector {
+	return NewVector(v.X, v.Y)
+}

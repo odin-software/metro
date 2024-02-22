@@ -35,7 +35,7 @@ func PrintMap(width, height int, sts []model.Station, trs []model.Train) {
 			}
 			if !foundTrain {
 				for _, st := range sts {
-					if int(st.Location.X) == x && int(st.Location.Y) == y {
+					if int(st.Position.X) == x && int(st.Position.Y) == y {
 						t := fmt.Sprintf(" %s ", centerString(getIdNumber(st), 3))
 						fmt.Printf(StationColor, t)
 						foundStation = true
@@ -49,6 +49,7 @@ func PrintMap(width, height int, sts []model.Station, trs []model.Train) {
 		}
 		fmt.Println()
 	}
+	fmt.Println(len(sts[1].Trains))
 }
 
 func ClearScreen() {

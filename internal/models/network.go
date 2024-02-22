@@ -5,13 +5,13 @@ import (
 	"slices"
 )
 
-type Network[T comparable] struct {
+type Network[T any] struct {
 	vertices     map[string]T
 	edges        map[string]map[string][]Vector
 	hashFunction func(T) string
 }
 
-func NewNetwork[T comparable](hashF func(T) string) Network[T] {
+func NewNetwork[T any](hashF func(T) string) Network[T] {
 	return Network[T]{
 		vertices:     make(map[string]T),
 		edges:        make(map[string]map[string][]Vector),
