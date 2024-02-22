@@ -2,12 +2,11 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"internal/model"
 	"time"
 
 	"internal/broadcast"
-
-	"github.com/VividCortex/multitick"
 )
 
 var stationHashFunction = func(station model.Station) string {
@@ -16,7 +15,7 @@ var stationHashFunction = func(station model.Station) string {
 
 func main() {
 	// Setup
-	tick := multitick.NewTicker(20*time.Millisecond, -1*time.Millisecond)
+	tick := time.NewTicker(20 * time.Millisecond)
 	tickerMap := time.NewTicker(1000 * time.Millisecond)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -45,27 +44,32 @@ func main() {
 	chu4 := model.NewMake("4-Legged-chu", "A type of fast train.", 0.003, 1)
 	chu1 := model.NewMake("1-Legged-chu", "Another type of fast train.", 0.004, 0.7)
 	trains := make([]model.Train, 0)
-	train := model.NewTrain("Chu", chu1, sts[1].Position, sts[1], lines[1], &g, arrivals, departures)
-	train2 := model.NewTrain("Cha", chu4, sts[0].Position, sts[0], lines[0], &g, arrivals, departures)
-	train3 := model.NewTrain("Che", chu1, sts[3].Position, sts[3], lines[3], &g, arrivals, departures)
-	train4 := model.NewTrain("Chi", chu1, sts[11].Position, sts[11], lines[0], &g, arrivals, departures)
-	train5 := model.NewTrain("Cho", chu4, sts[7].Position, sts[7], lines[2], &g, arrivals, departures)
+	train := model.NewTrain("Chu", chu1, sts[1].Position, *sts[1], lines[1], &g, arrivals, departures)
+	train2 := model.NewTrain("Cha", chu4, sts[0].Position, *sts[0], lines[0], &g, arrivals, departures)
+	train3 := model.NewTrain("Che", chu1, sts[3].Position, *sts[3], lines[3], &g, arrivals, departures)
+	train4 := model.NewTrain("Chi", chu1, sts[11].Position, *sts[11], lines[0], &g, arrivals, departures)
+	train5 := model.NewTrain("Cho", chu4, sts[7].Position, *sts[7], lines[2], &g, arrivals, departures)
 	trains = append(trains, train, train2, train3, train4, train5)
 
 	// Starting the goroutines for the trains.
 	// This should be changed eventually to have just one tick and then on tick call all the updates on goroutines.
-	for i := 0; i < len(trains); i++ {
-		go func(idx int) {
-			sub := tick.Subscribe()
-			for range sub {
-				trains[idx].Update()
+
+	go func() {
+		for range tick.C {
+			for i := 0; i < len(trains); i++ {
+				go trains[i].Update()
 			}
-		}(i)
-	}
+		}
+	}()
 
 	// Drawing a map in the console of the trains and stations.
 	for range tickerMap.C {
-		// go PrintMap(800, 600, sts, trains)
+		fmt.Println(len(sts[0].Trains))
+		fmt.Println(len(sts[1].Trains))
+		fmt.Println(len(sts[2].Trains))
+		fmt.Println(len(sts[3].Trains))
+		fmt.Println(len(sts[4].Trains))
+		// 	go PrintMap(800, 600, sts, trains)
 	}
 
 	// Starting the server for The New Metro Times.

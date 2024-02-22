@@ -1,7 +1,6 @@
 package model
 
 import (
-	"fmt"
 	"internal/broadcast"
 )
 
@@ -14,8 +13,8 @@ type Station struct {
 	departures <-chan broadcast.ADMessage[Train]
 }
 
-func NewStation(id string, name string, location Vector, arr <-chan broadcast.ADMessage[Train], dep <-chan broadcast.ADMessage[Train]) Station {
-	st := Station{
+func NewStation(id string, name string, location Vector, arr <-chan broadcast.ADMessage[Train], dep <-chan broadcast.ADMessage[Train]) *Station {
+	st := &Station{
 		ID:         id,
 		Name:       name,
 		Position:   location,
@@ -24,7 +23,8 @@ func NewStation(id string, name string, location Vector, arr <-chan broadcast.AD
 		departures: dep,
 	}
 
-	go st.ListenForTrains()
+	go st.ListenForArrivals()
+	go st.ListenForDepartures()
 
 	return st
 }
@@ -42,22 +42,22 @@ func (st *Station) RemoveTrain(train Train) {
 	}
 }
 
-func (st *Station) ListenForTrains() {
+func (st *Station) ListenForArrivals() {
 	// This should be a goroutine that listens for trains and adds them to the station.
-	select {
-	case msg := <-st.arrivals:
-		fmt.Println("Arrival")
+	for msg := range st.arrivals {
 		if msg.StationID != st.ID {
-			return
+			continue
 		}
 		st.AddTrain(msg.Train)
-	case msg := <-st.departures:
-		fmt.Println("Departures")
+	}
+}
+
+func (st *Station) ListenForDepartures() {
+	// This should be a goroutine that listens for trains and removes them to the station.
+	for msg := range st.departures {
 		if msg.StationID != st.ID {
-			return
+			continue
 		}
 		st.RemoveTrain(msg.Train)
-	default:
-		fmt.Println("No message")
 	}
 }

@@ -5,8 +5,8 @@ import (
 	"internal/model"
 )
 
-func GenerateTestData(arrs broadcast.BroadcastServer[broadcast.ADMessage[model.Train]], deps broadcast.BroadcastServer[broadcast.ADMessage[model.Train]]) ([]model.Station, []model.Line) {
-	sts := []model.Station{
+func GenerateTestData(arrs broadcast.BroadcastServer[broadcast.ADMessage[model.Train]], deps broadcast.BroadcastServer[broadcast.ADMessage[model.Train]]) ([]*model.Station, []model.Line) {
+	sts := []*model.Station{
 		model.NewStation("station-1", "Station 1", model.NewVector(50.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
 		model.NewStation("station-2", "Station 2", model.NewVector(250.0, 200.0), arrs.Subscribe(), deps.Subscribe()),
 		model.NewStation("station-3", "Station 3", model.NewVector(150.0, 100.0), arrs.Subscribe(), deps.Subscribe()),
@@ -23,19 +23,19 @@ func GenerateTestData(arrs broadcast.BroadcastServer[broadcast.ADMessage[model.T
 	lines := []model.Line{
 		{
 			Name:     "Linea 1",
-			Stations: []model.Station{sts[0], sts[1], sts[3], sts[11]},
+			Stations: []model.Station{*sts[0], *sts[1], *sts[3], *sts[11]},
 		},
 		{
 			Name:     "Linea 2",
-			Stations: []model.Station{sts[2], sts[1], sts[5], sts[6]},
+			Stations: []model.Station{*sts[2], *sts[1], *sts[5], *sts[6]},
 		},
 		{
 			Name:     "Linea 3",
-			Stations: []model.Station{sts[7], sts[8], sts[9]},
+			Stations: []model.Station{*sts[7], *sts[8], *sts[9]},
 		},
 		{
 			Name:     "Linea 4",
-			Stations: []model.Station{sts[10], sts[3], sts[4]},
+			Stations: []model.Station{*sts[10], *sts[3], *sts[4]},
 		},
 	}
 	return sts, lines
