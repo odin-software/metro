@@ -18,7 +18,7 @@ func getIdNumber(st model.Station) string {
 	return a[1]
 }
 
-func PrintMap(width, height int, sts []model.Station, trs []model.Train) {
+func PrintMap(width, height int, sts []*model.Station, trs []model.Train) {
 	ClearScreen()
 	fmt.Printf("Mapa de New Metro\n\n")
 	for y := 0; y <= height; y += 50 {
@@ -36,7 +36,7 @@ func PrintMap(width, height int, sts []model.Station, trs []model.Train) {
 			if !foundTrain {
 				for _, st := range sts {
 					if int(st.Position.X) == x && int(st.Position.Y) == y {
-						t := fmt.Sprintf(" %s ", centerString(getIdNumber(st), 3))
+						t := fmt.Sprintf(" %s ", centerString(getIdNumber(*st), 3))
 						fmt.Printf(StationColor, t)
 						foundStation = true
 						break

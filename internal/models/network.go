@@ -44,6 +44,16 @@ func (gr *Network[T]) InsertVertices(vertices []T) error {
 	return nil
 }
 
+func (gr *Network[T]) InsertVertices2(vertices []*T) error {
+	for _, v := range vertices {
+		err := gr.InsertVertex(*v)
+		if err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 // Inserts an edge between two vertices, the points are positions in between the vertices.
 func (gr *Network[T]) InsertEdge(firstVertex T, secondVertex T, points []Vector) error {
 	firstKey := gr.hashFunction(firstVertex)
