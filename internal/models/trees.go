@@ -1,8 +1,4 @@
-// Package data has utility data structures to store and manipulate the models used by
-// this project.
-//
-// This package is for internal use and isn't meant to be used by the main package.
-package data
+package model
 
 import (
 	"errors"
