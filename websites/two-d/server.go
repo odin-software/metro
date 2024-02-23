@@ -18,11 +18,11 @@ func TwoDimensionalServer() {
 	server := echo.New()
 	server.Use(middleware.Logger())
 
-	server.Static("/web/2d/images", "images")
-	server.Static("/web/2d/css", "css")
+	server.Static("/js", "websites/two-d/js")
+	server.Static("/css", "websites/two-d/css")
 
 	server.GET("/", func(c echo.Context) error {
-		return Render(c, http.StatusOK, hello("Ken"))
+		return Render(c, http.StatusOK, Index())
 	})
 
 	server.Logger.Fatal(server.Start(":2444"))
