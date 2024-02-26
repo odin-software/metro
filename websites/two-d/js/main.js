@@ -11,7 +11,7 @@ function animate() {
   // Resizing the canvas
   ctx.clearRect(0, 0, canvas.width, canvas.height);
   canvas.height = window.innerHeight;
-  car.update();
+  car.update(road.borders);
 
   ctx.save(); 
   ctx.translate(0, -car.y + canvas.height *0.7);
