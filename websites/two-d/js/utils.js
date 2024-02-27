@@ -23,3 +23,16 @@ function getIntersection(A, B, C, D) {
 
   return null
 }
+
+function polysIntersect(poly1, poly2) {
+  for (let i = 0; i < poly1.length; i++) {
+    const next = (i + 1) % poly1.length;
+    for (let j = 0; j < poly2.length; j++) {
+      const next2 = (j + 1) % poly2.length;
+      if (getIntersection(poly1[i], poly1[next], poly2[j], poly2[next2])) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
