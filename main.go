@@ -8,6 +8,8 @@ import (
 	"internal/broadcast"
 
 	"github.com/VividCortex/multitick"
+	Reporter "github.com/odin-software/metro/websites/reporter"
+	TwoD "github.com/odin-software/metro/websites/two-d"
 )
 
 var stationHashFunction = func(station model.Station) string {
@@ -17,7 +19,7 @@ var stationHashFunction = func(station model.Station) string {
 func main() {
 	// Setup
 	tick := multitick.NewTicker(20*time.Millisecond, -1*time.Millisecond)
-	tickerMap := time.NewTicker(1000 * time.Millisecond)
+	// tickerMap := time.NewTicker(1000 * time.Millisecond)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -66,15 +68,17 @@ func main() {
 	}
 
 	// Drawing a map in the console of the trains and stations.
-	for range tickerMap.C {
-		// fmt.Println(len(sts[0].Trains))
-		// fmt.Println(len(sts[1].Trains))
-		// fmt.Println(len(sts[2].Trains))
-		// fmt.Println(len(sts[3].Trains))
-		// fmt.Println(len(sts[4].Trains))
-		go PrintMap(800, 600, sts, trains)
-	}
+	// for range tickerMap.C {
+	// fmt.Println(len(sts[0].Trains))
+	// fmt.Println(len(sts[1].Trains))
+	// fmt.Println(len(sts[2].Trains))
+	// fmt.Println(len(sts[3].Trains))
+	// fmt.Println(len(sts[4].Trains))
+	// go PrintMap(800, 600, sts, trains)
+	// }
 
 	// Starting the server for The New Metro Times.
-	ReporterServer()
+
+	go Reporter.ReporterServer()
+	TwoD.TwoDimensionalServer()
 }

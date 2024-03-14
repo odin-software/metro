@@ -1,4 +1,4 @@
-package main
+package Reporter
 
 import (
 	"html/template"
@@ -19,7 +19,7 @@ func (t *Templates) Render(w io.Writer, name string, data interface{}, c echo.Co
 
 func newTemplate() *Templates {
 	return &Templates{
-		templates: template.Must(template.ParseGlob("views/reporter/*.html")),
+		templates: template.Must(template.ParseGlob("websites/reporter/*.html")),
 	}
 }
 
@@ -104,8 +104,8 @@ func ReporterServer() {
 	e.Renderer = newTemplate()
 	page := newPage()
 
-	e.Static("/images", "images")
-	e.Static("/css", "css")
+	e.Static("websites/reporter/images", "images")
+	e.Static("websites/reporter/css", "css")
 
 	e.GET("/", func(c echo.Context) error {
 		return c.Render(200, "index", page)
