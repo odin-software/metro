@@ -10,6 +10,7 @@ import (
 	"github.com/VividCortex/multitick"
 	Reporter "github.com/odin-software/metro/websites/reporter"
 	TwoD "github.com/odin-software/metro/websites/two-d"
+	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
 )
 
 var stationHashFunction = func(station model.Station) string {
@@ -80,5 +81,6 @@ func main() {
 	// Starting the server for The New Metro Times.
 
 	go Reporter.ReporterServer()
-	TwoD.TwoDimensionalServer()
+	go TwoD.TwoDimensionalServer()
+	VirtualWorld.VirtualWorldServer()
 }
