@@ -10,11 +10,15 @@ templ Index() {
 			// Canvas
 			<h1>World Editor</h1>
 			<canvas id="theCanvas"></canvas>
-			<div id="controls"></div>
+			<div id="controls">
+				<button onclick="dispose()">🗑️</button>
+				<button onclick="save()">💾</button>
+			</div>
 			<script src="/vw-js/primitives/point.js"></script>
 			<script src="/vw-js/primitives/segment.js"></script>
 			<script src="/vw-js/math/graph.js"></script>
 			<script src="/vw-js/math/utils.js"></script>
+			<script src="/vw-js/viewport.js"></script>
 			<script src="/vw-js/graphEditor.js"></script>
 			<script src="/vw-js/main.js"></script>
 		</body>
