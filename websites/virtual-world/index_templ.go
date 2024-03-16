@@ -23,7 +23,7 @@ func Index() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><title>World Editor</title><link rel=\"stylesheet\" href=\"/vw-css/index.css\"></head><body><h1>World Editor</h1><canvas id=\"theCanvas\"></canvas><div id=\"controls\"><button onclick=\"dispose()\">🗑️</button> <button onclick=\"save()\">💾</button></div><script src=\"/vw-js/primitives/point.js\"></script><script src=\"/vw-js/primitives/segment.js\"></script><script src=\"/vw-js/math/graph.js\"></script><script src=\"/vw-js/math/utils.js\"></script><script src=\"/vw-js/viewport.js\"></script><script src=\"/vw-js/graphEditor.js\"></script><script src=\"/vw-js/main.js\"></script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><title>World Editor</title><link rel=\"stylesheet\" href=\"/vw-css/index.css\"></head><body><h1>World Editor</h1><canvas id=\"theCanvas\"></canvas><div id=\"controls\"><button onclick=\"dispose()\">🗑️</button> <button onclick=\"save()\">💾</button></div><script src=\"/vw-js/primitives/point.js\"></script><script src=\"/vw-js/primitives/segment.js\"></script><script src=\"/vw-js/primitives/envelope.js\"></script><script src=\"/vw-js/primitives/polygon.js\"></script><script src=\"/vw-js/math/graph.js\"></script><script src=\"/vw-js/math/utils.js\"></script><script src=\"/vw-js/viewport.js\"></script><script src=\"/vw-js/graphEditor.js\"></script><script src=\"/vw-js/main.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

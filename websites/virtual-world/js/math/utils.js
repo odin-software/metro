@@ -10,3 +10,14 @@ function getNearestPoint(loc, points, maxDist = Number.MAX_VALUE) {
   }
   return nearest;
 }
+
+function translate(loc, angle, offset) {
+  return new Point(
+    loc.x + Math.cos(angle) * offset,
+    loc.y + Math.sin(angle) * offset 
+  )
+}
+
+function angle(p) {
+  return Math.atan2(p.y, p.x);
+}
