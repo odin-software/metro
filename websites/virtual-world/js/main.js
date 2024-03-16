@@ -11,6 +11,8 @@ const ctx = theCanvas.getContext('2d');
 const graphString = localStorage.getItem('graph');
 const graphInfo = graphString ? JSON.parse(graphString) : null;
 const graph = graphInfo ? Graph.load(graphInfo) : new Graph();
+const world = new World(graph);
+
 const viewPort = new Viewport(theCanvas);
 const graphEditor = new GraphEditor(viewPort, graph);
 
@@ -18,9 +20,11 @@ animate();
 
 function animate() {
   viewPort.reset();
+  world.generate();
+  world.draw(ctx);
+  ctx.globalAlpha = 0.5;
   graphEditor.display();
-  // new Polygon(graph.points).draw(ctx);
-  new Envelope(graph.segments[0], 80).draw(ctx);
+  ctx.globalAlpha = 1;
 
   requestAnimationFrame(animate);
 }
