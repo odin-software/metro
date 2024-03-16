@@ -16,11 +16,15 @@ const world = new World(graph);
 const viewPort = new Viewport(theCanvas);
 const graphEditor = new GraphEditor(viewPort, graph);
 
+let oldGraphHash = graph.hash();
 animate();
 
 function animate() {
   viewPort.reset();
-  world.generate();
+  if (graph.hash() != oldGraphHash) {
+    world.generate();
+    oldGraphHash = graph.hash();
+  }
   world.draw(ctx);
   ctx.globalAlpha = 0.5;
   graphEditor.display();
