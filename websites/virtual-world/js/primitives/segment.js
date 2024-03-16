@@ -4,6 +4,14 @@ class Segment {
     this.p2 = p2;
   }
 
+  length() {
+    return this.p1.distanceTo(this.p2);
+  }
+
+  directionVector() {
+    return normalize(Point.sub(this.p2, this.p1));
+  }
+
   equals(other) {
     return this.includes(other.p1) && this.includes(other.p2);
   }
