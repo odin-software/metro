@@ -30,8 +30,19 @@ function magnitude(p) {
   return Math.hypot(p.x, p.y);
 }
 
+function dot(p1, p2) {
+  return p1.x * p2.x + p1.y * p2.y;
+}
+
 function lerp(a, b, t) {
   return a + (b - a) * t;
+}
+
+function lerp2D(A, B, t) {
+  return new Point(
+    lerp(A.x, B.x, t),
+    lerp(A.y, B.y, t)
+  );
 }
 
 function getIntersection(A, B, C, D) {
@@ -62,4 +73,11 @@ function getRandomColor() {
 
 function average(p1, p2) {
   return new Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+}
+
+function getFake3DPoint(point, viewPoint, height) {
+  const dir = normalize(Point.sub(point, viewPoint));
+  const dist = point.distanceTo(viewPoint);
+  const scaler = Math.atan(dist / 300) / (Math.PI / 2);
+  return Point.add(point, Point.scale(dir, height * scaler));
 }

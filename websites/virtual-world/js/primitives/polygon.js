@@ -64,6 +64,14 @@ class Polygon {
     }
   }
 
+  distanceToPoint(point) {
+    return Math.min(...this.segments.map(seg => seg.distanceToPoint(point)));
+  }
+
+  distanceToPoly(poly) {
+    return Math.min(...this.points.map(p => poly.distanceToPoint(p)));
+  }
+
   intersectsPoly(poly) {
     for (let s1 of this.segments) {
       for (let s2 of poly.segments) {
@@ -100,7 +108,7 @@ class Polygon {
     }
   }
 
-  draw(ctx, { stroke = "blue", lineWidth = 2, fill = "rgba(0, 0, 255, 0.2)" } = {}) {
+  draw(ctx, { stroke = "blue", lineWidth = 2, fill = "rgba(0, 0, 255, 0.2)", join = "miter" } = {}) {
     if (this.points.length < 2) {
       return;
     }
@@ -108,6 +116,7 @@ class Polygon {
     ctx.fillStyle = fill;
     ctx.strokeStyle = stroke;
     ctx.lineWidth = lineWidth;
+    ctx.lineJoin = join;
     ctx.moveTo(this.points[0].x, this.points[0].y);
     for (let i = 1; i < this.points.length; i++) {
       ctx.lineTo(this.points[i].x, this.points[i].y);
