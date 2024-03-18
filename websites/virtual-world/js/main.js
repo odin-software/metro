@@ -19,6 +19,10 @@ const tools = {
   stop: { button: stopBtn, editor: new StopEditor(viewPort, world) },
   crossing: { button: crossingBtn, editor: new CrossingEditor(viewPort, world) },
   start: { button: startBtn, editor: new StartEditor(viewPort, world) },
+  parking: { button: parkingBtn, editor: new ParkingEditor(viewPort, world) },
+  light: { button: lightBtn, editor: new LightEditor(viewPort, world) },
+  target: { button: targetBtn, editor: new TargetEditor(viewPort, world) },
+  yield: { button: yieldBtn, editor: new YieldEditor(viewPort, world) },
 }
 
 let oldGraphHash = graph.hash();
