@@ -20,6 +20,7 @@ func VirtualWorldServer() {
 
 	server.Static("/vw-js", "websites/virtual-world/js")
 	server.Static("/vw-css", "websites/virtual-world/css")
+	server.Static("/vw-images", "websites/virtual-world/images")
 
 	server.GET("/", func(c echo.Context) error {
 		return Render(c, http.StatusOK, Index())

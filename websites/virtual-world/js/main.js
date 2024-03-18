@@ -14,9 +14,17 @@ const graph = graphInfo ? Graph.load(graphInfo) : new Graph();
 const world = new World(graph);
 
 const viewPort = new Viewport(theCanvas);
-const graphEditor = new GraphEditor(viewPort, graph);
+const tools = {
+  graph: { button: graphBtn, editor: new GraphEditor(viewPort, graph) },
+  stop: { button: stopBtn, editor: new StopEditor(viewPort, world) },
+  crossing: { button: crossingBtn, editor: new CrossingEditor(viewPort, world) },
+  start: { button: startBtn, editor: new StartEditor(viewPort, world) },
+}
 
 let oldGraphHash = graph.hash();
+
+setMode('graph');
+
 animate();
 
 function animate() {
@@ -29,16 +37,34 @@ function animate() {
   world.draw(ctx, viewPoint);
 
   ctx.globalAlpha = 0.5;
-  graphEditor.display();
+  for (const tool of Object.values(tools)) {
+    tool.editor.display();
+  }
   ctx.globalAlpha = 1;
 
   requestAnimationFrame(animate);
 }
 
 function dispose() {
-  graphEditor.dispose();
+  tools["graph"].editor.dispose();
+  world.markings.length = 0;
 }
 
 function save() {
   localStorage.setItem('graph', JSON.stringify(graph));
+}
+
+function setMode(mode) {
+  disableEditors();
+  tools[mode].button.style.backgroundColor = "white";
+  tools[mode].button.style.filter = "";
+  tools[mode].editor.enable();
+}
+
+function disableEditors() {
+  for (const tool of Object.values(tools)) {
+    tool.button.style.backgroundColor = "gray";
+    tool.button.style.filter = "grayscale(100%)";
+    tool.editor.disable();
+  }
 }

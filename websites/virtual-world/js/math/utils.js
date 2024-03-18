@@ -11,6 +11,23 @@ function getNearestPoint(loc, points, maxDist = Number.MAX_VALUE) {
   return nearest;
 }
 
+function getNearestSegment(loc, segments, maxDist = Number.MAX_VALUE) {
+  let minDist = Infinity;
+  let nearest = null;
+  for (const seg of segments) {
+    const dist = seg.distanceToPoint(loc);
+    if (dist < minDist && dist < maxDist) {
+      minDist = dist;
+      nearest = seg;
+    }
+  }
+  return nearest;
+}
+
+function perpendicular(p) {
+  return new Point(-p.y, p.x);
+}
+
 function translate(loc, angle, offset) {
   return new Point(
     loc.x + Math.cos(angle) * offset,

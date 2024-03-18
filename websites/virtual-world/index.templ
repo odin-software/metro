@@ -13,6 +13,11 @@ templ Index() {
 			<div id="controls">
 				<button onclick="dispose()">🗑️</button>
 				<button onclick="save()">💾</button>
+				&nbsp;
+				<button id="graphBtn" onclick="setMode('graph')">️🌐</button>
+				<button id="stopBtn" onclick="setMode('stop')">🛑️</button>
+				<button id="crossingBtn" onclick="setMode('crossing')">️🚶</button>
+				<button id="startBtn" onclick="setMode('start')">️🏎️</button>
 			</div>
 			<script src="/vw-js/primitives/point.js"></script>
 			<script src="/vw-js/primitives/segment.js"></script>
@@ -20,11 +25,19 @@ templ Index() {
 			<script src="/vw-js/primitives/polygon.js"></script>
 			<script src="/vw-js/math/graph.js"></script>
 			<script src="/vw-js/math/utils.js"></script>
+			<script src="/vw-js/markings/marking.js"></script>
+			<script src="/vw-js/markings/stop.js"></script>
+			<script src="/vw-js/markings/crossing.js"></script>
+			<script src="/vw-js/markings/start.js"></script>
 			<script src="/vw-js/items/tree.js"></script>
 			<script src="/vw-js/items/building.js"></script>
 			<script src="/vw-js/viewport.js"></script>
-			<script src="/vw-js/graphEditor.js"></script>
 			<script src="/vw-js/world.js"></script>
+			<script src="/vw-js/editors/graphEditor.js"></script>
+			<script src="/vw-js/editors/markingEditor.js"></script>
+			<script src="/vw-js/editors/stopEditor.js"></script>
+			<script src="/vw-js/editors/crossingEditor.js"></script>
+			<script src="/vw-js/editors/startEditor.js"></script>
 			<script src="/vw-js/main.js"></script>
 		</body>
 	</html>
