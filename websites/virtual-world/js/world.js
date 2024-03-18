@@ -19,7 +19,6 @@ class World {
     this.roadBorders = [];
     this.buildings = [];
     this.trees = [];
-    this.treeSize = treeSize;
     this.laneGuides = [];
 
     this.markings = [];
@@ -28,14 +27,40 @@ class World {
     this.generate();
   }
 
+  static load(info) {
+    const world = new World(new Graph());
+
+    world.graph = Graph.load(info.graph);
+    world.roadWidth = info.roadWidth;
+    world.roadRoundness = info.roadRoundness;
+    world.buildingWidth = info.buildingWidth;
+    world.buildingMinLength = info.buildingMinLength;
+    world.spacing = info.spacing;
+    world.treeSize = info.treeSize;
+
+    world.envelopes = info.envelopes.map(env => Envelope.load(env));
+    world.roadBorders = info.roadBorders.map(seg => new Segment(seg.p1, seg.p2));
+    world.buildings = info.buildings.map(building => Building.load(building));
+    world.trees = info.trees.map(t => new Tree(new Point(t.center.x, t.center.y), info.treeSize));
+    world.laneGuides = info.laneGuides.map(seg => new Segment(seg.p1, seg.p2));
+    world.markings = info.markings.map(marking => Marking.load(marking));
+
+    world.zoom = info.zoom;
+    world.offset = info.offset;
+        
+    return world;
+  }
+
   generate() {
     this.envelopes.length = 0;
-    for (const seg of this.graph.segments) {
-      this.envelopes.push(
-        new Envelope(
-          seg, this.roadWidth, this.roadRoundness
-        )
-      );
+    if (this.graph) {
+      for (const seg of this.graph.segments) {
+        this.envelopes.push(
+          new Envelope(
+            seg, this.roadWidth, this.roadRoundness
+          )
+        );
+      }
     }
 
     this.roadBorders = Polygon.union(this.envelopes.map(env => env.poly));
@@ -47,6 +72,9 @@ class World {
 
   #generateLaneGuides() {
     const tmpEnvelopes = [];
+    if (!this.graph) {
+      return [];
+    }
     for (const seg of this.graph.segments) {
       tmpEnvelopes.push(
         new Envelope(
@@ -61,9 +89,11 @@ class World {
     return segments;
   }
 
-
   #generateBuildings() {
     const tmpEnvelopes = [];
+    if (!this.graph) {
+      return [];
+    }
     for (const seg of this.graph.segments) {
       tmpEnvelopes.push(
         new Envelope(

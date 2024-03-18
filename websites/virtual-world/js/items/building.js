@@ -4,6 +4,10 @@ class Building {
     this.height = height;
   }
 
+  static load(info) {
+    return new Building(Polygon.load(info.base), info.height);
+  }
+
   draw(ctx, viewPoint) {
     const topPoints = this.base.points.map(p => {
       return getFake3DPoint(p, viewPoint, this.height * 0.6);
@@ -51,5 +55,4 @@ class Building {
       roofPoly.draw(ctx, { fill: "#D44", stroke: "#C44", lineWidth: 8, join: "round" })
     }
   }
-
 }
