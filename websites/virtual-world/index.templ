@@ -8,25 +8,18 @@ templ Index() {
 		</head>
 		<body>
 			// Canvas
-			<h1>World Editor</h1>
-			<canvas id="theCanvas"></canvas>
-			<div id="controls">
-				<button onclick="dispose()">🗑️</button>
+			<canvas id="carCanvas"></canvas>
+			<div id="verticalButtons">
 				<button onclick="save()">💾</button>
-				<label for="fileInput" class="file-input-label">
-					📂
-					<input type="file" id="fileInput" accept=".world" onchange="load(event)"/>
-				</label>
-				&nbsp;
-				<button id="graphBtn" onclick="setMode('graph')">️🌐</button>
-				<button id="stopBtn" onclick="setMode('stop')">🛑️</button>
-				<button id="yieldBtn" onclick="setMode('yield')">️⚠️</button>
-				<button id="crossingBtn" onclick="setMode('crossing')">️🚶</button>
-				<button id="parkingBtn" onclick="setMode('parking')">️️🅿️</button>
-				<button id="lightBtn" onclick="setMode('light')">️🚦</button>
-				<button id="startBtn" onclick="setMode('start')">️🏎️</button>
-				<button id="targetBtn" onclick="setMode('target')">️️🎯</button>
+				<button onclick="discard()">🗑️</button>
 			</div>
+			<canvas id="networkCanvas"></canvas>
+			<script src="/vw-js/car/utils.js"></script>
+			<script src="/vw-js/car/visualizer.js"></script>
+			<script src="/vw-js/car/network.js"></script>
+			<script src="/vw-js/car/sensor.js"></script>
+			<script src="/vw-js/car/controls.js"></script>
+			<script src="/vw-js/car/car.js"></script>
 			<script src="/vw-js/primitives/point.js"></script>
 			<script src="/vw-js/primitives/segment.js"></script>
 			<script src="/vw-js/primitives/envelope.js"></script>

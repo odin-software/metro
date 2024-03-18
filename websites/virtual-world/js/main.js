@@ -1,50 +1,88 @@
-const width = 700;
-const height = 700;
+const carCanvas = document.getElementById('carCanvas');
+carCanvas.width = window.innerWidth - 330;
+const networkCanvas = document.getElementById('networkCanvas');
+networkCanvas.width = 300;
 
-const theCanvas = document.getElementById('theCanvas');
-
-theCanvas.width = width;
-theCanvas.height = height;
-
-const ctx = theCanvas.getContext('2d');
+carCanvas.height = window.innerHeight;
+networkCanvas.height = window.innerHeight;
 
 const worldString = localStorage.getItem('world');
 const worldInfo = worldString ? JSON.parse(worldString) : null;
 let world = worldInfo ? World.load(worldInfo) : new World();
 const graph = world.graph;
 
-const viewPort = new Viewport(theCanvas, world.zoom, world.offset);
-const tools = {
-  graph: { button: graphBtn, editor: new GraphEditor(viewPort, graph) },
-  stop: { button: stopBtn, editor: new StopEditor(viewPort, world) },
-  crossing: { button: crossingBtn, editor: new CrossingEditor(viewPort, world) },
-  start: { button: startBtn, editor: new StartEditor(viewPort, world) },
-  parking: { button: parkingBtn, editor: new ParkingEditor(viewPort, world) },
-  light: { button: lightBtn, editor: new LightEditor(viewPort, world) },
-  target: { button: targetBtn, editor: new TargetEditor(viewPort, world) },
-  yield: { button: yieldBtn, editor: new YieldEditor(viewPort, world) },
+const viewPort = new Viewport(carCanvas, world.zoom, world.offset);
+
+const carCtx = carCanvas.getContext('2d');
+const networkCtx = networkCanvas.getContext('2d');
+const n = 100;
+const cars = generateCars(n);
+let bestCar = cars[0];
+
+if (localStorage.getItem('bestBrain')) {
+  for (let i = 0; i < cars.length; i++) {
+    cars[i].brain = JSON.parse(localStorage.getItem('bestBrain'));
+    if (i !== 0) {
+      NeuralNetwork.mutate(cars[i].brain, 0.1);
+    }
+  }
 }
 
-let oldGraphHash = graph.hash();
-
-setMode('graph');
+const traffic = [];
+const roadBorders = world.roadBorders.map(s => [s.p1, s.p2]);
 
 animate();
 
-function animate() {
-  viewPort.reset();
-  if (graph.hash() != oldGraphHash) {
-    world.generate();
-    oldGraphHash = graph.hash();
-  }
-  const viewPoint = Point.scale(viewPort.getOffset(), -1);
-  world.draw(ctx, viewPoint);
+function save() {
+  localStorage.setItem('bestBrain', JSON.stringify(bestCar.brain))
+}
 
-  ctx.globalAlpha = 0.5;
-  for (const tool of Object.values(tools)) {
-    tool.editor.display();
+function discard() {
+  localStorage.removeItem('bestBrain');
+}
+
+function generateCars(n) {
+  const startPoints = world.markings.filter(m => m.type === "start");
+  const startPoint = startPoints.length > 0 ? startPoints[0].center : new Point(100, 100);
+  const dir = startPoints.length > 0 ? startPoints[0].directionVector : new Point(0, -1);
+  const startAngle = -angle(dir) + Math.PI / 2;
+
+  const cars = [];
+  for (let i = 1; i <= n; i++) {
+    cars.push(new Car(startPoint.x, startPoint.y, 30, 50, "AI", startAngle));
   }
-  ctx.globalAlpha = 1;
+  return cars;
+}
+
+function animate(time) {
+  // Resizing the canvas
+  for (let i = 0; i < traffic.length; i++) {
+    traffic[i].update(roadBorders, []);
+  }
+  for (let i = 0; i < cars.length; i++) {
+    cars[i].update(roadBorders, traffic);
+  }
+  const lessMinFitness = Math.max(...cars.map(c => c.fitness))
+  bestCar = cars.find(car => car.fitness == lessMinFitness);
+
+  world.cars = cars;
+  world.bestCar = bestCar;
+
+  viewPort.offset.x = -bestCar.x;
+  viewPort.offset.y = -bestCar.y;
+
+  viewPort.reset();
+  const viewPoint = Point.scale(viewPort.getOffset(), -1);
+  world.draw(carCtx, viewPoint, false);
+
+  // Traffic draw
+  for (let i = 0; i < traffic.length; i++) {
+    traffic[i].draw(carCtx, "red");
+  }
+
+  networkCtx.lineDashOffset = - time / 50;
+  networkCtx.clearRect(0, 0, networkCanvas.width, networkCanvas.height);
+  Visualizer.drawNetwork(networkCtx, bestCar.brain);
 
   requestAnimationFrame(animate);
 }
@@ -85,17 +123,10 @@ function load(event) {
   };
 }
 
-function setMode(mode) {
-  disableEditors();
-  tools[mode].button.style.backgroundColor = "white";
-  tools[mode].button.style.filter = "";
-  tools[mode].editor.enable();
+function save() {
+  localStorage.setItem('bestBrain', JSON.stringify(bestCar.brain))
 }
 
-function disableEditors() {
-  for (const tool of Object.values(tools)) {
-    tool.button.style.backgroundColor = "gray";
-    tool.button.style.filter = "grayscale(100%)";
-    tool.editor.disable();
-  }
+function discard() {
+  localStorage.removeItem('bestBrain');
 }
