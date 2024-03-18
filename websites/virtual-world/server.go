@@ -25,6 +25,9 @@ func VirtualWorldServer() {
 	server.GET("/", func(c echo.Context) error {
 		return Render(c, http.StatusOK, Index())
 	})
+	server.GET("/editor", func(c echo.Context) error {
+		return Render(c, http.StatusOK, WorldEditor())
+	})
 
 	server.Logger.Fatal(server.Start(":2445"))
 }
