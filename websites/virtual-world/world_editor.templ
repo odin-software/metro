@@ -17,6 +17,7 @@ templ WorldEditor() {
 					📂
 					<input type="file" id="fileInput" accept=".world" onchange="load(event)"/>
 				</label>
+				<button onclick="openOsmPanel()">🗺️</button>
 				&nbsp;
 				<button id="graphBtn" onclick="setMode('graph')">️🌐</button>
 				<button id="stopBtn" onclick="setMode('stop')">🛑️</button>
@@ -26,6 +27,13 @@ templ WorldEditor() {
 				<button id="lightBtn" onclick="setMode('light')">️🚦</button>
 				<button id="startBtn" onclick="setMode('start')">️🏎️</button>
 				<button id="targetBtn" onclick="setMode('target')">️️🎯</button>
+				<div id="osmPanel" style="display:none;">
+					<textarea id="osmDataContainer" placeholder="Paste OSM data here" rows="10" cols="50"></textarea>
+					<div>
+						<button onclick="loadOsmData()">✔️</button>
+						<button onclick="closeOsmPanel()">❌</button>
+					</div>
+				</div>
 			</div>
 			<script src="/vw-js/primitives/point.js"></script>
 			<script src="/vw-js/primitives/segment.js"></script>
@@ -33,6 +41,7 @@ templ WorldEditor() {
 			<script src="/vw-js/primitives/polygon.js"></script>
 			<script src="/vw-js/math/graph.js"></script>
 			<script src="/vw-js/math/utils.js"></script>
+			<script src="/vw-js/math/osm.js"></script>
 			<script src="/vw-js/markings/marking.js"></script>
 			<script src="/vw-js/markings/stop.js"></script>
 			<script src="/vw-js/markings/crossing.js"></script>

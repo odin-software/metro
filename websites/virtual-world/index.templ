@@ -13,17 +13,21 @@ templ Index() {
 				<button onclick="save()">💾</button>
 				<button onclick="discard()">🗑️</button>
 			</div>
-			<canvas id="networkCanvas"></canvas>
+			<div>
+				<canvas id="networkCanvas"></canvas>
+				<canvas id="miniMapCanvas"></canvas>
+			</div>
+			<script src="/vw-js/primitives/point.js"></script>
+			<script src="/vw-js/primitives/segment.js"></script>
+			<script src="/vw-js/primitives/envelope.js"></script>
+			<script src="/vw-js/primitives/polygon.js"></script>
 			<script src="/vw-js/car/utils.js"></script>
+			<script src="/vw-js/car/miniMap.js"></script>
 			<script src="/vw-js/car/visualizer.js"></script>
 			<script src="/vw-js/car/network.js"></script>
 			<script src="/vw-js/car/sensor.js"></script>
 			<script src="/vw-js/car/controls.js"></script>
 			<script src="/vw-js/car/car.js"></script>
-			<script src="/vw-js/primitives/point.js"></script>
-			<script src="/vw-js/primitives/segment.js"></script>
-			<script src="/vw-js/primitives/envelope.js"></script>
-			<script src="/vw-js/primitives/polygon.js"></script>
 			<script src="/vw-js/math/graph.js"></script>
 			<script src="/vw-js/math/utils.js"></script>
 			<script src="/vw-js/markings/marking.js"></script>

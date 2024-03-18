@@ -99,3 +99,23 @@ function disableEditors() {
     tool.editor.disable();
   }
 }
+
+function openOsmPanel() {
+  osmPanel.style.display = "block";
+}
+
+function closeOsmPanel() {
+  osmPanel.style.display = "none";
+}
+
+function loadOsmData() {
+  if (osmDataContainer.value == "") {
+    alert("Please enter a valid OSM data");
+    return;
+  }
+
+  const res = Osm.parseRoads(JSON.parse(osmDataContainer.value));
+  graph.points = res.points;
+  graph.segments = res.segments;
+  closeOsmPanel();
+}
