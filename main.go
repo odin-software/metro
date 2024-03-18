@@ -10,6 +10,7 @@ import (
 	"github.com/VividCortex/multitick"
 	Reporter "github.com/odin-software/metro/websites/reporter"
 	TwoD "github.com/odin-software/metro/websites/two-d"
+	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
 )
 
 var stationHashFunction = func(station model.Station) string {
@@ -69,16 +70,17 @@ func main() {
 
 	// Drawing a map in the console of the trains and stations.
 	// for range tickerMap.C {
-	// fmt.Println(len(sts[0].Trains))
-	// fmt.Println(len(sts[1].Trains))
-	// fmt.Println(len(sts[2].Trains))
-	// fmt.Println(len(sts[3].Trains))
-	// fmt.Println(len(sts[4].Trains))
-	// go PrintMap(800, 600, sts, trains)
+	// 	fmt.Println(len(sts[0].Trains))
+	// 	fmt.Println(len(sts[1].Trains))
+	// 	fmt.Println(len(sts[2].Trains))
+	// 	fmt.Println(len(sts[3].Trains))
+	// 	fmt.Println(len(sts[4].Trains))
+	// 	go PrintMap(800, 600, sts, trains)
 	// }
 
 	// Starting the server for The New Metro Times.
 
 	go Reporter.ReporterServer()
-	TwoD.TwoDimensionalServer()
+	go TwoD.TwoDimensionalServer()
+	VirtualWorld.VirtualWorldServer()
 }
