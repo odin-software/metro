@@ -2,6 +2,7 @@ class Light extends Marking {
   constructor(center, directionVector, width, height) {
     super(center, directionVector, width, 18);
 
+    this.state = "green";
     this.border = this.poly.segments[0];
   }
 
@@ -24,5 +25,17 @@ class Light extends Marking {
     green.draw(ctx, { color: "#060", size: this.height * 0.6 });
     yellow.draw(ctx, { color: "#660", size: this.height * 0.6 });
     red.draw(ctx, { color: "#600", size: this.height * 0.6 });
+    
+    switch (this.state) {
+      case "green":
+        green.draw(ctx, { color: "#0f0", size: this.height * 0.6 });
+        break;
+      case "yellow":
+        yellow.draw(ctx, { color: "#ff0", size: this.height * 0.6 });
+        break;
+      case "red":
+        red.draw(ctx, { color: "#f00", size: this.height * 0.6 });
+        break;
+    }
   }
 }

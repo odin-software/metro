@@ -23,6 +23,7 @@ class World {
     this.laneGuides = [];
 
     this.markings = [];
+    this.frameCount = 0;
 
     this.generate();
   }
@@ -189,7 +190,59 @@ class World {
     return trees;
   }
 
+  #getIntersections() {
+    const subset = [];
+    for (const point of this.graph.points) {
+      let degree = 0;
+      for (const seg of this.graph.segments) {
+        if (seg.includes(point)) {
+          degree++;
+        }
+      }
+
+      if (degree > 2) {
+        subset.push(point);
+      }
+    }
+    return subset;
+  }
+
+  #updateLights() {
+    const lights = this.markings.filter(m=>m instanceof Light)
+    const controlCenters = [];
+    for (const l of lights) {
+      const point = getNearestPoint(l.center, this.#getIntersections());
+      let controlCenter = controlCenters.find(c => c.equals(point));
+      if (!controlCenter) {
+          controlCenter = new Point(point.x, point.y);
+          controlCenter.lights=[l];
+          controlCenters.push(controlCenter);
+      } else {
+          controlCenter.lights.push(l);
+      }
+    }
+    const greenDuration = 2, yellowDuration = 1;
+    for (const center of controlCenters) {
+      center.ticks = center.lights.length * (greenDuration+yellowDuration)
+    }
+    const tick = Math.floor(this.frameCount/60);
+    for(const center of controlCenters) {
+        const cTick=tick%center.ticks;
+        const greenYellowIndex = Math.floor(cTick/(greenDuration + yellowDuration));
+        const greenYellowState = cTick%(greenDuration+yellowDuration) < greenDuration ? "green": "yellow";
+        for (let i = 0; i < center.lights.length; i++) {
+            if (i == greenYellowIndex) {
+                center.lights[i].state = greenYellowState;
+            } else {
+                center.lights[i].state = "red";
+            }
+        }
+    }
+    this.frameCount++
+  }
+
   draw(ctx, viewPoint) {
+    this.#updateLights();
     for (const env of this.envelopes) {
       env.draw(ctx, { fill: "#BBB", stroke: "#BBB", lineWidth: 15 });
     }
