@@ -16,7 +16,10 @@ class World {
 
   draw(ctx, viewPoint) {
     for (const seg of this.graph.segments) {
-      seg.draw(ctx, { color: "white", width: 3 });
+      seg.draw(ctx, { color: "white", width: 2, dash: [30, 5]});
+    }
+    for (const point of this.graph.points) {
+      point.draw(ctx, { color: "white", size: 30 });
     }
   }
 }
