@@ -1,14 +1,14 @@
-package CityEditor
+package City
 
 templ Index() {
 	<html>
 		<head>
-			<title>City Editor</title>
+			<title>City</title>
 			<link rel="stylesheet" href="/ce-css/index.css"/>
 		</head>
 		<body>
 			// Canvas
-			<h1>City Editor</h1>
+			<h1>City</h1>
 			<canvas id="editorCanvas"></canvas>
 			<div id="controls">
 				<button onclick="dispose()">🗑️</button>
@@ -36,8 +36,6 @@ templ Index() {
 			<script src="/ce-js/math/osm.js"></script>
 			<script src="/ce-js/markings/marking.js"></script>
 			<script src="/ce-js/markings/start.js"></script>
-			<script src="/ce-js/items/tree.js"></script>
-			<script src="/ce-js/items/building.js"></script>
 			<script src="/ce-js/viewport.js"></script>
 			<script src="/ce-js/world.js"></script>
 			<script src="/ce-js/editors/graphEditor.js"></script>

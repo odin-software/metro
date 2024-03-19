@@ -8,7 +8,7 @@ import (
 	"internal/broadcast"
 
 	"github.com/VividCortex/multitick"
-	CityEditor "github.com/odin-software/metro/websites/city-editor"
+	City "github.com/odin-software/metro/websites/city"
 	Reporter "github.com/odin-software/metro/websites/reporter"
 	TwoD "github.com/odin-software/metro/websites/two-d"
 	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
@@ -84,5 +84,5 @@ func main() {
 	go Reporter.ReporterServer()
 	go TwoD.TwoDimensionalServer()
 	go VirtualWorld.VirtualWorldServer()
-	CityEditor.CityEditorServer()
+	City.CityEditorServer()
 }

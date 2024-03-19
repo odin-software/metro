@@ -1,4 +1,4 @@
-package CityEditor
+package City
 
 import (
 	"net/http"
@@ -22,8 +22,11 @@ func CityEditorServer() {
 	server.Static("/ce-css", "websites/city-editor/css")
 	server.Static("/ce-images", "websites/city-editor/images")
 
-	server.GET("/editor", func(c echo.Context) error {
+	server.GET("/", func(c echo.Context) error {
 		return Render(c, http.StatusOK, Index())
+	})
+	server.GET("/editor", func(c echo.Context) error {
+		return Render(c, http.StatusOK, Editor())
 	})
 
 	server.Logger.Fatal(server.Start(":2221"))
