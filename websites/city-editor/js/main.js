@@ -1,31 +1,23 @@
-const width = 700;
-const height = 700;
+const width = window.innerWidth;
+const height = window.innerHeight - 150;
 
-const theCanvas = document.getElementById('theCanvas');
+const editorCanvas = document.getElementById('editorCanvas');
 
-theCanvas.width = width;
-theCanvas.height = height;
+editorCanvas.width = width;
+editorCanvas.height = height;
 
-const ctx = theCanvas.getContext('2d');
+const ctx = editorCanvas.getContext('2d');
 
 const worldString = localStorage.getItem('world');
 const worldInfo = worldString ? JSON.parse(worldString) : null;
 let world = worldInfo ? World.load(worldInfo) : new World();
 const graph = world.graph;
 
-const viewPort = new Viewport(theCanvas, world.zoom, world.offset);
+const viewPort = new Viewport(editorCanvas, world.zoom, world.offset);
 const tools = {
   graph: { button: graphBtn, editor: new GraphEditor(viewPort, graph) },
-  stop: { button: stopBtn, editor: new StopEditor(viewPort, world) },
-  crossing: { button: crossingBtn, editor: new CrossingEditor(viewPort, world) },
   start: { button: startBtn, editor: new StartEditor(viewPort, world) },
-  parking: { button: parkingBtn, editor: new ParkingEditor(viewPort, world) },
-  light: { button: lightBtn, editor: new LightEditor(viewPort, world) },
-  target: { button: targetBtn, editor: new TargetEditor(viewPort, world) },
-  yield: { button: yieldBtn, editor: new YieldEditor(viewPort, world) },
 }
-
-let oldGraphHash = graph.hash();
 
 setMode('graph');
 
@@ -33,10 +25,6 @@ animate();
 
 function animate() {
   viewPort.reset();
-  if (graph.hash() != oldGraphHash) {
-    world.generate();
-    oldGraphHash = graph.hash();
-  }
   const viewPoint = Point.scale(viewPort.getOffset(), -1);
   world.draw(ctx, viewPoint);
 
@@ -110,7 +98,7 @@ function closeOsmPanel() {
 
 function loadOsmData() {
   if (osmDataContainer.value == "") {
-    alert("Please enter a valid OSM data");
+    alert("Please enter valid OSM data");
     return;
   }
 
