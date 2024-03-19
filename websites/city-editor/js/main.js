@@ -37,11 +37,6 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-function dispose() {
-  tools["graph"].editor.dispose();
-  world.markings.length = 0;
-}
-
 function save() {
   world.zoom = viewPort.zoom;
   world.offset = viewPort.getOffset();
@@ -71,6 +66,11 @@ function load(event) {
     localStorage.setItem('world', JSON.stringify(world));
     location.reload();
   };
+}
+
+function dispose() {
+  tools["graph"].editor.dispose();
+  world.markings.length = 0;
 }
 
 function setMode(mode) {

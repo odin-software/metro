@@ -18,8 +18,5 @@ class World {
     for (const seg of this.graph.segments) {
       seg.draw(ctx, { color: "white", width: 3 });
     }
-    for (const p of this.graph.points) {
-      p.draw(ctx, { color: "white", radius: 12 });
-    }
   }
 }

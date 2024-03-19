@@ -85,7 +85,7 @@ class Graph {
     }
 
     for (const point of this.points) {
-      point.draw(ctx);
+      point.draw(ctx, { size: 20, color: "white"});
     }
   }
 }
