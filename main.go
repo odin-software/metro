@@ -84,5 +84,5 @@ func main() {
 	go Reporter.ReporterServer()
 	go TwoD.TwoDimensionalServer()
 	go VirtualWorld.VirtualWorldServer()
-	City.CityEditorServer()
+	City.CityServer()
 }

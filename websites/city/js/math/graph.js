@@ -5,7 +5,7 @@ class Graph {
   }
 
   static load(info) {
-    const points = info.points.map(p => new Point(p.x, p.y));
+    const points = info.points.map(p => new Point(p.x, p.y, p.name));
     const segments = info.segments.map(s => {
       return new Segment(
         points.find(p => p.equals(s.p1)),

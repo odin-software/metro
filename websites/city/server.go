@@ -14,13 +14,13 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	return t.Render(ctx.Request().Context(), ctx.Response().Writer)
 }
 
-func CityEditorServer() {
+func CityServer() {
 	server := echo.New()
 	server.Use(middleware.Logger())
 
-	server.Static("/ce-js", "websites/city-editor/js")
-	server.Static("/ce-css", "websites/city-editor/css")
-	server.Static("/ce-images", "websites/city-editor/images")
+	server.Static("/ce-js", "websites/city/js")
+	server.Static("/ce-css", "websites/city/css")
+	server.Static("/ce-images", "websites/city/images")
 
 	server.GET("/", func(c echo.Context) error {
 		return Render(c, http.StatusOK, Index())

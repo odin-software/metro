@@ -25,6 +25,7 @@ const Osm = {
       const x = invLerp(minLon, maxLon, node.lon) * width;
       const point = new Point(x, y);
       point.id = node.id;
+      point.name = node.tags && node.tags.name;
       points.push(point);
     }
     for (const way of ways) {
