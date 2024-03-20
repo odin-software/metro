@@ -6,17 +6,24 @@ const ctx = canvas.getContext('2d');
 
 const worldString = localStorage.getItem('world');
 const worldInfo = worldString ? JSON.parse(worldString) : null;
-let world = worldInfo ? World.load(worldInfo) : new World();
+let world = worldInfo ? World.load(worldInfo) : new World(new Graph());
 const graph = world.graph;
 
 const viewPort = new Viewport(canvas, world.zoom, world.offset);
+const mouse = new Point(0, 0);
+
+canvas.addEventListener('mousemove', (event) => {
+  mouse.x = event.clientX;
+  mouse.y = event.clientY;
+});
 
 animate();
 
 function animate() {
   viewPort.reset();
-  const viewPoint = Point.scale(viewPort.getOffset(), -1);
-  world.draw(ctx, viewPoint);
+  const gm = viewPort.getMouseFromPoint(mouse);
+  world.update(ctx, gm);
+  world.draw(ctx);
 
   requestAnimationFrame(animate);
 }

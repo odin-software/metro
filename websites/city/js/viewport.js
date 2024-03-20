@@ -25,6 +25,15 @@ class Viewport {
     return substractDragOffset ? Point.sub(p, this.drag.offset) : p;
   }
 
+  getMouseFromPoint(p) {
+    const fp = new Point(
+      (p.x - this.center.x) * this.zoom - this.offset.x,
+      (p.y - this.center.y) * this.zoom - this.offset.y
+    )
+
+    return fp;
+  }
+
   getOffset() {
     return Point.add(this.offset, this.drag.offset);
   }
