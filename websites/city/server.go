@@ -14,7 +14,7 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	return t.Render(ctx.Request().Context(), ctx.Response().Writer)
 }
 
-func CityEditorServer() {
+func CityServer() {
 	server := echo.New()
 	server.Use(middleware.Logger())
 
