@@ -6,11 +6,14 @@ replace internal/model => ./internal/models
 
 replace internal/broadcast => ./internal/broadcast
 
+replace internal/baso => ./internal/baso
+
 require (
 	github.com/VividCortex/multitick v1.0.0
 	github.com/labstack/echo/v4 v4.11.4
 	internal/broadcast v1.0.0
 	internal/model v1.0.0
+	internal/baso v1.0.0
 )
 
 require (

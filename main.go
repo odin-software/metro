@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"internal/baso"
 	"internal/model"
 	"time"
 
@@ -80,6 +81,7 @@ func main() {
 	// }
 
 	// Starting the server for The New Metro Times.
+	baso.Stations()
 
 	go Reporter.ReporterServer()
 	go TwoD.TwoDimensionalServer()
