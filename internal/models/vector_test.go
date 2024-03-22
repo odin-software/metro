@@ -1,8 +1,6 @@
-package model
+package models
 
-import (
-	"testing"
-)
+import "testing"
 
 func TestNewVector(t *testing.T) {
 	vec := NewVector(2.0, 1.3)

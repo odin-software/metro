@@ -41,6 +41,12 @@ export GOOSE_DBSTRING=metro.db
 export GOOSE_MIGRATIONS_DIR=migrations
 ```
 
+To create a migration, you can use the following command:
+
+```bash
+goose -dir migrations create <migration_name> sql
+```
+
 To run the migrations, you can use the following command:
 
 ```bash

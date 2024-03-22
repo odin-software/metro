@@ -1,4 +1,4 @@
-package model
+package models
 
 import "math"
 
@@ -10,12 +10,6 @@ type Vector struct {
 func NewVector(x, y float64) Vector {
 	return Vector{x, y}
 }
-
-// type Points = []Vector
-
-// // Points methods.
-// func (p Points) Reverse() Points {
-// }
 
 // modification methods.
 func (v *Vector) Add(v2 Vector) {

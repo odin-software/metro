@@ -1,8 +1,6 @@
-package model
+package models
 
-import (
-	"internal/broadcast"
-)
+import "github.com/odin-software/metro/internal/broadcast"
 
 type Station struct {
 	ID         string

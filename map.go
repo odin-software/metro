@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"internal/model"
 	"os"
 	"os/exec"
 	"strings"
+
+	"github.com/odin-software/metro/internal/models"
 )
 
 const (
@@ -13,12 +14,12 @@ const (
 	TrainColor   = "\033[1;31m%s\033[0m"
 )
 
-func getIdNumber(st model.Station) string {
+func getIdNumber(st models.Station) string {
 	a := strings.Split(st.ID, "-")
 	return a[1]
 }
 
-func PrintMap(width, height int, sts []*model.Station, trs []model.Train) {
+func PrintMap(width, height int, sts []*models.Station, trs []models.Train) {
 	ClearScreen()
 	fmt.Printf("Mapa de New Metro\n\n")
 	for y := 0; y <= height; y += 50 {
