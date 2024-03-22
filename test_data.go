@@ -1,41 +1,41 @@
 package main
 
 import (
-	"internal/broadcast"
-	"internal/model"
+	"github.com/odin-software/metro/internal/broadcast"
+	"github.com/odin-software/metro/internal/models"
 )
 
-func GenerateTestData(arrs broadcast.BroadcastServer[broadcast.ADMessage[model.Train]], deps broadcast.BroadcastServer[broadcast.ADMessage[model.Train]]) ([]*model.Station, []model.Line) {
-	sts := []*model.Station{
-		model.NewStation("station-1", "Station 1", model.NewVector(50.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-2", "Station 2", model.NewVector(250.0, 200.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-3", "Station 3", model.NewVector(150.0, 100.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-4", "Station 4", model.NewVector(500.0, 50.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-5", "Station 5", model.NewVector(650.0, 150.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-6", "Station 6", model.NewVector(200.0, 400.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-7", "Station 7", model.NewVector(200.0, 500.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-8", "Station 8", model.NewVector(400.0, 450.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-9", "Station 9", model.NewVector(500.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-10", "Station 10", model.NewVector(650.0, 300.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-11", "Station 11", model.NewVector(450.0, 150.0), arrs.Subscribe(), deps.Subscribe()),
-		model.NewStation("station-12", "Station 12", model.NewVector(700.0, 50.0), arrs.Subscribe(), deps.Subscribe()),
+func GenerateTestData(arrs broadcast.BroadcastServer[broadcast.ADMessage[models.Train]], deps broadcast.BroadcastServer[broadcast.ADMessage[models.Train]]) ([]*models.Station, []models.Line) {
+	sts := []*models.Station{
+		models.NewStation("station-1", "Station 1", models.NewVector(50.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-2", "Station 2", models.NewVector(250.0, 200.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-3", "Station 3", models.NewVector(150.0, 100.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-4", "Station 4", models.NewVector(500.0, 50.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-5", "Station 5", models.NewVector(650.0, 150.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-6", "Station 6", models.NewVector(200.0, 400.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-7", "Station 7", models.NewVector(200.0, 500.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-8", "Station 8", models.NewVector(400.0, 450.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-9", "Station 9", models.NewVector(500.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-10", "Station 10", models.NewVector(650.0, 300.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-11", "Station 11", models.NewVector(450.0, 150.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation("station-12", "Station 12", models.NewVector(700.0, 50.0), arrs.Subscribe(), deps.Subscribe()),
 	}
-	lines := []model.Line{
+	lines := []models.Line{
 		{
 			Name:     "Linea 1",
-			Stations: []model.Station{*sts[0], *sts[1], *sts[3], *sts[11]},
+			Stations: []models.Station{*sts[0], *sts[1], *sts[3], *sts[11]},
 		},
 		{
 			Name:     "Linea 2",
-			Stations: []model.Station{*sts[2], *sts[1], *sts[5], *sts[6]},
+			Stations: []models.Station{*sts[2], *sts[1], *sts[5], *sts[6]},
 		},
 		{
 			Name:     "Linea 3",
-			Stations: []model.Station{*sts[7], *sts[8], *sts[9]},
+			Stations: []models.Station{*sts[7], *sts[8], *sts[9]},
 		},
 		{
 			Name:     "Linea 4",
-			Stations: []model.Station{*sts[10], *sts[3], *sts[4]},
+			Stations: []models.Station{*sts[10], *sts[3], *sts[4]},
 		},
 	}
 	return sts, lines

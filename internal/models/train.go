@@ -1,9 +1,10 @@
-package model
+package models
 
 import (
 	"fmt"
-	"internal/broadcast"
 	"time"
+
+	"github.com/odin-software/metro/internal/broadcast"
 )
 
 type Make struct {

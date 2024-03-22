@@ -2,11 +2,11 @@ package main
 
 import (
 	"context"
-	"internal/baso"
-	"internal/model"
 	"time"
 
-	"internal/broadcast"
+	"github.com/odin-software/metro/internal/baso"
+	"github.com/odin-software/metro/internal/broadcast"
+	"github.com/odin-software/metro/internal/models"
 
 	"github.com/VividCortex/multitick"
 	City "github.com/odin-software/metro/websites/city"
@@ -15,7 +15,7 @@ import (
 	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
 )
 
-var stationHashFunction = func(station model.Station) string {
+var stationHashFunction = func(station models.Station) string {
 	return station.ID
 }
 
@@ -26,36 +26,36 @@ func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
-	arrivals := make(chan broadcast.ADMessage[model.Train])
-	departures := make(chan broadcast.ADMessage[model.Train])
+	arrivals := make(chan broadcast.ADMessage[models.Train])
+	departures := make(chan broadcast.ADMessage[models.Train])
 	bcArr := broadcast.NewBroadcastServer(ctx, arrivals)
 	bcDep := broadcast.NewBroadcastServer(ctx, departures)
 
 	// Filling graph data.
-	g := model.NewNetwork[model.Station](stationHashFunction)
+	g := models.NewNetwork[models.Station](stationHashFunction)
 	sts, lines := GenerateTestData(bcArr, bcDep)
 	// g.InsertVertices(sts)
 	g.InsertVertices2(sts)
-	g.InsertEdge(*sts[0], *sts[1], []model.Vector{model.NewVector(50.0, 250.0), model.NewVector(150.0, 200.0)})
-	g.InsertEdge(*sts[1], *sts[2], []model.Vector{model.NewVector(250.0, 100.0)})
-	g.InsertEdge(*sts[1], *sts[5], []model.Vector{model.NewVector(300.0, 300.0)})
-	g.InsertEdge(*sts[1], *sts[3], []model.Vector{model.NewVector(350.0, 200.0), model.NewVector(400.0, 150.0), model.NewVector(400.0, 50.0)})
-	g.InsertEdge(*sts[3], *sts[4], []model.Vector{model.NewVector(550.0, 100.0), model.NewVector(600.0, 100.0)})
-	g.InsertEdge(*sts[3], *sts[10], []model.Vector{})
-	g.InsertEdge(*sts[3], *sts[11], []model.Vector{model.NewVector(600.0, 50.0)})
-	g.InsertEdge(*sts[5], *sts[6], []model.Vector{model.NewVector(100.0, 500.0)})
-	g.InsertEdge(*sts[7], *sts[8], []model.Vector{model.NewVector(500.0, 450.0)})
-	g.InsertEdge(*sts[8], *sts[9], []model.Vector{model.NewVector(500.0, 250.0), model.NewVector(550.0, 200.0)})
+	g.InsertEdge(*sts[0], *sts[1], []models.Vector{models.NewVector(50.0, 250.0), models.NewVector(150.0, 200.0)})
+	g.InsertEdge(*sts[1], *sts[2], []models.Vector{models.NewVector(250.0, 100.0)})
+	g.InsertEdge(*sts[1], *sts[5], []models.Vector{models.NewVector(300.0, 300.0)})
+	g.InsertEdge(*sts[1], *sts[3], []models.Vector{models.NewVector(350.0, 200.0), models.NewVector(400.0, 150.0), models.NewVector(400.0, 50.0)})
+	g.InsertEdge(*sts[3], *sts[4], []models.Vector{models.NewVector(550.0, 100.0), models.NewVector(600.0, 100.0)})
+	g.InsertEdge(*sts[3], *sts[10], []models.Vector{})
+	g.InsertEdge(*sts[3], *sts[11], []models.Vector{models.NewVector(600.0, 50.0)})
+	g.InsertEdge(*sts[5], *sts[6], []models.Vector{models.NewVector(100.0, 500.0)})
+	g.InsertEdge(*sts[7], *sts[8], []models.Vector{models.NewVector(500.0, 450.0)})
+	g.InsertEdge(*sts[8], *sts[9], []models.Vector{models.NewVector(500.0, 250.0), models.NewVector(550.0, 200.0)})
 
 	// Creating the train and queing some destinations.
-	chu4 := model.NewMake("4-Legged-chu", "A type of fast train.", 0.003, 1)
-	chu1 := model.NewMake("1-Legged-chu", "Another type of fast train.", 0.004, 0.7)
-	trains := make([]model.Train, 0)
-	train := model.NewTrain("Chu", chu1, sts[1].Position, *sts[1], lines[1], &g, arrivals, departures)
-	train2 := model.NewTrain("Cha", chu4, sts[0].Position, *sts[0], lines[0], &g, arrivals, departures)
-	train3 := model.NewTrain("Che", chu1, sts[3].Position, *sts[3], lines[3], &g, arrivals, departures)
-	train4 := model.NewTrain("Chi", chu1, sts[1].Position, *sts[11], lines[0], &g, arrivals, departures)
-	train5 := model.NewTrain("Cho", chu4, sts[7].Position, *sts[7], lines[2], &g, arrivals, departures)
+	chu4 := models.NewMake("4-Legged-chu", "A type of fast train.", 0.003, 1)
+	chu1 := models.NewMake("1-Legged-chu", "Another type of fast train.", 0.004, 0.7)
+	trains := make([]models.Train, 0)
+	train := models.NewTrain("Chu", chu1, sts[1].Position, *sts[1], lines[1], &g, arrivals, departures)
+	train2 := models.NewTrain("Cha", chu4, sts[0].Position, *sts[0], lines[0], &g, arrivals, departures)
+	train3 := models.NewTrain("Che", chu1, sts[3].Position, *sts[3], lines[3], &g, arrivals, departures)
+	train4 := models.NewTrain("Chi", chu1, sts[1].Position, *sts[11], lines[0], &g, arrivals, departures)
+	train5 := models.NewTrain("Cho", chu4, sts[7].Position, *sts[7], lines[2], &g, arrivals, departures)
 	trains = append(trains, train, train2, train3, train4, train5)
 
 	// Starting the goroutines for the trains.
