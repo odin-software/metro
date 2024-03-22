@@ -2,6 +2,7 @@ metro
 go.sum
 tmp/
 metro.db
+data/metro.db
 __debug__*
 
 .env
