@@ -12,6 +12,6 @@ create_migration:
 	goose -dir "data/sql/migrations" create "$(name)" sql 
 
 # Target: generate sqlc types in go.
-generate:
+generate_sqlc:
 	echo "Generating sqlc types"
 	sqlc generate

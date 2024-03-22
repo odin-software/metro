@@ -6,4 +6,5 @@ sql:
     engine: "sqlite"
     gen:
       go:
+        package: "dbstore"
         out: "internal/dbstore"

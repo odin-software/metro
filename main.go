@@ -11,7 +11,6 @@ import (
 	"github.com/VividCortex/multitick"
 	City "github.com/odin-software/metro/websites/city"
 	Reporter "github.com/odin-software/metro/websites/reporter"
-	TwoD "github.com/odin-software/metro/websites/two-d"
 	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
 )
 
@@ -32,7 +31,7 @@ func main() {
 	bcDep := broadcast.NewBroadcastServer(ctx, departures)
 
 	// Filling graph data.
-	g := models.NewNetwork[models.Station](stationHashFunction)
+	g := models.NewNetwork(stationHashFunction)
 	sts, lines := GenerateTestData(bcArr, bcDep)
 	// g.InsertVertices(sts)
 	g.InsertVertices2(sts)
@@ -84,7 +83,6 @@ func main() {
 	baso.Stations()
 
 	go Reporter.ReporterServer()
-	go TwoD.TwoDimensionalServer()
 	go VirtualWorld.VirtualWorldServer()
 	City.CityServer()
 }
