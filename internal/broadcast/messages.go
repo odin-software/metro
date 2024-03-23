@@ -1,6 +1,6 @@
 package broadcast
 
 type ADMessage[T any] struct {
-	StationID string
+	StationID int64
 	Train     T
 }

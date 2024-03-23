@@ -7,18 +7,18 @@ import (
 
 func GenerateTestData(arrs broadcast.BroadcastServer[broadcast.ADMessage[models.Train]], deps broadcast.BroadcastServer[broadcast.ADMessage[models.Train]]) ([]*models.Station, []models.Line) {
 	sts := []*models.Station{
-		models.NewStation("station-1", "Station 1", models.NewVector(50.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-2", "Station 2", models.NewVector(250.0, 200.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-3", "Station 3", models.NewVector(150.0, 100.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-4", "Station 4", models.NewVector(500.0, 50.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-5", "Station 5", models.NewVector(650.0, 150.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-6", "Station 6", models.NewVector(200.0, 400.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-7", "Station 7", models.NewVector(200.0, 500.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-8", "Station 8", models.NewVector(400.0, 450.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-9", "Station 9", models.NewVector(500.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-10", "Station 10", models.NewVector(650.0, 300.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-11", "Station 11", models.NewVector(450.0, 150.0), arrs.Subscribe(), deps.Subscribe()),
-		models.NewStation("station-12", "Station 12", models.NewVector(700.0, 50.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(1, "Station 1", models.NewVector(50.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(2, "Station 2", models.NewVector(250.0, 200.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(3, "Station 3", models.NewVector(150.0, 100.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(4, "Station 4", models.NewVector(500.0, 50.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(5, "Station 5", models.NewVector(650.0, 150.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(6, "Station 6", models.NewVector(200.0, 400.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(7, "Station 7", models.NewVector(200.0, 500.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(8, "Station 8", models.NewVector(400.0, 450.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(9, "Station 9", models.NewVector(500.0, 350.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(10, "Station 10", models.NewVector(650.0, 300.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(11, "Station 11", models.NewVector(450.0, 150.0), arrs.Subscribe(), deps.Subscribe()),
+		models.NewStation(12, "Station 12", models.NewVector(700.0, 50.0), arrs.Subscribe(), deps.Subscribe()),
 	}
 	lines := []models.Line{
 		{

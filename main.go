@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/odin-software/metro/internal/baso"
@@ -15,7 +16,7 @@ import (
 )
 
 var stationHashFunction = func(station models.Station) string {
-	return station.ID
+	return strconv.FormatInt(station.ID, 10)
 }
 
 func main() {
@@ -80,7 +81,11 @@ func main() {
 	// }
 
 	// Starting the server for The New Metro Times.
-	baso.Stations()
+	baso := baso.NewBaso()
+	bs := baso.ListStations()
+	for _, st := range bs {
+		println(st.Name)
+	}
 
 	go Reporter.ReporterServer()
 	go VirtualWorld.VirtualWorldServer()

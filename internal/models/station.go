@@ -3,7 +3,7 @@ package models
 import "github.com/odin-software/metro/internal/broadcast"
 
 type Station struct {
-	ID         string
+	ID         int64
 	Name       string
 	Position   Vector
 	Trains     []Train
@@ -11,7 +11,7 @@ type Station struct {
 	departures <-chan broadcast.ADMessage[Train]
 }
 
-func NewStation(id string, name string, location Vector, arr <-chan broadcast.ADMessage[Train], dep <-chan broadcast.ADMessage[Train]) *Station {
+func NewStation(id int64, name string, location Vector, arr <-chan broadcast.ADMessage[Train], dep <-chan broadcast.ADMessage[Train]) *Station {
 	st := &Station{
 		ID:         id,
 		Name:       name,

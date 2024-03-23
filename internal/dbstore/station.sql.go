@@ -9,6 +9,46 @@ import (
 	"context"
 )
 
+const getStationById = `-- name: GetStationById :one
+SELECT id, name, x, y, z, created_at, updated_at FROM station WHERE id = ? ORDER BY id
+`
+
+func (q *Queries) GetStationById(ctx context.Context, id int64) (Station, error) {
+	row := q.db.QueryRowContext(ctx, getStationById, id)
+	var i Station
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.X,
+		&i.Y,
+		&i.Z,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
+const getStationByName = `-- name: GetStationByName :one
+SELECT id, name, x, y, z, created_at, updated_at FROM station
+WHERE name = ? 
+ORDER BY id
+`
+
+func (q *Queries) GetStationByName(ctx context.Context, name string) (Station, error) {
+	row := q.db.QueryRowContext(ctx, getStationByName, name)
+	var i Station
+	err := row.Scan(
+		&i.ID,
+		&i.Name,
+		&i.X,
+		&i.Y,
+		&i.Z,
+		&i.CreatedAt,
+		&i.UpdatedAt,
+	)
+	return i, err
+}
+
 const listStations = `-- name: ListStations :many
 SELECT id, name, x, y, z, created_at, updated_at FROM station ORDER BY id
 `
