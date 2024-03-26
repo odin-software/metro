@@ -1,6 +1,6 @@
 -- +goose Up
 -- +goose StatementBegin
-SELECT 'UP initial SQL query';
+SELECT 'UP initial migration';
 CREATE TABLE station (
     id INTEGER PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
@@ -43,7 +43,7 @@ CREATE TABLE station_line (
 
 -- +goose Down
 -- +goose StatementBegin
-SELECT 'DOWN initial SQL query';
+SELECT 'DOWN initial migration';
 DROP TABLE station;
 DROP TABLE line;
 DROP TABLE train;
