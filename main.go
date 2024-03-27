@@ -51,11 +51,11 @@ func main() {
 	chu4 := models.NewMake("4-Legged-chu", "A type of fast train.", 0.003, 1)
 	chu1 := models.NewMake("1-Legged-chu", "Another type of fast train.", 0.004, 0.7)
 	trains := make([]models.Train, 0)
-	train := models.NewTrain("Chu", chu1, sts[1].Position, *sts[1], lines[1], &g, arrivals, departures)
 	train2 := models.NewTrain("Cha", chu4, sts[0].Position, *sts[0], lines[0], &g, arrivals, departures)
 	train3 := models.NewTrain("Che", chu1, sts[3].Position, *sts[3], lines[3], &g, arrivals, departures)
 	train4 := models.NewTrain("Chi", chu1, sts[1].Position, *sts[11], lines[0], &g, arrivals, departures)
 	train5 := models.NewTrain("Cho", chu4, sts[7].Position, *sts[7], lines[2], &g, arrivals, departures)
+	train := models.NewTrain("Chu", chu1, sts[1].Position, *sts[1], lines[1], &g, arrivals, departures)
 	trains = append(trains, train, train2, train3, train4, train5)
 
 	// Starting the goroutines for the trains.
