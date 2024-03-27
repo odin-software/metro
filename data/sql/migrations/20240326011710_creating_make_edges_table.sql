@@ -20,7 +20,7 @@ CREATE TABLE edge (
 CREATE TABLE edge_point (
     id INTEGER PRIMARY KEY,
     edgeId INTEGER NOT NULL,
-    order INTEGER NOT NULL,
+    odr INTEGER NOT NULL,
     x REAL NOT NULL,
     y REAL NOT NULL,
     z REAL NOT NULL,
