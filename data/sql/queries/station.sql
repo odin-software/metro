@@ -1,5 +1,6 @@
 -- name: ListStations :many
-SELECT id, name, x, y, z FROM station ORDER BY id;
+SELECT id, name, x, y, z FROM station 
+ORDER BY id;
 
 -- name: GetStationById :one
 SELECT id, name, x, y, z FROM station 

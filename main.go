@@ -31,9 +31,12 @@ func main() {
 	bcArr := broadcast.NewBroadcastServer(ctx, arrivals)
 	bcDep := broadcast.NewBroadcastServer(ctx, departures)
 
-	// Filling graph data.
+	// Creating the city graph.
 	cityNetwork := models.NewNetwork(stationHashFunction)
-	sts, lines := GenerateTestData(bcArr, bcDep)
+
+	// Loading stations and lines from the database.
+	sts := LoadStations(bcArr, bcDep)
+	lines := LoadLines()
 
 	cityNetwork.InsertVertices2(sts)
 	cityNetwork.InsertEdge(*sts[0], *sts[1], []models.Vector{models.NewVector(50.0, 250.0), models.NewVector(150.0, 200.0)})

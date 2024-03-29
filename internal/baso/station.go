@@ -11,7 +11,7 @@ func (bs *Baso) ListStations() []models.Station {
 	if err != nil {
 		log.Fatal(err)
 	}
-	result := make([]models.Station, len(stations))
+	result := make([]models.Station, 0)
 	for _, station := range stations {
 		result = append(result, models.Station{
 			ID:       station.ID,

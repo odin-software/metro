@@ -28,7 +28,7 @@ CREATE TABLE train (
     created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     FOREIGN KEY(currentId) REFERENCES station(id),
-    FOREIGN KEY(nextId) REFERENCES station(id) 
+    FOREIGN KEY(nextId) REFERENCES station(id), 
     FOREIGN KEY(makeId) REFERENCES make(id),
     FOREIGN KEY(lineId) REFERENCES line(id) 
 );
