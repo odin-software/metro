@@ -13,14 +13,16 @@ LIMIT 1;
 
 -- name: CreateLine :one
 INSERT INTO line (name)
-VALUES (?);
+VALUES (?)
+RETURNING id;
 
 -- name: UpdateLine :one
 UPDATE line
 SET name = ?
-WHERE id = ?;
+WHERE id = ?
+RETURNING id;
 
--- name: DeleteLine :one
+-- name: DeleteLine :exec
 DELETE FROM line 
 WHERE id = ?;
 
@@ -36,8 +38,9 @@ ORDER BY id;
 
 -- name: AddStationToLine :one
 INSERT INTO station_line (stationId, lineId, odr)
-SELECT ?, ?, COALESCE(MAX(odr), 0) + 1;
+SELECT ?, ?, COALESCE(MAX(odr), 0) + 1
+RETURNING id;
 
--- name: RemoveStationFromLine :one
+-- name: RemoveStationFromLine :exec
 DELETE FROM station_line
 WHERE stationId = ? AND lineId = ?;

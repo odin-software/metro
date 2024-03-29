@@ -13,15 +13,18 @@ LIMIT 1;
 
 -- name: CreateStation :one
 INSERT INTO station (name, x, y, z) 
-VALUES (?, ?, ?, ?);
+VALUES (?, ?, ?, ?)
+RETURNING id;
 
 -- name: UpdateStation :one
 UPDATE station
 SET name = ?, x = ?, y = ?, z = ?
-WHERE id = ?;
+WHERE id = ?
+RETURNING id;
 
--- name: DeleteStation :one
-DELETE FROM station WHERE id = ?;
+-- name: DeleteStation :exec
+DELETE FROM station 
+WHERE id = ?;
 
 -- name: TrainsAtStation :many
 SELECT id, name FROM train

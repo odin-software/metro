@@ -9,11 +9,36 @@ import (
 	"time"
 )
 
+type Edge struct {
+	ID     int64
+	Fromid int64
+	Toid   int64
+}
+
+type EdgePoint struct {
+	ID     int64
+	Edgeid int64
+	Odr    int64
+	X      float64
+	Y      float64
+	Z      float64
+}
+
 type Line struct {
 	ID        int64
 	Name      string
 	CreatedAt time.Time
 	UpdatedAt time.Time
+}
+
+type Make struct {
+	ID           int64
+	Name         string
+	Description  string
+	Acceleration sql.NullFloat64
+	TopSpeed     sql.NullFloat64
+	CreatedAt    time.Time
+	UpdatedAt    time.Time
 }
 
 type Station struct {
@@ -30,6 +55,7 @@ type StationLine struct {
 	ID        int64
 	Stationid sql.NullInt64
 	Lineid    sql.NullInt64
+	Odr       sql.NullInt64
 }
 
 type Train struct {
@@ -42,4 +68,6 @@ type Train struct {
 	Nextid    sql.NullInt64
 	CreatedAt time.Time
 	UpdatedAt time.Time
+	MakeId    sql.NullInt64
+	LineId    sql.NullInt64
 }
