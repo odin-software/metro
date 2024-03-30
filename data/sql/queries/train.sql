@@ -2,6 +2,20 @@
 SELECT id, name, x, y, z FROM train 
 ORDER BY id;
 
+-- name: GetAllTrainsFull :many
+SELECT
+	tr.name,
+	tr.x,
+	tr.y,
+	tr.z,
+	st.id as stationId,
+	ln.name as lineName,
+	mk.name as makeName
+FROM train tr
+JOIN line ln ON tr.lineId = ln.id
+JOIN make mk ON tr.makeId = mk.id
+JOIN station st ON tr.currentId = st.id;
+
 -- name: GetTrainById :one
 SELECT id, name, x, y, z FROM train
 WHERE id = ?

@@ -93,6 +93,62 @@ func (q *Queries) GetAllTrains(ctx context.Context) ([]GetAllTrainsRow, error) {
 	return items, nil
 }
 
+const getAllTrainsFull = `-- name: GetAllTrainsFull :many
+SELECT
+	tr.name,
+	tr.x,
+	tr.y,
+	tr.z,
+	st.id as stationId,
+	ln.name as lineName,
+	mk.name as makeName
+FROM train tr
+JOIN line ln ON tr.lineId = ln.id
+JOIN make mk ON tr.makeId = mk.id
+JOIN station st ON tr.currentId = st.id
+`
+
+type GetAllTrainsFullRow struct {
+	Name      string
+	X         float64
+	Y         float64
+	Z         float64
+	Stationid int64
+	Linename  string
+	Makename  string
+}
+
+func (q *Queries) GetAllTrainsFull(ctx context.Context) ([]GetAllTrainsFullRow, error) {
+	rows, err := q.db.QueryContext(ctx, getAllTrainsFull)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetAllTrainsFullRow
+	for rows.Next() {
+		var i GetAllTrainsFullRow
+		if err := rows.Scan(
+			&i.Name,
+			&i.X,
+			&i.Y,
+			&i.Z,
+			&i.Stationid,
+			&i.Linename,
+			&i.Makename,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getTrainById = `-- name: GetTrainById :one
 SELECT id, name, x, y, z FROM train
 WHERE id = ?

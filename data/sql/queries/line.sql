@@ -2,21 +2,19 @@
 SELECT id, name FROM line
 ORDER BY name;
 
--- name: ListLinesWithStations :many
+-- name: GetStationsFromLine :many
 SELECT
-	ln. "name",
-	st. "name"
+	st.id,
+	st.name,
+	st.x,
+	st.y,
+	st.z
 FROM
 	line ln
 	JOIN station_line sl ON ln.id = sl.lineId
 	JOIN station st ON sl.stationId = st.id
-ORDER BY
-	ln. "name";
-
--- name: GetTrainsOnLine :many
-SELECT id, name, x, y, z FROM train
-WHERE lineId = ?
-ORDER BY id;
+WHERE
+	lineId = ?;
 
 -- name: GetLineById :one
 SELECT id, name FROM line

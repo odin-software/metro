@@ -35,31 +35,23 @@ func main() {
 	cityNetwork := models.NewNetwork(stationHashFunction)
 
 	// Loading stations and lines from the database.
-	sts := LoadStations(bcArr, bcDep)
+	stations := LoadStations(bcArr, bcDep)
 	lines := LoadLines()
 
-	cityNetwork.InsertVertices2(sts)
-	cityNetwork.InsertEdge(*sts[0], *sts[1], []models.Vector{models.NewVector(50.0, 250.0), models.NewVector(150.0, 200.0)})
-	cityNetwork.InsertEdge(*sts[1], *sts[2], []models.Vector{models.NewVector(250.0, 100.0)})
-	cityNetwork.InsertEdge(*sts[1], *sts[5], []models.Vector{models.NewVector(300.0, 300.0)})
-	cityNetwork.InsertEdge(*sts[1], *sts[3], []models.Vector{models.NewVector(350.0, 200.0), models.NewVector(400.0, 150.0), models.NewVector(400.0, 50.0)})
-	cityNetwork.InsertEdge(*sts[3], *sts[4], []models.Vector{models.NewVector(550.0, 100.0), models.NewVector(600.0, 100.0)})
-	cityNetwork.InsertEdge(*sts[3], *sts[10], []models.Vector{})
-	cityNetwork.InsertEdge(*sts[3], *sts[11], []models.Vector{models.NewVector(600.0, 50.0)})
-	cityNetwork.InsertEdge(*sts[5], *sts[6], []models.Vector{models.NewVector(100.0, 500.0)})
-	cityNetwork.InsertEdge(*sts[7], *sts[8], []models.Vector{models.NewVector(500.0, 450.0)})
-	cityNetwork.InsertEdge(*sts[8], *sts[9], []models.Vector{models.NewVector(500.0, 250.0), models.NewVector(550.0, 200.0)})
+	cityNetwork.InsertVertices2(stations)
+	cityNetwork.InsertEdge(*stations[0], *stations[1], []models.Vector{models.NewVector(50.0, 250.0), models.NewVector(150.0, 200.0)})
+	cityNetwork.InsertEdge(*stations[1], *stations[2], []models.Vector{models.NewVector(250.0, 100.0)})
+	cityNetwork.InsertEdge(*stations[1], *stations[5], []models.Vector{models.NewVector(300.0, 300.0)})
+	cityNetwork.InsertEdge(*stations[1], *stations[3], []models.Vector{models.NewVector(350.0, 200.0), models.NewVector(400.0, 150.0), models.NewVector(400.0, 50.0)})
+	cityNetwork.InsertEdge(*stations[3], *stations[4], []models.Vector{models.NewVector(550.0, 100.0), models.NewVector(600.0, 100.0)})
+	cityNetwork.InsertEdge(*stations[3], *stations[10], []models.Vector{})
+	cityNetwork.InsertEdge(*stations[3], *stations[11], []models.Vector{models.NewVector(600.0, 50.0)})
+	cityNetwork.InsertEdge(*stations[5], *stations[6], []models.Vector{models.NewVector(100.0, 500.0)})
+	cityNetwork.InsertEdge(*stations[7], *stations[8], []models.Vector{models.NewVector(500.0, 450.0)})
+	cityNetwork.InsertEdge(*stations[8], *stations[9], []models.Vector{models.NewVector(500.0, 250.0), models.NewVector(550.0, 200.0)})
 
 	// Creating the train and queing some destinations.
-	chu4 := models.NewMake("4-Legged-chu", "A type of fast train.", 0.003, 1)
-	chu1 := models.NewMake("1-Legged-chu", "Another type of fast train.", 0.004, 0.7)
-	trains := make([]models.Train, 0)
-	train2 := models.NewTrain("Cha", chu4, sts[0].Position, *sts[0], lines[0], &cityNetwork, arrivals, departures)
-	train3 := models.NewTrain("Che", chu1, sts[3].Position, *sts[3], lines[3], &cityNetwork, arrivals, departures)
-	train4 := models.NewTrain("Chi", chu1, sts[1].Position, *sts[11], lines[0], &cityNetwork, arrivals, departures)
-	train5 := models.NewTrain("Cho", chu4, sts[7].Position, *sts[7], lines[2], &cityNetwork, arrivals, departures)
-	train := models.NewTrain("Chu", chu1, sts[1].Position, *sts[1], lines[1], &cityNetwork, arrivals, departures)
-	trains = append(trains, train, train2, train3, train4, train5)
+	trains := LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
 
 	// Starting the goroutines for the trains.
 	// This should be changed eventually to have just one tick and then on tick call all the updates on goroutines.

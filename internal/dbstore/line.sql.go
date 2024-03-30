@@ -150,29 +150,38 @@ func (q *Queries) GetLineTrains(ctx context.Context, lineid sql.NullInt64) ([]Ge
 	return items, nil
 }
 
-const getTrainsOnLine = `-- name: GetTrainsOnLine :many
-SELECT id, name, x, y, z FROM train
-WHERE lineId = ?
-ORDER BY id
+const getStationsFromLine = `-- name: GetStationsFromLine :many
+SELECT
+	st.id,
+	st.name,
+	st.x,
+	st.y,
+	st.z
+FROM
+	line ln
+	JOIN station_line sl ON ln.id = sl.lineId
+	JOIN station st ON sl.stationId = st.id
+WHERE
+	lineId = ?
 `
 
-type GetTrainsOnLineRow struct {
+type GetStationsFromLineRow struct {
 	ID   int64
 	Name string
-	X    float64
-	Y    float64
-	Z    float64
+	X    sql.NullFloat64
+	Y    sql.NullFloat64
+	Z    sql.NullFloat64
 }
 
-func (q *Queries) GetTrainsOnLine(ctx context.Context, lineid sql.NullInt64) ([]GetTrainsOnLineRow, error) {
-	rows, err := q.db.QueryContext(ctx, getTrainsOnLine, lineid)
+func (q *Queries) GetStationsFromLine(ctx context.Context, lineid sql.NullInt64) ([]GetStationsFromLineRow, error) {
+	rows, err := q.db.QueryContext(ctx, getStationsFromLine, lineid)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-	var items []GetTrainsOnLineRow
+	var items []GetStationsFromLineRow
 	for rows.Next() {
-		var i GetTrainsOnLineRow
+		var i GetStationsFromLineRow
 		if err := rows.Scan(
 			&i.ID,
 			&i.Name,
@@ -213,46 +222,6 @@ func (q *Queries) ListLines(ctx context.Context) ([]ListLinesRow, error) {
 	for rows.Next() {
 		var i ListLinesRow
 		if err := rows.Scan(&i.ID, &i.Name); err != nil {
-			return nil, err
-		}
-		items = append(items, i)
-	}
-	if err := rows.Close(); err != nil {
-		return nil, err
-	}
-	if err := rows.Err(); err != nil {
-		return nil, err
-	}
-	return items, nil
-}
-
-const listLinesWithStations = `-- name: ListLinesWithStations :many
-SELECT
-	ln. "name",
-	st. "name"
-FROM
-	line ln
-	JOIN station_line sl ON ln.id = sl.lineId
-	JOIN station st ON sl.stationId = st.id
-ORDER BY
-	ln. "name"
-`
-
-type ListLinesWithStationsRow struct {
-	Name   string
-	Name_2 string
-}
-
-func (q *Queries) ListLinesWithStations(ctx context.Context) ([]ListLinesWithStationsRow, error) {
-	rows, err := q.db.QueryContext(ctx, listLinesWithStations)
-	if err != nil {
-		return nil, err
-	}
-	defer rows.Close()
-	var items []ListLinesWithStationsRow
-	for rows.Next() {
-		var i ListLinesWithStationsRow
-		if err := rows.Scan(&i.Name, &i.Name_2); err != nil {
 			return nil, err
 		}
 		items = append(items, i)
