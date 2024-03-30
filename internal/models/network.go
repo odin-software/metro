@@ -45,8 +45,6 @@ func (gr *Network[T]) InsertVertices(vertices []T) error {
 }
 
 func (gr *Network[T]) InsertVertices2(vertices []*T) error {
-	println("InsertVertices2")
-	println(len(vertices))
 	for _, v := range vertices {
 		err := gr.InsertVertex(*v)
 		if err != nil {

@@ -5,11 +5,9 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/odin-software/metro/internal/baso"
 	"github.com/odin-software/metro/internal/broadcast"
 	"github.com/odin-software/metro/internal/models"
 
-	"github.com/VividCortex/multitick"
 	City "github.com/odin-software/metro/websites/city"
 	Reporter "github.com/odin-software/metro/websites/reporter"
 	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
@@ -21,7 +19,8 @@ var stationHashFunction = func(station models.Station) string {
 
 func main() {
 	// Setup
-	tick := multitick.NewTicker(20*time.Millisecond, -1*time.Millisecond)
+	loopTick := time.NewTicker(20 * time.Millisecond)
+	quit := make(chan struct{})
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -50,20 +49,23 @@ func main() {
 	cityNetwork.InsertEdge(*stations[7], *stations[8], []models.Vector{models.NewVector(500.0, 450.0)})
 	cityNetwork.InsertEdge(*stations[8], *stations[9], []models.Vector{models.NewVector(500.0, 250.0), models.NewVector(550.0, 200.0)})
 
-	// Creating the train and queing some destinations.
+	// Creating the train with lines and channels to communicate.
 	trains := LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
 
 	// Starting the goroutines for the trains.
-	// This should be changed eventually to have just one tick and then on tick call all the updates on goroutines.
-
-	for i := 0; i < len(trains); i++ {
-		go func(idx int) {
-			sub := tick.Subscribe()
-			for range sub {
-				trains[idx].Update()
+	go func() {
+		for {
+			select {
+			case <-loopTick.C:
+				for i := 0; i < len(trains); i++ {
+					go trains[i].Update()
+				}
+			case <-quit:
+				loopTick.Stop()
+				return
 			}
-		}(i)
-	}
+		}
+	}()
 
 	// Drawing a map in the console of the trains and stations.
 	// for range tickerMap.C {
@@ -76,12 +78,6 @@ func main() {
 	// }
 
 	// Starting the server for The New Metro Times.
-	baso := baso.NewBaso()
-	bs := baso.ListStations()
-	for _, st := range bs {
-		println(st.Name)
-	}
-
 	go Reporter.ReporterServer()
 	go VirtualWorld.VirtualWorldServer()
 	City.CityServer()
