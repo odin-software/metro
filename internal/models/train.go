@@ -8,10 +8,10 @@ import (
 )
 
 type Make struct {
-	name        string
-	description string
-	accMag      float64
-	topSpeed    float64
+	Name        string
+	Description string
+	AccMag      float64
+	TopSpeed    float64
 }
 
 type Train struct {
@@ -106,9 +106,9 @@ func (tr *Train) Update() {
 			for pc.Dist(path[i]) >= 1 {
 				ticks++
 				d := path[i].SoftSub(pc)
-				d.SetMag(tr.make.accMag)
+				d.SetMag(tr.make.AccMag)
 				vc.Add(d)
-				vc.Limit(tr.make.topSpeed)
+				vc.Limit(tr.make.TopSpeed)
 				pc.Add(vc)
 			}
 			vc.Scale(0)
@@ -137,15 +137,15 @@ func (tr *Train) Update() {
 	where := tr.current.Position.Dist(reach) / 8
 
 	if mag < where {
-		m := Map(mag, 0, where, 0, tr.make.accMag)
+		m := Map(mag, 0, where, 0, tr.make.AccMag)
 		direction.SetMag(m)
 	} else {
-		direction.SetMag(tr.make.accMag)
+		direction.SetMag(tr.make.AccMag)
 	}
 
 	// Update position based on velocity
 	tr.velocity.Add(direction)
-	tr.velocity.Limit(tr.make.topSpeed)
+	tr.velocity.Limit(tr.make.TopSpeed)
 	tr.Position.Add(tr.velocity)
 	distance := tr.Position.Dist(reach)
 
@@ -172,9 +172,9 @@ func (tr *Train) Update() {
 
 func NewMake(name string, description string, accMag float64, topSpeed float64) Make {
 	return Make{
-		name:        name,
-		description: description,
-		accMag:      accMag,
-		topSpeed:    topSpeed,
+		Name:        name,
+		Description: description,
+		AccMag:      accMag,
+		TopSpeed:    topSpeed,
 	}
 }

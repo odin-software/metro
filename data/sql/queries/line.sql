@@ -1,0 +1,61 @@
+-- name: ListLines :many
+SELECT id, name FROM line
+ORDER BY name;
+
+-- name: GetStationsFromLine :many
+SELECT
+	st.id,
+	st.name,
+	st.x,
+	st.y,
+	st.z
+FROM
+	line ln
+	JOIN station_line sl ON ln.id = sl.lineId
+	JOIN station st ON sl.stationId = st.id
+WHERE
+	lineId = ?;
+
+-- name: GetLineById :one
+SELECT id, name FROM line
+WHERE id = ?
+LIMIT 1;
+
+-- name: GetLineByName :one
+SELECT id, name FROM line
+WHERE name = ?
+LIMIT 1;
+
+-- name: CreateLine :one
+INSERT INTO line (name)
+VALUES (?)
+RETURNING id;
+
+-- name: UpdateLine :one
+UPDATE line
+SET name = ?
+WHERE id = ?
+RETURNING id;
+
+-- name: DeleteLine :exec
+DELETE FROM line 
+WHERE id = ?;
+
+-- name: GetLineStations :many
+SELECT stationId FROM station_line
+WHERE lineId = ?
+ORDER by odr;
+
+-- name: GetLineTrains :many
+SELECT id, name FROM train
+WHERE lineId = ?
+ORDER BY id;
+
+-- name: AddStationToLine :one
+INSERT INTO station_line (stationId, lineId, odr)
+SELECT ?, ?, COALESCE(MAX(odr), 0) + 1
+RETURNING id;
+
+-- name: RemoveStationFromLine :exec
+DELETE FROM station_line
+WHERE stationId = ? AND lineId = ?;

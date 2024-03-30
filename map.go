@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"strconv"
 	"strings"
 
 	"github.com/odin-software/metro/internal/models"
@@ -13,11 +14,6 @@ const (
 	StationColor = "\033[1;36m%s\033[0m"
 	TrainColor   = "\033[1;31m%s\033[0m"
 )
-
-func getIdNumber(st models.Station) string {
-	a := strings.Split(st.ID, "-")
-	return a[1]
-}
 
 func PrintMap(width, height int, sts []*models.Station, trs []models.Train) {
 	ClearScreen()
@@ -37,7 +33,7 @@ func PrintMap(width, height int, sts []*models.Station, trs []models.Train) {
 			if !foundTrain {
 				for _, st := range sts {
 					if int(st.Position.X) == x && int(st.Position.Y) == y {
-						t := fmt.Sprintf(" %s ", centerString(getIdNumber(*st), 3))
+						t := fmt.Sprintf(" %s ", centerString(strconv.FormatInt(st.ID, 10), 3))
 						fmt.Printf(StationColor, t)
 						foundStation = true
 						break
