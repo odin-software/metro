@@ -6,6 +6,7 @@ import (
 	"os/exec"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/odin-software/metro/internal/models"
 )
@@ -53,6 +54,12 @@ func ClearScreen() {
 	c := exec.Command("clear")
 	c.Stdout = os.Stdout
 	c.Run()
+}
+
+func StartMap(tick <-chan time.Time, sts []*models.Station, trs []models.Train) {
+	for range tick {
+		PrintMap(600, 600, sts, trs)
+	}
 }
 
 func centerString(str string, width int) string {
