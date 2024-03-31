@@ -2,10 +2,8 @@ package main
 
 import (
 	"context"
-	"strconv"
 	"time"
 
-	"github.com/odin-software/metro/internal/baso"
 	"github.com/odin-software/metro/internal/broadcast"
 	"github.com/odin-software/metro/internal/models"
 
@@ -15,13 +13,10 @@ import (
 	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
 )
 
-var stationHashFunction = func(station models.Station) string {
-	return strconv.FormatInt(station.ID, 10)
-}
-
 func main() {
 	// Setup
-	tick := multitick.NewTicker(20*time.Millisecond, -1*time.Millisecond)
+	loopTick := multitick.NewTicker(DefaultConfig.LoopDuration, DefaultConfig.LoopDurationOffset)
+	mapTick := time.NewTicker(DefaultConfig.TerminalMapDuration)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -32,7 +27,7 @@ func main() {
 	bcDep := broadcast.NewBroadcastServer(ctx, departures)
 
 	// Creating the city graph.
-	cityNetwork := models.NewNetwork(stationHashFunction)
+	cityNetwork := models.NewNetwork(StationHashFunction)
 
 	// Loading stations and lines from the database.
 	stations := LoadStations(bcArr, bcDep)
@@ -50,15 +45,13 @@ func main() {
 	cityNetwork.InsertEdge(*stations[7], *stations[8], []models.Vector{models.NewVector(500.0, 450.0)})
 	cityNetwork.InsertEdge(*stations[8], *stations[9], []models.Vector{models.NewVector(500.0, 250.0), models.NewVector(550.0, 200.0)})
 
-	// Creating the train and queing some destinations.
+	// Creating the train with lines and channels to communicate.
 	trains := LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
 
 	// Starting the goroutines for the trains.
-	// This should be changed eventually to have just one tick and then on tick call all the updates on goroutines.
-
 	for i := 0; i < len(trains); i++ {
 		go func(idx int) {
-			sub := tick.Subscribe()
+			sub := loopTick.Subscribe()
 			for range sub {
 				trains[idx].Update()
 			}
@@ -66,22 +59,11 @@ func main() {
 	}
 
 	// Drawing a map in the console of the trains and stations.
-	// for range tickerMap.C {
-	// 	fmt.Println(len(sts[0].Trains))
-	// 	fmt.Println(len(sts[1].Trains))
-	// 	fmt.Println(len(sts[2].Trains))
-	// 	fmt.Println(len(sts[3].Trains))
-	// 	fmt.Println(len(sts[4].Trains))
-	// 	go PrintMap(800, 600, sts, trains)
-	// }
-
-	// Starting the server for The New Metro Times.
-	baso := baso.NewBaso()
-	bs := baso.ListStations()
-	for _, st := range bs {
-		println(st.Name)
+	if DefaultConfig.TerminalMapEnabled {
+		StartMap(mapTick.C, stations, trains)
 	}
 
+	// Starting the server for The New Metro Times, Virtual World and CityServer.
 	go Reporter.ReporterServer()
 	go VirtualWorld.VirtualWorldServer()
 	City.CityServer()

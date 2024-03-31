@@ -2,10 +2,9 @@ module github.com/odin-software/metro
 
 go 1.22
 
-require (
-	github.com/VividCortex/multitick v1.0.0
-	github.com/labstack/echo/v4 v4.11.4
-)
+require github.com/labstack/echo/v4 v4.11.4
+
+require github.com/VividCortex/multitick v1.0.0
 
 require (
 	github.com/a-h/templ v0.2.543
