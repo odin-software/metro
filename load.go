@@ -80,6 +80,21 @@ func LoadTrains(
 	return result
 }
 
+func LoadEdges(cn *models.Network[models.Station]) {
+	db := baso.NewBaso()
+	edges := db.ListEdges()
+	for _, edge := range edges {
+		edgePoints := db.ListEdgePoints(edge.ID)
+		station1 := db.GetStationById(edge.Fromid)
+		station2 := db.GetStationById(edge.Toid)
+		eps := make([]models.Vector, 0)
+		for _, ep := range edgePoints {
+			eps = append(eps, models.NewVector(ep.X, ep.Y))
+		}
+		cn.InsertEdge(station1, station2, eps)
+	}
+}
+
 func getMakeByName(name string, makes []models.Make) (models.Make, error) {
 	for _, make := range makes {
 		if make.Name == name {
