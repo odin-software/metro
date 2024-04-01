@@ -33,8 +33,8 @@ RETURNING id;
 
 -- name: UpdateTrain :one
 UPDATE train
-SET name = ?, x = ?, y = ?, z = ?, currentId = ?, makeId = ?, lineId = ?
-WHERE id = ?
+SET name = ?, x = ?, y = ?, z = ?, currentId = ?, nextId = ?
+WHERE name = ?
 RETURNING id;
 
 -- name: DeleteTrain :exec

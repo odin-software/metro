@@ -20,8 +20,8 @@ type Train struct {
 	Position     Vector
 	velocity     Vector
 	acceleration Vector
-	current      Station
-	next         *Station
+	Current      Station
+	Next         *Station
 	forward      bool
 	destinations Line
 	q            Queue[Vector]
@@ -46,8 +46,8 @@ func NewTrain(
 		Position:     pos,
 		velocity:     NewVector(0.0, 0.0),
 		acceleration: NewVector(0.0, 0.0),
-		current:      initialStation,
-		next:         nil,
+		Current:      initialStation,
+		Next:         nil,
 		forward:      true,
 		destinations: line,
 		q:            Queue[Vector]{},
@@ -63,34 +63,34 @@ func (tr *Train) addToQueue(sts []Vector) {
 
 func (tr *Train) Update() {
 	// If there is no next station, assign one from the destinations queue
-	if tr.next == nil {
+	if tr.Next == nil {
 		if tr.forward {
 			for i, st := range tr.destinations.Stations {
-				if st.ID == tr.current.ID {
+				if st.ID == tr.Current.ID {
 					if i == len(tr.destinations.Stations)-1 {
 						tr.forward = false
-						tr.next = &tr.destinations.Stations[i-1]
+						tr.Next = &tr.destinations.Stations[i-1]
 						break
 					}
-					tr.next = &tr.destinations.Stations[i+1]
+					tr.Next = &tr.destinations.Stations[i+1]
 					break
 				}
 			}
 		} else {
 			for i, st := range tr.destinations.Stations {
-				if st.ID == tr.current.ID {
+				if st.ID == tr.Current.ID {
 					if i == 0 {
 						tr.forward = true
-						tr.next = &tr.destinations.Stations[i+1]
+						tr.Next = &tr.destinations.Stations[i+1]
 						break
 					}
-					tr.next = &tr.destinations.Stations[i-1]
+					tr.Next = &tr.destinations.Stations[i-1]
 					break
 				}
 			}
 		}
-		path, err := tr.central.AreConnected(tr.current, *tr.next)
-		path = append(path, tr.next.Position)
+		path, err := tr.central.AreConnected(tr.Current, *tr.Next)
+		path = append(path, tr.Next.Position)
 		if err != nil {
 			fmt.Println("Something went wrong")
 		}
@@ -115,11 +115,11 @@ func (tr *Train) Update() {
 		}
 
 		timeToNext := float64(ticks) / 60.0
-		fmt.Printf("%s is going to %s, it will arrive in %.1f seconds\n", tr.Name, tr.next.Name, timeToNext)
+		fmt.Printf("%s is going to %s, it will arrive in %.1f seconds\n", tr.Name, tr.Next.Name, timeToNext)
 
 		// Broadcast departure
 		msg := broadcast.ADMessage[Train]{
-			StationID: tr.current.ID,
+			StationID: tr.Current.ID,
 			Train:     *tr,
 		}
 		tr.departures <- msg
@@ -134,7 +134,7 @@ func (tr *Train) Update() {
 
 	direction := reach.SoftSub(tr.Position)
 	mag := direction.Magnitude()
-	where := tr.current.Position.Dist(reach) / 8
+	where := tr.Current.Position.Dist(reach) / 8
 
 	if mag < where {
 		m := Map(mag, 0, where, 0, tr.make.AccMag)
@@ -153,13 +153,13 @@ func (tr *Train) Update() {
 		tr.q.DQ()
 		tr.velocity.Scale(0)
 		if tr.q.Size() == 0 {
-			tr.current = *tr.next
-			tr.next = nil
-			fmt.Printf("%s arrived at: %s\n", tr.Name, tr.current.Name)
+			tr.Current = *tr.Next
+			tr.Next = nil
+			fmt.Printf("%s arrived at: %s\n", tr.Name, tr.Current.Name)
 
 			// Broadcast arrival
 			msg := broadcast.ADMessage[Train]{
-				StationID: tr.current.ID,
+				StationID: tr.Current.ID,
 				Train:     *tr,
 			}
 			tr.arrivals <- msg
