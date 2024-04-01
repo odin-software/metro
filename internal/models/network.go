@@ -34,7 +34,7 @@ func (gr *Network[T]) InsertVertex(vertex T) error {
 }
 
 // Works like InsertVertex, but for a slice of vertices.
-func (gr *Network[T]) InsertVertices(vertices []T) error {
+func (gr *Network[T]) InsertVertices2(vertices []T) error {
 	for _, v := range vertices {
 		err := gr.InsertVertex(v)
 		if err != nil {
@@ -44,7 +44,7 @@ func (gr *Network[T]) InsertVertices(vertices []T) error {
 	return nil
 }
 
-func (gr *Network[T]) InsertVertices2(vertices []*T) error {
+func (gr *Network[T]) InsertVertices(vertices []*T) error {
 	for _, v := range vertices {
 		err := gr.InsertVertex(*v)
 		if err != nil {

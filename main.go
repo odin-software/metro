@@ -29,11 +29,10 @@ func main() {
 	// Creating the city graph.
 	cityNetwork := models.NewNetwork(StationHashFunction)
 
-	// Loading stations and lines from the database.
+	// Loading stations, lines, edges from the database.
 	stations := LoadStations(bcArr, bcDep)
 	lines := LoadLines()
-
-	cityNetwork.InsertVertices2(stations)
+	cityNetwork.InsertVertices(stations)
 	LoadEdges(&cityNetwork)
 
 	// Creating the train with lines and channels to communicate.
