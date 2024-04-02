@@ -4,6 +4,7 @@ import (
 	"context"
 	"time"
 
+	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/broadcast"
 	"github.com/odin-software/metro/internal/models"
 
@@ -15,9 +16,9 @@ import (
 
 func main() {
 	// Setup
-	loopTick := multitick.NewTicker(DefaultConfig.LoopDuration, DefaultConfig.LoopDurationOffset)
-	reflexTick := time.NewTicker(DefaultConfig.ReflexDuration)
-	mapTick := time.NewTicker(DefaultConfig.TerminalMapDuration)
+	loopTick := multitick.NewTicker(control.DefaultConfig.LoopDuration, control.DefaultConfig.LoopDurationOffset)
+	reflexTick := time.NewTicker(control.DefaultConfig.ReflexDuration)
+	mapTick := time.NewTicker(control.DefaultConfig.TerminalMapDuration)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
 
@@ -28,16 +29,16 @@ func main() {
 	bcDep := broadcast.NewBroadcastServer(ctx, departures)
 
 	// Creating the city graph.
-	cityNetwork := models.NewNetwork(StationHashFunction)
+	cityNetwork := models.NewNetwork(control.StationHashFunction)
 
 	// Loading stations, lines, edges from the database.
-	stations := LoadStations(bcArr, bcDep)
-	lines := LoadLines()
+	stations := control.LoadStations(bcArr, bcDep)
+	lines := control.LoadLines()
 	cityNetwork.InsertVertices(stations)
-	LoadEdges(&cityNetwork)
+	control.LoadEdges(&cityNetwork)
 
 	// Creating the train with lines and channels to communicate.
-	trains := LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
+	trains := control.LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
 
 	// Starting the goroutines for the trains.
 	for i := 0; i < len(trains); i++ {
@@ -50,14 +51,14 @@ func main() {
 	}
 
 	// Drawing a map in the console of the trains and stations.
-	if DefaultConfig.TerminalMapEnabled {
+	if control.DefaultConfig.TerminalMapEnabled {
 		StartMap(mapTick.C, stations, trains)
 	}
 
 	// Reflect what's on memory on the DB.
 	go func() {
 		for range reflexTick.C {
-			DumpTrainsData(trains)
+			control.DumpTrainsData(trains)
 		}
 	}()
 
@@ -66,3 +67,5 @@ func main() {
 	go VirtualWorld.VirtualWorldServer()
 	City.CityServer()
 }
+
+func runTrains()
