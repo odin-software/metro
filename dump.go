@@ -8,6 +8,10 @@ import (
 func DumpTrainsData(trains []models.Train) {
 	bs := baso.NewBaso()
 	for _, train := range trains {
-		bs.UpdateTrain(train.Name, train.Position.X, train.Position.Y, 0.0, train.Current.ID, train.Next.ID)
+		if train.Next != nil {
+			bs.UpdateTrain(train.Name, train.Position.X, train.Position.Y, 0.0, train.Current.ID, train.Next.ID)
+		} else {
+			bs.UpdateTrainNoNext(train.Name, train.Position.X, train.Position.Y, 0.0, train.Current.ID)
+		}
 	}
 }
