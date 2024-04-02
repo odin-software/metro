@@ -12,6 +12,7 @@ type Config struct {
 	LoopDurationOffset  time.Duration
 	PortCity            int
 	PortReporter        int
+	ReflexDuration      time.Duration
 	TerminalMapDuration time.Duration
 	TerminalMapEnabled  bool
 }
@@ -21,6 +22,7 @@ var DefaultConfig = Config{
 	LoopDurationOffset:  -1 * time.Millisecond,
 	PortCity:            2221,
 	PortReporter:        2222,
+	ReflexDuration:      3000 * time.Millisecond,
 	TerminalMapDuration: 800 * time.Millisecond,
 	TerminalMapEnabled:  false,
 }

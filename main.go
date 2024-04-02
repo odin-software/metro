@@ -16,6 +16,7 @@ import (
 func main() {
 	// Setup
 	loopTick := multitick.NewTicker(DefaultConfig.LoopDuration, DefaultConfig.LoopDurationOffset)
+	reflexTick := time.NewTicker(DefaultConfig.ReflexDuration)
 	mapTick := time.NewTicker(DefaultConfig.TerminalMapDuration)
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -52,6 +53,13 @@ func main() {
 	if DefaultConfig.TerminalMapEnabled {
 		StartMap(mapTick.C, stations, trains)
 	}
+
+	// Reflect what's on memory on the DB.
+	go func() {
+		for range reflexTick.C {
+			DumpTrainsData(trains)
+		}
+	}()
 
 	// Starting the server for The New Metro Times, Virtual World and CityServer.
 	go Reporter.ReporterServer()

@@ -257,8 +257,8 @@ func (q *Queries) SetTrainNext(ctx context.Context, arg SetTrainNextParams) erro
 
 const updateTrain = `-- name: UpdateTrain :one
 UPDATE train
-SET name = ?, x = ?, y = ?, z = ?, currentId = ?, makeId = ?, lineId = ?
-WHERE id = ?
+SET name = ?, x = ?, y = ?, z = ?, currentId = ?, nextId = ?
+WHERE name = ?
 RETURNING id
 `
 
@@ -268,9 +268,8 @@ type UpdateTrainParams struct {
 	Y         float64
 	Z         float64
 	Currentid sql.NullInt64
-	Makeid    sql.NullInt64
-	Lineid    sql.NullInt64
-	ID        int64
+	Nextid    sql.NullInt64
+	Name_2    string
 }
 
 func (q *Queries) UpdateTrain(ctx context.Context, arg UpdateTrainParams) (int64, error) {
@@ -280,9 +279,8 @@ func (q *Queries) UpdateTrain(ctx context.Context, arg UpdateTrainParams) (int64
 		arg.Y,
 		arg.Z,
 		arg.Currentid,
-		arg.Makeid,
-		arg.Lineid,
-		arg.ID,
+		arg.Nextid,
+		arg.Name_2,
 	)
 	var id int64
 	err := row.Scan(&id)
