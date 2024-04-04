@@ -31,6 +31,6 @@ func Server() {
 		return Render(c, http.StatusOK, WorldEditor())
 	})
 
-	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)
+	port := fmt.Sprintf(":%d", control.DefaultConfig.PortVirtual)
 	server.Logger.Fatal(server.Start(port))
 }
