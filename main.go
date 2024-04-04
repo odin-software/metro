@@ -16,7 +16,10 @@ import (
 
 func main() {
 	// Setup
-	loopTick := sematick.NewTicker(control.DefaultConfig.LoopDuration, 1)
+	loopTick := sematick.NewTicker(
+		control.DefaultConfig.LoopDuration,
+		control.DefaultConfig.LoopStartingState,
+	)
 	reflexTick := time.NewTicker(control.DefaultConfig.ReflexDuration)
 	mapTick := time.NewTicker(control.DefaultConfig.TerminalMapDuration)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -65,5 +68,5 @@ func main() {
 	// Starting the server for The New Metro Times, Virtual World and CityServer.
 	go Reporter.ReporterServer()
 	go VirtualWorld.VirtualWorldServer()
-	City.CityServer(loopTick)
+	City.CityServer()
 }

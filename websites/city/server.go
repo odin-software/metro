@@ -1,12 +1,13 @@
 package City
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
-	"github.com/odin-software/metro/internal/sematick"
+	"github.com/odin-software/metro/control"
 )
 
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {
@@ -15,7 +16,7 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	return t.Render(ctx.Request().Context(), ctx.Response().Writer)
 }
 
-func CityServer(ticker *sematick.Ticker) {
+func CityServer() {
 	server := echo.New()
 	server.Use(middleware.Logger())
 
@@ -26,17 +27,10 @@ func CityServer(ticker *sematick.Ticker) {
 	server.GET("/", func(c echo.Context) error {
 		return Render(c, http.StatusOK, Index())
 	})
-	server.GET("/pause", func(c echo.Context) error {
-		ticker.Pause()
-		return nil
-	})
-	server.GET("/resume", func(c echo.Context) error {
-		ticker.Resume()
-		return nil
-	})
 	server.GET("/editor", func(c echo.Context) error {
 		return Render(c, http.StatusOK, Editor())
 	})
 
-	server.Logger.Fatal(server.Start(":2221"))
+	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)
+	server.Logger.Fatal(server.Start(port))
 }

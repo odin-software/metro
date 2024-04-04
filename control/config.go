@@ -10,6 +10,7 @@ import (
 type Config struct {
 	LoopDuration        time.Duration
 	LoopDurationOffset  time.Duration
+	LoopStartingState   int
 	PortCity            int
 	PortReporter        int
 	ReflexDuration      time.Duration
@@ -20,6 +21,7 @@ type Config struct {
 var DefaultConfig = Config{
 	LoopDuration:        20 * time.Millisecond,
 	LoopDurationOffset:  -1 * time.Millisecond,
+	LoopStartingState:   1,
 	PortCity:            2221,
 	PortReporter:        2222,
 	ReflexDuration:      3000 * time.Millisecond,
