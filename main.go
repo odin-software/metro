@@ -9,9 +9,10 @@ import (
 	"github.com/odin-software/metro/internal/models"
 	"github.com/odin-software/metro/internal/sematick"
 
-	City "github.com/odin-software/metro/websites/city"
-	Reporter "github.com/odin-software/metro/websites/reporter"
-	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
+	"github.com/odin-software/metro/websites/city"
+	"github.com/odin-software/metro/websites/events"
+	"github.com/odin-software/metro/websites/reporter"
+	"github.com/odin-software/metro/websites/virtual-world"
 )
 
 func main() {
@@ -66,7 +67,8 @@ func main() {
 	}()
 
 	// Starting the server for The New Metro Times, Virtual World and CityServer.
-	go Reporter.ReporterServer()
-	go VirtualWorld.VirtualWorldServer()
-	City.CityServer()
+	go reporter.Server()
+	go virtual.Server()
+	go events.Server()
+	city.Server()
 }

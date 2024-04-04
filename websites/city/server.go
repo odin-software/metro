@@ -1,4 +1,4 @@
-package City
+package city
 
 import (
 	"fmt"
@@ -16,7 +16,7 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	return t.Render(ctx.Request().Context(), ctx.Response().Writer)
 }
 
-func CityServer() {
+func Server() {
 	server := echo.New()
 	server.Use(middleware.Logger())
 
