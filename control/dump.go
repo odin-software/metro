@@ -1,4 +1,4 @@
-package main
+package control
 
 import (
 	"github.com/odin-software/metro/internal/baso"

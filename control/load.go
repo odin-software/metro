@@ -1,4 +1,4 @@
-package main
+package control
 
 import (
 	"errors"
@@ -93,6 +93,16 @@ func LoadEdges(cn *models.Network[models.Station]) {
 		}
 		cn.InsertEdge(station1, station2, eps)
 	}
+}
+
+func LoadEverything(
+	arrs broadcast.BroadcastServer[broadcast.ADMessage[models.Train]],
+	deps broadcast.BroadcastServer[broadcast.ADMessage[models.Train]],
+	cn *models.Network[models.Station],
+) {
+	// lines := LoadLines()
+	// stations := LoadStations(arrs, deps)
+	LoadEdges(cn)
 }
 
 func getMakeByName(name string, makes []models.Make) (models.Make, error) {

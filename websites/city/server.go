@@ -1,11 +1,13 @@
 package City
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/odin-software/metro/control"
 )
 
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {
@@ -29,5 +31,6 @@ func CityServer() {
 		return Render(c, http.StatusOK, Editor())
 	})
 
-	server.Logger.Fatal(server.Start(":2221"))
+	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)
+	server.Logger.Fatal(server.Start(port))
 }

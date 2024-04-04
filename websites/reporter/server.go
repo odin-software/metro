@@ -1,12 +1,14 @@
 package Reporter
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"strconv"
 
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/odin-software/metro/control"
 )
 
 type Templates struct {
@@ -98,20 +100,20 @@ func newPage() Page {
 }
 
 func ReporterServer() {
-	e := echo.New()
-	e.Use(middleware.Logger())
+	server := echo.New()
+	server.Use(middleware.Logger())
 
-	e.Renderer = newTemplate()
+	server.Renderer = newTemplate()
 	page := newPage()
 
-	e.Static("websites/reporter/images", "images")
-	e.Static("websites/reporter/css", "css")
+	server.Static("websites/reporter/images", "images")
+	server.Static("websites/reporter/css", "css")
 
-	e.GET("/", func(c echo.Context) error {
+	server.GET("/", func(c echo.Context) error {
 		return c.Render(200, "index", page)
 	})
 
-	e.POST("/contacts", func(c echo.Context) error {
+	server.POST("/contacts", func(c echo.Context) error {
 		name := c.FormValue("name")
 		email := c.FormValue("email")
 
@@ -131,7 +133,7 @@ func ReporterServer() {
 		return c.Render(200, "oob-contact", contact)
 	})
 
-	e.DELETE("/contacts/:id", func(c echo.Context) error {
+	server.DELETE("/contacts/:id", func(c echo.Context) error {
 		idStr := c.Param("id")
 		id, err := strconv.Atoi(idStr)
 		if err != nil {
@@ -148,5 +150,6 @@ func ReporterServer() {
 		return c.NoContent(200)
 	})
 
-	e.Logger.Fatal(e.Start(":4440"))
+	port := fmt.Sprintf(":%d", control.DefaultConfig.PortReporter)
+	server.Logger.Fatal(server.Start(port))
 }
