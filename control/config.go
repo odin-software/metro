@@ -32,7 +32,7 @@ var DefaultConfig = Config{
 	ReflexDuration:      3000 * time.Millisecond,
 	WebSocketKey:        "metro-socket-key",
 	TerminalMapDuration: 800 * time.Millisecond,
-	TerminalMapEnabled:  false,
+	TerminalMapEnabled:  true,
 }
 
 var StationHashFunction = func(station models.Station) string {

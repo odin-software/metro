@@ -56,7 +56,7 @@ func main() {
 
 	// Drawing a map in the console of the trains and stations.
 	if control.DefaultConfig.TerminalMapEnabled {
-		StartMap(mapTick.C, stations, trains)
+		go StartMap(mapTick.C, stations, trains)
 	}
 
 	// Reflect what's on memory on the DB.
