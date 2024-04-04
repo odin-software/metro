@@ -7,8 +7,8 @@ import (
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/broadcast"
 	"github.com/odin-software/metro/internal/models"
+	"github.com/odin-software/metro/internal/sematick"
 
-	"github.com/VividCortex/multitick"
 	City "github.com/odin-software/metro/websites/city"
 	Reporter "github.com/odin-software/metro/websites/reporter"
 	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
@@ -16,7 +16,7 @@ import (
 
 func main() {
 	// Setup
-	loopTick := multitick.NewTicker(control.DefaultConfig.LoopDuration, control.DefaultConfig.LoopDurationOffset)
+	loopTick := sematick.NewTicker(control.DefaultConfig.LoopDuration, 1)
 	reflexTick := time.NewTicker(control.DefaultConfig.ReflexDuration)
 	mapTick := time.NewTicker(control.DefaultConfig.TerminalMapDuration)
 	ctx, cancel := context.WithCancel(context.Background())
@@ -65,7 +65,5 @@ func main() {
 	// Starting the server for The New Metro Times, Virtual World and CityServer.
 	go Reporter.ReporterServer()
 	go VirtualWorld.VirtualWorldServer()
-	City.CityServer()
+	City.CityServer(loopTick)
 }
-
-func runTrains()
