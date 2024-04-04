@@ -103,7 +103,6 @@ func LoadEverything(
 	// lines := LoadLines()
 	// stations := LoadStations(arrs, deps)
 	LoadEdges(cn)
-
 }
 
 func getMakeByName(name string, makes []models.Make) (models.Make, error) {
