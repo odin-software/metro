@@ -1,4 +1,4 @@
-// Sematick is a ticker that sends a single message at specified intervals
+// Package sematick is a ticker that sends a single message at specified intervals
 // to every subscribed channel. This ticker can be stopped, paused or resumed.
 package sematick
 
