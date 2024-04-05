@@ -18,6 +18,7 @@ include_dir = [
   "views",
   "pkg",
   "internal",
+  "control",
   "websites/city",
   "websites/events",
   "websites/reporter",

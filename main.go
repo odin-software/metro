@@ -69,6 +69,6 @@ func main() {
 	// Starting the server for The New Metro Times, Virtual World and CityServer.
 	go reporter.Server()
 	go virtual.Server()
-	go events.Server()
+	go events.Main()
 	city.Server()
 }
