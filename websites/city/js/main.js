@@ -17,7 +17,7 @@ canvas.addEventListener('mousemove', (event) => {
   mouse.y = event.clientY;
 });
 
-const ws = new WebSocket("ws://localhost:2223/wso");
+const ws = new WebSocket("ws://localhost:2223/trains");
 ws.onmessage = (ev) => {
   console.log("msg from server -> ", ev.data)
 };

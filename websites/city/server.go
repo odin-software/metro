@@ -18,7 +18,11 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 
 func Server() {
 	server := echo.New()
-	server.Use(middleware.Logger())
+	server.Use(middleware.LoggerWithConfig(
+		middleware.LoggerConfig{
+			Format: control.LoggingFormat,
+		},
+	))
 
 	server.Static("/ce-js", "websites/city/js")
 	server.Static("/ce-css", "websites/city/css")
