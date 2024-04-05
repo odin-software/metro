@@ -1,4 +1,4 @@
-package Reporter
+package reporter
 
 import (
 	"fmt"
@@ -99,7 +99,7 @@ func newPage() Page {
 	}
 }
 
-func ReporterServer() {
+func Server() {
 	server := echo.New()
 	server.Use(middleware.Logger())
 

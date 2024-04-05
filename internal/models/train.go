@@ -114,8 +114,8 @@ func (tr *Train) Update() {
 			vc.Scale(0)
 		}
 
-		timeToNext := float64(ticks) / 60.0
-		fmt.Printf("%s is going to %s, it will arrive in %.1f seconds\n", tr.Name, tr.Next.Name, timeToNext)
+		// timeToNext := float64(ticks) / 60.0
+		// fmt.Printf("%s is going to %s, it will arrive in %.1f seconds\n", tr.Name, tr.Next.Name, timeToNext)
 
 		// Broadcast departure
 		msg := broadcast.ADMessage[Train]{
@@ -155,7 +155,9 @@ func (tr *Train) Update() {
 		if tr.q.Size() == 0 {
 			tr.Current = *tr.Next
 			tr.Next = nil
-			fmt.Printf("%s arrived at: %s\n", tr.Name, tr.Current.Name)
+			// if control.DefaultConfig.TrainLogs {
+			// 	fmt.Printf("%s arrived at: %s\n", tr.Name, tr.Current.Name)
+			// }
 
 			// Broadcast arrival
 			msg := broadcast.ADMessage[Train]{

@@ -3,10 +3,10 @@ package models
 import "github.com/odin-software/metro/internal/broadcast"
 
 type Station struct {
-	ID         int64
-	Name       string
-	Position   Vector
-	Trains     []Train
+	ID         int64   `json:"id"`
+	Name       string  `json:"name"`
+	Position   Vector  `json:"position"`
+	Trains     []Train `json:"trains"`
 	arrivals   <-chan broadcast.ADMessage[Train]
 	departures <-chan broadcast.ADMessage[Train]
 }

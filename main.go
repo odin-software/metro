@@ -9,9 +9,10 @@ import (
 	"github.com/odin-software/metro/internal/models"
 	"github.com/odin-software/metro/internal/sematick"
 
-	City "github.com/odin-software/metro/websites/city"
-	Reporter "github.com/odin-software/metro/websites/reporter"
-	VirtualWorld "github.com/odin-software/metro/websites/virtual-world"
+	"github.com/odin-software/metro/websites/city"
+	"github.com/odin-software/metro/websites/events"
+	"github.com/odin-software/metro/websites/reporter"
+	"github.com/odin-software/metro/websites/virtual-world"
 )
 
 func main() {
@@ -55,7 +56,7 @@ func main() {
 
 	// Drawing a map in the console of the trains and stations.
 	if control.DefaultConfig.TerminalMapEnabled {
-		StartMap(mapTick.C, stations, trains)
+		go StartMap(mapTick.C, stations, trains)
 	}
 
 	// Reflect what's on memory on the DB.
@@ -66,7 +67,8 @@ func main() {
 	}()
 
 	// Starting the server for The New Metro Times, Virtual World and CityServer.
-	go Reporter.ReporterServer()
-	go VirtualWorld.VirtualWorldServer()
-	City.CityServer()
+	go reporter.Server()
+	go virtual.Server()
+	go events.Main()
+	city.Server()
 }

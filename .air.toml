@@ -18,9 +18,11 @@ include_dir = [
   "views",
   "pkg",
   "internal",
-  "websites/two-d",
-  "websites/virtual-world",
+  "control",
   "websites/city",
+  "websites/events",
+  "websites/reporter",
+  "websites/virtual-world",
 ]
 include_ext = ["go", "html", "css", "js"]
 include_file = ["reporter.go", "main.go"]

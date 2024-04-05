@@ -11,10 +11,23 @@ const graph = world.graph;
 
 const viewPort = new Viewport(canvas, world.zoom, world.offset);
 const mouse = new Point(0, 0);
+let trains = [];
 
 canvas.addEventListener('mousemove', (event) => {
   mouse.x = event.clientX;
   mouse.y = event.clientY;
+});
+
+const ws = new WebSocket("ws://localhost:2223/trains");
+ws.onmessage = (ev) => {
+  parsed = JSON.parse(ev.data);
+  trains = parsed;
+};
+
+let stations;
+
+fetch("http://localhost:2221/stations").then(res => res.json()).then(data => {
+  stations = data;
 });
 
 animate();
@@ -24,6 +37,16 @@ function animate() {
   const gm = viewPort.getMouseFromPoint(mouse);
   world.update(ctx, gm);
   world.draw(ctx);
+  if (stations) {
+    stations.forEach(st => {
+      p = new Point(st.position.x, st.position.y)
+      p.draw(ctx, { size: 14, color: "white" })
+    });
+  }
+  trains.forEach(tr => {
+    p = new Point(tr.x, tr.y)
+    p.draw(ctx, { size: 30, color: "white" })
+  });
 
   requestAnimationFrame(animate);
 }

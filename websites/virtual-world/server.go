@@ -1,11 +1,13 @@
-package VirtualWorld
+package virtual
 
 import (
+	"fmt"
 	"net/http"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/odin-software/metro/control"
 )
 
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {
@@ -14,7 +16,7 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	return t.Render(ctx.Request().Context(), ctx.Response().Writer)
 }
 
-func VirtualWorldServer() {
+func Server() {
 	server := echo.New()
 	server.Use(middleware.Logger())
 
@@ -29,5 +31,6 @@ func VirtualWorldServer() {
 		return Render(c, http.StatusOK, WorldEditor())
 	})
 
-	server.Logger.Fatal(server.Start(":2445"))
+	port := fmt.Sprintf(":%d", control.DefaultConfig.PortVirtual)
+	server.Logger.Fatal(server.Start(port))
 }

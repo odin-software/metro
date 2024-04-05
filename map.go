@@ -47,7 +47,6 @@ func PrintMap(width, height int, sts []*models.Station, trs []models.Train) {
 		}
 		fmt.Println()
 	}
-	fmt.Println(len(sts[1].Trains))
 }
 
 func ClearScreen() {
