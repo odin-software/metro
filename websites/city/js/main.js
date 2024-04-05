@@ -22,8 +22,13 @@ const ws = new WebSocket("ws://localhost:2223/trains");
 ws.onmessage = (ev) => {
   parsed = JSON.parse(ev.data);
   trains = parsed;
-  console.log("msg from server -> ", parsed);
 };
+
+let stations;
+
+fetch("http://localhost:2221/stations").then(res => res.json()).then(data => {
+  stations = data;
+});
 
 animate();
 
@@ -32,11 +37,16 @@ function animate() {
   const gm = viewPort.getMouseFromPoint(mouse);
   world.update(ctx, gm);
   world.draw(ctx);
+  if (stations) {
+    stations.forEach(st => {
+      p = new Point(st.position.x, st.position.y)
+      p.draw(ctx, { size: 14, color: "white" })
+    });
+  }
   trains.forEach(tr => {
     p = new Point(tr.x, tr.y)
-    // console.log(p)
-    p.draw(ctx, { size: 30})
-  })
+    p.draw(ctx, { size: 30, color: "white" })
+  });
 
   requestAnimationFrame(animate);
 }

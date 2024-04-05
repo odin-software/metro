@@ -77,7 +77,6 @@ class Viewport {
       this.drag.end = this.getMouse(e);
       this.drag.offset = Point.sub(this.drag.end, this.drag.start);
     }
-    console.log(this.center)
   }
 
   #onMouseUp(e) {

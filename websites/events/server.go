@@ -7,6 +7,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/baso"
 	"golang.org/x/net/websocket"
 )
@@ -41,7 +42,7 @@ func (s *Server) handleTrains(ws *websocket.Conn) {
 			fmt.Println(err)
 		}
 		ws.Write([]byte(payload))
-		time.Sleep(time.Second * 1)
+		time.Sleep(control.DefaultConfig.WSTrainDuration)
 	}
 }
 

@@ -16,10 +16,10 @@ type Config struct {
 	PortReporter        int
 	PortVirtual         int
 	ReflexDuration      time.Duration
-	WebSocketKey        string
 	TerminalMapDuration time.Duration
 	TerminalMapEnabled  bool
 	TrainLogs           bool
+	WSTrainDuration     time.Duration
 }
 
 var DefaultConfig = Config{
@@ -30,11 +30,11 @@ var DefaultConfig = Config{
 	PortEvents:          2223,
 	PortReporter:        2222,
 	PortVirtual:         2224,
-	ReflexDuration:      3000 * time.Millisecond,
-	WebSocketKey:        "metro-socket-key",
+	ReflexDuration:      200 * time.Millisecond,
 	TerminalMapDuration: 800 * time.Millisecond,
 	TerminalMapEnabled:  false,
 	TrainLogs:           false,
+	WSTrainDuration:     200 * time.Millisecond,
 }
 
 var StationHashFunction = func(station models.Station) string {
