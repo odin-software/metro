@@ -5,6 +5,7 @@ import (
 	"io"
 	"net/http"
 	"sync"
+	"time"
 
 	"github.com/odin-software/metro/control"
 	"golang.org/x/net/websocket"
@@ -18,6 +19,16 @@ type Server struct {
 func NewServer() *Server {
 	return &Server{
 		conns: make(map[*websocket.Conn]bool),
+	}
+}
+
+func (s *Server) handleWSOrderbook(ws *websocket.Conn) {
+	fmt.Println("new incoming connection from client to orderbook feed:", ws.RemoteAddr())
+
+	for {
+		payload := fmt.Sprintf("orderbook data -> %d\n", time.Now().UnixNano())
+		ws.Write([]byte(payload))
+		time.Sleep(time.Second * 1)
 	}
 }
 
@@ -44,17 +55,32 @@ func (s *Server) readLoop(ws *websocket.Conn) {
 		}
 
 		msg := buf[:n]
-		fmt.Println(string(msg))
-		ws.Write([]byte("thank you for the msg!"))
+		s.broadcast(msg)
+		// fmt.Println(string(msg))
+		// ws.Write([]byte("thank you for the msg!"))
 	}
 }
 
-const WSHeaderKey = "Sec-WebSocket-Key"
-const MagicString = "258EAFA5-E914-47DA-95CA-C5AB0DC85B11"
+func (s *Server) broadcast(b []byte) {
+	s.conmux.Lock()
+	defer s.conmux.Unlock()
+	for ws := range s.conns {
+		go func(ws *websocket.Conn) {
+			if _, err := ws.Write(b); err != nil {
+				fmt.Println("write error: ", err)
+			}
+		}(ws)
+	}
+}
 
 func Main() {
 	server := NewServer()
+	router := http.NewServeMux()
+
+	router.Handle("GET /wso", websocket.Handler(server.handleWSOrderbook))
+
 	http.Handle("/ws", websocket.Handler(server.handleWS))
+
 	port := fmt.Sprintf(":%d", control.DefaultConfig.PortEvents)
-	http.ListenAndServe(port, nil)
+	http.ListenAndServe(port, router)
 }

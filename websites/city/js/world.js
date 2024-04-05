@@ -17,7 +17,6 @@ class World {
   update(ctx, viewPoint) {
     for (const point of this.graph.points) {
       if (point.distanceTo(viewPoint) < 60) {
-        console.log("here")
         ctx.fillStyle = "white";
         ctx.font = "48px Arial";
         ctx.fillText(point.name, point.x - 140, point.y - 50);
