@@ -8,13 +8,13 @@ import (
 )
 
 type TrainsWithIds struct {
-	Name             string
-	X                float64
-	Y                float64
-	Z                float64
-	CurrentStationId int64
-	LineName         string
-	MakeName         string
+	Name             string  `json:"name"`
+	X                float64 `json:"x"`
+	Y                float64 `json:"y"`
+	Z                float64 `json:"z"`
+	CurrentStationId int64   `json:"currentId"`
+	LineName         string  `json:"line"`
+	MakeName         string  `json:"make"`
 }
 
 func (bs *Baso) ListTrainsFull() []TrainsWithIds {

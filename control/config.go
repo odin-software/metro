@@ -19,6 +19,7 @@ type Config struct {
 	WebSocketKey        string
 	TerminalMapDuration time.Duration
 	TerminalMapEnabled  bool
+	TrainLogs           bool
 }
 
 var DefaultConfig = Config{
@@ -33,6 +34,7 @@ var DefaultConfig = Config{
 	WebSocketKey:        "metro-socket-key",
 	TerminalMapDuration: 800 * time.Millisecond,
 	TerminalMapEnabled:  false,
+	TrainLogs:           false,
 }
 
 var StationHashFunction = func(station models.Station) string {

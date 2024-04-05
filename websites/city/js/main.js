@@ -19,7 +19,8 @@ canvas.addEventListener('mousemove', (event) => {
 
 const ws = new WebSocket("ws://localhost:2223/trains");
 ws.onmessage = (ev) => {
-  console.log("msg from server -> ", ev.data)
+  parsed = JSON.parse(ev.data);
+  console.log("msg from server -> ", parsed);
 };
 
 animate();
