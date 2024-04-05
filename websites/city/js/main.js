@@ -11,6 +11,7 @@ const graph = world.graph;
 
 const viewPort = new Viewport(canvas, world.zoom, world.offset);
 const mouse = new Point(0, 0);
+let trains = [];
 
 canvas.addEventListener('mousemove', (event) => {
   mouse.x = event.clientX;
@@ -20,6 +21,7 @@ canvas.addEventListener('mousemove', (event) => {
 const ws = new WebSocket("ws://localhost:2223/trains");
 ws.onmessage = (ev) => {
   parsed = JSON.parse(ev.data);
+  trains = parsed;
   console.log("msg from server -> ", parsed);
 };
 
@@ -30,6 +32,11 @@ function animate() {
   const gm = viewPort.getMouseFromPoint(mouse);
   world.update(ctx, gm);
   world.draw(ctx);
+  trains.forEach(tr => {
+    p = new Point(tr.x, tr.y)
+    // console.log(p)
+    p.draw(ctx, { size: 30})
+  })
 
   requestAnimationFrame(animate);
 }

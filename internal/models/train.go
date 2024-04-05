@@ -39,7 +39,6 @@ func NewTrain(
 	central *Network[Station],
 	a chan broadcast.ADMessage[Train],
 	d chan broadcast.ADMessage[Train],
-	logging bool,
 ) Train {
 	return Train{
 		Name:         name,
