@@ -57,38 +57,67 @@ func NewTrain(
 	}
 }
 
+func NewMake(name string, description string, accMag float64, topSpeed float64) Make {
+	return Make{
+		Name:        name,
+		Description: description,
+		AccMag:      accMag,
+		TopSpeed:    topSpeed,
+	}
+}
+
 func (tr *Train) addToQueue(sts []Vector) {
 	tr.q.QList(sts)
 }
 
-func (tr *Train) Update() {
+func (tr *Train) broadcastArrival(stationId int64) {
+	msg := broadcast.ADMessage[Train]{
+		StationID: stationId,
+		Train:     *tr,
+	}
+	tr.arrivals <- msg
+}
+
+func (tr *Train) broadcastDeparture(stationId int64) {
+	msg := broadcast.ADMessage[Train]{
+		StationID: stationId,
+		Train:     *tr,
+	}
+	tr.departures <- msg
+}
+
+func (tr *Train) getNextFromDestinations() *Station {
+	var next *Station
+	for i, st := range tr.destinations.Stations {
+		if st.ID == tr.Current.ID {
+			if tr.forward && i == len(tr.destinations.Stations)-1 {
+				tr.forward = false
+				next = &tr.destinations.Stations[i-1]
+				break
+			}
+			if !tr.forward && i == 0 {
+				tr.forward = true
+				next = &tr.destinations.Stations[i+1]
+				break
+			}
+			if tr.forward {
+				next = &tr.destinations.Stations[i+1]
+				break
+			}
+			next = &tr.destinations.Stations[i-1]
+			break
+		}
+	}
+
+	return next
+}
+
+func (tr *Train) Tick() {
 	// If there is no next station, assign one from the destinations queue
 	if tr.Next == nil {
-		if tr.forward {
-			for i, st := range tr.destinations.Stations {
-				if st.ID == tr.Current.ID {
-					if i == len(tr.destinations.Stations)-1 {
-						tr.forward = false
-						tr.Next = &tr.destinations.Stations[i-1]
-						break
-					}
-					tr.Next = &tr.destinations.Stations[i+1]
-					break
-				}
-			}
-		} else {
-			for i, st := range tr.destinations.Stations {
-				if st.ID == tr.Current.ID {
-					if i == 0 {
-						tr.forward = true
-						tr.Next = &tr.destinations.Stations[i+1]
-						break
-					}
-					tr.Next = &tr.destinations.Stations[i-1]
-					break
-				}
-			}
-		}
+		tr.Next = tr.getNextFromDestinations()
+
+		// Adding points between the current station and the next one.
 		path, err := tr.central.AreConnected(tr.Current, *tr.Next)
 		path = append(path, tr.Next.Position)
 		if err != nil {
@@ -96,33 +125,7 @@ func (tr *Train) Update() {
 		}
 		tr.addToQueue(path)
 
-		// Calculate time to the next station
-		// This needs to be updated to check for arrival.
-		// Maybe later I could come up with an equation.
-		pc := tr.Position.Copy()
-		vc := NewVector(0, 0)
-		ticks := 0
-		for i := 0; i < len(path); i++ {
-			for pc.Dist(path[i]) >= 1 {
-				ticks++
-				d := path[i].SoftSub(pc)
-				d.SetMag(tr.make.AccMag)
-				vc.Add(d)
-				vc.Limit(tr.make.TopSpeed)
-				pc.Add(vc)
-			}
-			vc.Scale(0)
-		}
-
-		// timeToNext := float64(ticks) / 60.0
-		// fmt.Printf("%s is going to %s, it will arrive in %.1f seconds\n", tr.Name, tr.Next.Name, timeToNext)
-
-		// Broadcast departure
-		msg := broadcast.ADMessage[Train]{
-			StationID: tr.Current.ID,
-			Train:     *tr,
-		}
-		tr.departures <- msg
+		tr.broadcastDeparture(tr.Current.ID)
 	}
 
 	// Update velocity based of direction of next location
@@ -136,6 +139,7 @@ func (tr *Train) Update() {
 	mag := direction.Magnitude()
 	where := tr.Current.Position.Dist(reach) / 8
 
+	// Slow down if we are close.
 	if mag < where {
 		m := Map(mag, 0, where, 0, tr.make.AccMag)
 		direction.SetMag(m)
@@ -155,28 +159,12 @@ func (tr *Train) Update() {
 		if tr.q.Size() == 0 {
 			tr.Current = *tr.Next
 			tr.Next = nil
-			// if control.DefaultConfig.TrainLogs {
-			// 	fmt.Printf("%s arrived at: %s\n", tr.Name, tr.Current.Name)
-			// }
 
 			// Broadcast arrival
-			msg := broadcast.ADMessage[Train]{
-				StationID: tr.Current.ID,
-				Train:     *tr,
-			}
-			tr.arrivals <- msg
+			tr.broadcastArrival(tr.Current.ID)
 
 			time.Sleep(3 * time.Second)
 			return
 		}
-	}
-}
-
-func NewMake(name string, description string, accMag float64, topSpeed float64) Make {
-	return Make{
-		Name:        name,
-		Description: description,
-		AccMag:      accMag,
-		TopSpeed:    topSpeed,
 	}
 }

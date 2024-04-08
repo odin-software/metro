@@ -49,7 +49,7 @@ func main() {
 		go func(idx int) {
 			sub := loopTick.Subscribe()
 			for range sub {
-				trains[idx].Update()
+				trains[idx].Tick()
 			}
 		}(i)
 	}
