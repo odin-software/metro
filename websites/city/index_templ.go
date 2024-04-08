@@ -23,7 +23,7 @@ func Index() templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><title>City</title><link rel=\"stylesheet\" href=\"/ce-css/index.css\"></head><body><h1>City</h1><canvas id=\"theCanvas\"></canvas><script src=\"/ce-js/primitives/point.js\"></script><script src=\"/ce-js/primitives/segment.js\"></script><script src=\"/ce-js/math/graph.js\"></script><script src=\"/ce-js/math/utils.js\"></script><script src=\"/ce-js/math/osm.js\"></script><script src=\"/ce-js/markings/marking.js\"></script><script src=\"/ce-js/markings/start.js\"></script><script src=\"/ce-js/viewport.js\"></script><script src=\"/ce-js/world.js\"></script><script src=\"/ce-js/editors/graphEditor.js\"></script><script src=\"/ce-js/editors/markingEditor.js\"></script><script src=\"/ce-js/editors/startEditor.js\"></script><script src=\"/ce-js/main.js\"></script></body></html>")
+		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString("<html><head><title>City</title><link rel=\"stylesheet\" href=\"/ce-css/index.css\"></head><body><h1>City</h1><canvas id=\"cityCanvas\"></canvas><script src=\"/ce-js/primitives/point.js\"></script><script src=\"/ce-js/primitives/segment.js\"></script><script src=\"/ce-js/math/graph.js\"></script><script src=\"/ce-js/math/utils.js\"></script><script src=\"/ce-js/viewport.js\"></script><script src=\"/ce-js/world.js\"></script><script src=\"/ce-js/main.js\"></script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
