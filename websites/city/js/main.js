@@ -1,7 +1,9 @@
+import Viewport from "./viewport.js";
+
 const canvas = document.getElementById('cityCanvas');
+const ctx = canvas.getContext('2d');
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
-const ctx = canvas.getContext('2d');
 
 const worldString = localStorage.getItem('world');
 const worldInfo = worldString ? JSON.parse(worldString) : null;
@@ -19,7 +21,7 @@ canvas.addEventListener('mousemove', (event) => {
 
 const ws = new WebSocket("ws://localhost:2223/trains");
 ws.onmessage = (ev) => {
-  parsed = JSON.parse(ev.data);
+  const parsed = JSON.parse(ev.data);
   trains = parsed;
 };
 
@@ -38,12 +40,12 @@ function animate() {
   world.draw(ctx);
   if (stations) {
     stations.forEach(st => {
-      p = new Point(st.position.x, st.position.y)
+      const p = new Point(st.position.x, st.position.y)
       p.draw(ctx, { size: 14, color: "white" })
     });
   }
   trains.forEach(tr => {
-    p = new Point(tr.x, tr.y)
+    const p = new Point(tr.x, tr.y)
     p.draw(ctx, { size: 30, color: "white" })
   });
 

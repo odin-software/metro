@@ -1,3 +1,14 @@
+/**
+ * Class related to the viewport of the application.
+ * It manages the transformations made to the world by
+ * dragging to see somewhere else, it also gives the correct
+ * mouse location when trying to click on the canvas asociated to
+ * this viewport.
+ * @constructor
+ * @param {} canvas - The canvas to associate the viewport with.
+ * @param {number} zoom - The initial zoom level of the viewport, defaults to 1.
+ * @param {} offset - 
+ */
 class Viewport {
   constructor(canvas, zoom = 1, offset = null) {
     this.canvas = canvas;
@@ -91,3 +102,5 @@ class Viewport {
     }
   }
 }
+
+export default Viewport
