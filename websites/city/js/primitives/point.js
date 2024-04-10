@@ -16,7 +16,7 @@ class Point {
    * Adds two points and returns a new Point with the sum.
    * @param {Point} p1
    * @param {Point} p2
-   * @returns Point
+   * @returns {Point}
    */
   static add(p1, p2) {
     return new Point(p1.x + p2.x, p1.y + p2.y);
@@ -26,7 +26,7 @@ class Point {
    * Substracts two points and returns a new Point with the difference.
    * @param {Point} p1
    * @param {Point} p2
-   * @returns Point
+   * @returns {Point}
    */
   static sub(p1, p2) {
     return new Point(p1.x - p2.x, p1.y - p2.y);
@@ -36,22 +36,45 @@ class Point {
    * Scalar multiplication of a vector, returns a new one.
    * @param {Point} p
    * @param {number} s - number to multiply both components of the point.
-   * @returns Point
+   * @returns {Point}
    */
   static scale(p, s) {
     return new Point(p.x * s, p.y * s);
   }
 
-  equals(other) {
-    return this.x === other.x && this.y === other.y;
+  /**
+   * Asserts whether the specified point is equal to this one.
+   * @param {Point} p
+   * @returns {boolean}
+   */
+  equals(p) {
+    return this.x === p.x && this.y === p.y;
   }
 
-  distanceTo(other) {
-    const dx = this.x - other.x;
-    const dy = this.y - other.y;
+  /**
+   * Returns the distance between the specified point and this one.
+   * @param {Point} p
+   * @returns {number}
+   */
+  distanceTo(p) {
+    const dx = this.x - p.x;
+    const dy = this.y - p.y;
     return Math.sqrt(dx * dx + dy * dy);
   }
 
+  /**
+   * Styling options for drawing a point.
+   * @typedef {Object} Styles
+   * @property {number} [size=18] - diameter of the point
+   * @property {string} [color=black] - color of the point
+   * @property {boolean} [outline=false] - whether the point has an outline
+   * @property {boolean} [fill=false] - whether the point has an fill
+   */
+  /**
+   * Function to draw a Point with options on styling.
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {Styles} style
+   */
   draw(
     ctx,
     { size = 18, color = "black", outline = false, fill = false } = {}

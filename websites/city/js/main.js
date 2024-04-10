@@ -38,6 +38,9 @@ console.log(stations);
 animate();
 
 function animate() {
+  if (!ctx) {
+    return;
+  }
   viewport.reset();
   const gm = viewport.getMouseFromPoint(mouse);
   world.update(ctx, gm);
