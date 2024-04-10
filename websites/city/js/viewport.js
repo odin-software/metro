@@ -39,6 +39,12 @@ class Viewport {
     return substractDragOffset ? Point.sub(p, this.drag.offset) : p;
   }
 
+  /**
+   * Getting point that represents the real coordinate taking account
+   * the offset of the viewport.
+   * @param {Point} p actual point of the mouse
+   * @returns {Point}
+   */
   getMouseFromPoint(p) {
     const fp = new Point(
       (p.x - this.center.x) * this.zoom - this.offset.x,

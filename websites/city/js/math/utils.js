@@ -37,18 +37,48 @@ export function translate(loc, angle, offset) {
   );
 }
 
+/**
+ * Returns the angle of a Point, based on the X axis.
+ * @param {Point} p
+ * @returns {number}
+ */
 export function angle(p) {
   return Math.atan2(p.y, p.x);
 }
 
+/**
+ * Returns a normalized vector. A normalized vector is a vector with
+ * the same direction but a magnitude of 1.
+ * @param {Point} p
+ * @returns {Point}
+ */
 export function normalize(p) {
   return Point.scale(p, 1 / magnitude(p));
 }
 
+/**
+ * Returns the magnitude of a vector, this is done by calculating
+ * the squared root of the sum of the squared values of a point.
+ * @param {Point} p
+ * @returns {number}
+ */
 export function magnitude(p) {
   return Math.hypot(p.x, p.y);
 }
 
+/**
+ * The dot function is used to check if two points are:
+ * - answer is more than 0, they are facing in somewhat the same direction
+ * - answer is less than 0, they are facing opposite directions
+ * - answer is 0, they are perpendicular to one another
+ * With unit vectors what happens is:
+ * - if answer is -1, they are facing opposite directions
+ * - if answer is 1, they are facing the exact direction
+ * - if answer is 0, they are perpendicular
+ * @param {Point} p1
+ * @param {Point} p2
+ * @returns {number} answer
+ */
 export function dot(p1, p2) {
   return p1.x * p2.x + p1.y * p2.y;
 }

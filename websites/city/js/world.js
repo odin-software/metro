@@ -1,15 +1,38 @@
 import Graph from "./math/graph.js";
 import Point from "./primitives/point.js";
+import Segment from "./primitives/segment.js";
 
 class World {
+  /**
+   * Representation of the world. It has the graph contained, also the initial
+   * zoom.
+   * @constructor
+   * @param {?Graph} [graph]
+   */
   constructor(graph) {
     this.graph = graph ? graph : new Graph();
     this.zoom = 1;
     this.offset = new Point(0, 0);
   }
 
+  /**
+   * @typedef GraphInfo
+   * @property {Point[]} points
+   * @property {Segment[]} segments
+   */
+  /**
+   * @typedef WorldInfo
+   * @property {GraphInfo} graph
+   * @property {number} zoom
+   * @property {Point} offset
+   */
+  /**
+   * Loads a world and returns it.
+   * @param {WorldInfo} info
+   * @returns
+   */
   static load(info) {
-    const world = new World(new Graph());
+    const world = new World();
 
     world.graph = Graph.load(info.graph);
 
@@ -19,9 +42,14 @@ class World {
     return world;
   }
 
-  update(ctx, viewPoint) {
+  /**
+   * Set of intructions to run on each tick.
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {*} vp - mouse point
+   */
+  update(ctx, vp) {
     for (const point of this.graph.points) {
-      if (point.distanceTo(viewPoint) < 60) {
+      if (point.distanceTo(vp) < 60) {
         ctx.fillStyle = "white";
         ctx.font = "48px Arial";
         ctx.fillText(point.name, point.x - 140, point.y - 50);

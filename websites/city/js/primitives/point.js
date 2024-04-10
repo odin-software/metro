@@ -1,6 +1,6 @@
 class Point {
   /**
-   * The point class represents a vector, it contains static methods
+   * The Point class represents a vector, it contains static methods
    * for basic vector calculations.
    * @param {number} x
    * @param {number} y

@@ -3,6 +3,8 @@ import World from "./world.js";
 import Point from "./primitives/point.js";
 import Graph from "./math/graph.js";
 
+import { initWs } from "./ws/trains.js";
+
 const canvas = document.getElementById("cityCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
   throw new Error("the element #cityCanvas was not found");
@@ -17,24 +19,18 @@ const worldInfo = worldString ? JSON.parse(worldString) : null;
 const world = worldInfo ? World.load(worldInfo) : new World(new Graph());
 
 const viewport = new Viewport(canvas, world.zoom, world.offset);
-const mouse = new Point(0, 0);
+
+const stations = await (await fetch("http://localhost:2221/stations")).json();
 let trains = [];
+
+const mouse = new Point(0, 0);
 
 canvas.addEventListener("mousemove", (event) => {
   mouse.x = event.clientX;
   mouse.y = event.clientY;
 });
 
-const ws = new WebSocket("ws://localhost:2223/trains");
-ws.onmessage = (ev) => {
-  const parsed = JSON.parse(ev.data);
-  trains = parsed;
-};
-
-const stations = await (await fetch("http://localhost:2221/stations")).json();
-
-console.log(stations);
-
+initWs();
 animate();
 
 function animate() {
@@ -59,18 +55,6 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-// function load(event) {
-//   const file = event.target.files[0];
-//   if (!file) return;
-
-//   const reader = new FileReader();
-//   reader.readAsText(file);
-//   reader.onload = function (event) {
-//     const fileContent = event.target.result;
-//     const worldInfo = JSON.parse(fileContent);
-//     world = World.load(worldInfo);
-
-//     localStorage.setItem("world", JSON.stringify(world));
-//     location.reload();
-//   };
-// }
+export function setTrains(wsTrains) {
+  trains = wsTrains;
+}

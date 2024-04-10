@@ -1,29 +1,58 @@
-import { dot, magnitude, normalize } from "../math/utils.js";
 import Point from "./point.js";
+import { dot, magnitude, normalize } from "../math/utils.js";
 
 class Segment {
+  /**
+   * The Segment class represents a connection between two points inside a graph.
+   * @param {Point} p1
+   * @param {Point} p2
+   * @param {boolean} [oneWay=false]
+   */
   constructor(p1, p2, oneWay = false) {
     this.p1 = p1;
     this.p2 = p2;
     this.oneWay = oneWay;
   }
 
+  /**
+   * Length of the segment, which is the distance between the two points connected.
+   * @returns {number}
+   */
   length() {
     return this.p1.distanceTo(this.p2);
   }
 
+  /**
+   * The direction vector of the two points of this segment.
+   * @returns {Point}
+   */
   directionVector() {
     return normalize(Point.sub(this.p2, this.p1));
   }
 
-  equals(other) {
-    return this.includes(other.p1) && this.includes(other.p2);
+  /**
+   * Checks if a segment has the same points as this one.
+   * @param {Segment} seg
+   * @returns {boolean}
+   */
+  equals(seg) {
+    return this.includes(seg.p1) && this.includes(seg.p2);
   }
 
+  /**
+   * Returns if a point is included in one of this segment's point.
+   * @param {Point} point
+   * @returns {boolean}
+   */
   includes(point) {
     return this.p1.equals(point) || this.p2.equals(point);
   }
 
+  /**
+   * Distance to a point.
+   * @param {Point} point
+   * @returns {number}
+   */
   distanceToPoint(point) {
     const proj = this.projectPoint(point);
     if (proj.offset > 0 && proj.offset < 1) {
@@ -34,6 +63,11 @@ class Segment {
     return Math.min(distToP1, distToP2);
   }
 
+  /**
+   * Project a point in this segment.
+   * @param {Point} point
+   * @returns
+   */
   projectPoint(point) {
     const a = Point.sub(point, this.p1);
     const b = Point.sub(this.p2, this.p1);
@@ -46,6 +80,18 @@ class Segment {
     return proj;
   }
 
+  /**
+   * Styling options for drawing a segment.
+   * @typedef {Object} Styles
+   * @property {number} [width=2] - with of the segment
+   * @property {string} [color=white] - color of the segment
+   * @property {number[]} [dash=[]] - defines the dash style of the segment
+   */
+  /**
+   * Function to draw a Segment with options on styling.
+   * @param {CanvasRenderingContext2D} ctx
+   * @param {Styles} style
+   */
   draw(ctx, { width = 2, color = "white", dash = [] } = {}) {
     ctx.beginPath();
     ctx.lineWidth = width;

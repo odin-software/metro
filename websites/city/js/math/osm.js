@@ -1,8 +1,14 @@
+import Point from "../primitives/point";
+import Segment from "../primitives/segment";
+import { degToRad, invLerp } from "./utils";
+
 const Osm = {
   parseRoads: (data) => {
     const nodes = data.elements.filter((element) => element.type == "node");
     const ways = data.elements.filter((element) => element.type == "way");
-    const relations = data.elements.filter((element) => element.type == "relation");
+    const relations = data.elements.filter(
+      (element) => element.type == "relation"
+    );
 
     const lats = nodes.map((node) => node.lat);
     const lons = nodes.map((node) => node.lon);
@@ -33,7 +39,8 @@ const Osm = {
       for (let i = 1; i < ids.length; i++) {
         const prev = points.find((p) => p.id == ids[i - 1]);
         const cur = points.find((p) => p.id == ids[i]);
-        const oneWay = way.tags && way.tags.oneway || way.tags && way.tags.lanes == 1;
+        const oneWay =
+          (way.tags && way.tags.oneway) || (way.tags && way.tags.lanes == 1);
         const segment = new Segment(prev, cur, oneWay);
         segments.push(segment);
       }
@@ -49,5 +56,5 @@ const Osm = {
     }
     const finalSegments = segments.filter((s) => s.p1 && s.p2);
     return { points, segments: finalSegments };
-  }
-}
+  },
+};
