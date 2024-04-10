@@ -1,18 +1,21 @@
-/**
- * Class related to the viewport of the application.
- * It manages the transformations made to the world by
- * dragging to see somewhere else, it also gives the correct
- * mouse location when trying to click on the canvas asociated to
- * this viewport.
- * @constructor
- * @param {} canvas - The canvas to associate the viewport with.
- * @param {number} zoom - The initial zoom level of the viewport, defaults to 1.
- * @param {} offset - 
- */
+import Point from "./primitives/point.js";
+
 class Viewport {
+  /**
+   * Class related to the viewport of the application.
+   * It manages the transformations made to the world by
+   * dragging to see somewhere else, it also gives the correct
+   * mouse location when trying to click on the canvas asociated to
+   * this viewport.
+   * @constructor
+   * @param {HTMLCanvasElement} canvas - The canvas to associate the viewport with.
+   * @param {number} zoom - The initial zoom level of the viewport, defaults to 1.
+   * @param {?Point} offset - The world offset according to where the middle of the points
+   * in the graph are located.
+   */
   constructor(canvas, zoom = 1, offset = null) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext("2d");
 
     this.zoom = zoom;
     this.center = new Point(canvas.width / 2, canvas.height / 2);
@@ -21,15 +24,15 @@ class Viewport {
       start: new Point(0, 0),
       end: new Point(0, 0),
       offset: new Point(0, 0),
-      active: false
-    }
+      active: false,
+    };
 
     this.#addEventListeners();
   }
 
   getMouse(e, substractDragOffset = false) {
     const p = new Point(
-      (e.offsetX - this.center.x) * this.zoom - this.offset.x, 
+      (e.offsetX - this.center.x) * this.zoom - this.offset.x,
       (e.offsetY - this.center.y) * this.zoom - this.offset.y
     );
 
@@ -40,7 +43,7 @@ class Viewport {
     const fp = new Point(
       (p.x - this.center.x) * this.zoom - this.offset.x,
       (p.y - this.center.y) * this.zoom - this.offset.y
-    )
+    );
 
     return fp;
   }
@@ -50,6 +53,9 @@ class Viewport {
   }
 
   reset() {
+    if (!this.ctx) {
+      throw new Error("viewport.reset - context is 'null'");
+    }
     this.ctx.restore();
 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -63,10 +69,10 @@ class Viewport {
   }
 
   #addEventListeners() {
-    this.canvas.addEventListener('mousewheel', e =>  this.#onMouseWheel(e));
-    this.canvas.addEventListener('mousedown', e =>  this.#onMouseDown(e));
-    this.canvas.addEventListener('mousemove', e =>  this.#onMouseMove(e));
-    this.canvas.addEventListener('mouseup', e =>  this.#onMouseUp(e));
+    this.canvas.addEventListener("mousewheel", (e) => this.#onMouseWheel(e));
+    this.canvas.addEventListener("mousedown", (e) => this.#onMouseDown(e));
+    this.canvas.addEventListener("mousemove", (e) => this.#onMouseMove(e));
+    this.canvas.addEventListener("mouseup", (e) => this.#onMouseUp(e));
   }
 
   #onMouseWheel(e) {
@@ -97,10 +103,10 @@ class Viewport {
         start: new Point(0, 0),
         end: new Point(0, 0),
         offset: new Point(0, 0),
-        active: false
+        active: false,
       };
     }
   }
 }
 
-export default Viewport
+export default Viewport;

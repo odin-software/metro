@@ -1,18 +1,43 @@
 class Point {
+  /**
+   * The point class represents a vector, it contains static methods
+   * for basic vector calculations.
+   * @param {number} x
+   * @param {number} y
+   * @param {string} name - the name representing this point.
+   */
   constructor(x, y, name = "") {
     this.x = x;
     this.y = y;
     this.name = name;
   }
 
+  /**
+   * Adds two points and returns a new Point with the sum.
+   * @param {Point} p1
+   * @param {Point} p2
+   * @returns Point
+   */
   static add(p1, p2) {
     return new Point(p1.x + p2.x, p1.y + p2.y);
   }
 
+  /**
+   * Substracts two points and returns a new Point with the difference.
+   * @param {Point} p1
+   * @param {Point} p2
+   * @returns Point
+   */
   static sub(p1, p2) {
     return new Point(p1.x - p2.x, p1.y - p2.y);
   }
-  
+
+  /**
+   * Scalar multiplication of a vector, returns a new one.
+   * @param {Point} p
+   * @param {number} s - number to multiply both components of the point.
+   * @returns Point
+   */
   static scale(p, s) {
     return new Point(p.x * s, p.y * s);
   }
@@ -27,7 +52,10 @@ class Point {
     return Math.sqrt(dx * dx + dy * dy);
   }
 
-  draw(ctx, { size = 18, color = "black", outline = false, fill = false } = {}) {
+  draw(
+    ctx,
+    { size = 18, color = "black", outline = false, fill = false } = {}
+  ) {
     const radius = size / 2;
     ctx.beginPath();
     ctx.fillStyle = color;
@@ -48,3 +76,5 @@ class Point {
     }
   }
 }
+
+export default Point;

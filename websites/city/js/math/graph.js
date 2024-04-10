@@ -1,3 +1,6 @@
+import Point from "../primitives/point.js";
+import Segment from "../primitives/segment.js";
+
 class Graph {
   constructor(points = [], segments = []) {
     this.points = points;
@@ -5,13 +8,13 @@ class Graph {
   }
 
   static load(info) {
-    const points = info.points.map(p => new Point(p.x, p.y, p.name));
-    const segments = info.segments.map(s => {
+    const points = info.points.map((p) => new Point(p.x, p.y, p.name));
+    const segments = info.segments.map((s) => {
       return new Segment(
-        points.find(p => p.equals(s.p1)),
-        points.find(p => p.equals(s.p2))
+        points.find((p) => p.equals(s.p1)),
+        points.find((p) => p.equals(s.p2))
       );
-    })
+    });
     return new Graph(points, segments);
   }
 
@@ -24,7 +27,7 @@ class Graph {
   }
 
   containsPoint(point) {
-    return this.points.find(p => p.equals(point));
+    return this.points.find((p) => p.equals(point));
   }
 
   tryAddPoint(point) {
@@ -50,7 +53,7 @@ class Graph {
   }
 
   containsSegment(segment) {
-    return this.segments.find(s => s.equals(segment));
+    return this.segments.find((s) => s.equals(segment));
   }
 
   tryAddSegment(segment) {
@@ -71,7 +74,7 @@ class Graph {
   }
 
   getSegmentsWithPoint(point) {
-    return this.segments.filter(seg => seg.includes(point));
+    return this.segments.filter((seg) => seg.includes(point));
   }
 
   dispose() {
@@ -85,7 +88,9 @@ class Graph {
     }
 
     for (const point of this.points) {
-      point.draw(ctx, { size: 20, color: "white"});
+      point.draw(ctx, { size: 20, color: "white" });
     }
   }
 }
+
+export default Graph;

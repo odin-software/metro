@@ -1,20 +1,26 @@
 import Viewport from "./viewport.js";
+import World from "./world.js";
+import Point from "./primitives/point.js";
+import Graph from "./math/graph.js";
 
-const canvas = document.getElementById('cityCanvas');
-const ctx = canvas.getContext('2d');
+const canvas = document.getElementById("cityCanvas");
+if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
+  throw new Error("the element #cityCanvas was not found");
+}
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const worldString = localStorage.getItem('world');
+const ctx = canvas.getContext("2d");
+const worldString = localStorage.getItem("world");
 const worldInfo = worldString ? JSON.parse(worldString) : null;
-let world = worldInfo ? World.load(worldInfo) : new World(new Graph());
-const graph = world.graph;
 
-const viewPort = new Viewport(canvas, world.zoom, world.offset);
+const world = worldInfo ? World.load(worldInfo) : new World(new Graph());
+
+const viewport = new Viewport(canvas, world.zoom, world.offset);
 const mouse = new Point(0, 0);
 let trains = [];
 
-canvas.addEventListener('mousemove', (event) => {
+canvas.addEventListener("mousemove", (event) => {
   mouse.x = event.clientX;
   mouse.y = event.clientY;
 });
@@ -25,45 +31,43 @@ ws.onmessage = (ev) => {
   trains = parsed;
 };
 
-let stations;
+const stations = await (await fetch("http://localhost:2221/stations")).json();
 
-fetch("http://localhost:2221/stations").then(res => res.json()).then(data => {
-  stations = data;
-});
+console.log(stations);
 
 animate();
 
 function animate() {
-  viewPort.reset();
-  const gm = viewPort.getMouseFromPoint(mouse);
+  viewport.reset();
+  const gm = viewport.getMouseFromPoint(mouse);
   world.update(ctx, gm);
   world.draw(ctx);
   if (stations) {
-    stations.forEach(st => {
-      const p = new Point(st.position.x, st.position.y)
-      p.draw(ctx, { size: 14, color: "white" })
+    stations.forEach((st) => {
+      const p = new Point(st.position.x, st.position.y);
+      p.draw(ctx, { size: 14, color: "white" });
     });
   }
-  trains.forEach(tr => {
-    const p = new Point(tr.x, tr.y)
-    p.draw(ctx, { size: 30, color: "white" })
+  trains.forEach((tr) => {
+    const p = new Point(tr.x, tr.y);
+    p.draw(ctx, { size: 30, color: "white" });
   });
 
   requestAnimationFrame(animate);
 }
 
-function load(event) {
-  const file = event.target.files[0];
-  if (!file) return;
+// function load(event) {
+//   const file = event.target.files[0];
+//   if (!file) return;
 
-  const reader = new FileReader();
-  reader.readAsText(file);
-  reader.onload = function (event) {
-    const fileContent = event.target.result;
-    const worldInfo = JSON.parse(fileContent);
-    world = World.load(worldInfo);
+//   const reader = new FileReader();
+//   reader.readAsText(file);
+//   reader.onload = function (event) {
+//     const fileContent = event.target.result;
+//     const worldInfo = JSON.parse(fileContent);
+//     world = World.load(worldInfo);
 
-    localStorage.setItem('world', JSON.stringify(world));
-    location.reload();
-  };
-}
+//     localStorage.setItem("world", JSON.stringify(world));
+//     location.reload();
+//   };
+// }

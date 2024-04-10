@@ -1,3 +1,6 @@
+import { dot, magnitude, normalize } from "../math/utils.js";
+import Point from "./point.js";
+
 class Segment {
   constructor(p1, p2, oneWay = false) {
     this.p1 = p1;
@@ -39,7 +42,7 @@ class Segment {
     const proj = {
       point: Point.add(this.p1, Point.scale(normB, scaler)),
       offset: scaler / magnitude(b),
-    }
+    };
     return proj;
   }
 
@@ -53,3 +56,5 @@ class Segment {
     ctx.stroke();
   }
 }
+
+export default Segment;
