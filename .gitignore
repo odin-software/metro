@@ -6,3 +6,7 @@ data/metro.db
 __debug__*
 
 .env
+
+## js
+**/dist
+node_modules
