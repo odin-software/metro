@@ -83,16 +83,9 @@ class Segment {
   }
 
   /**
-   * Styling options for drawing a segment.
-   * @typedef {Object} Styles
-   * @property {number} [width=2] - with of the segment
-   * @property {string} [color=white] - color of the segment
-   * @property {number[]} [dash=[]] - defines the dash style of the segment
-   */
-  /**
    * Function to draw a Segment with options on styling.
    * @param {CanvasRenderingContext2D} ctx
-   * @param {SegmentStyle} style
+   * @param {?SegmentStyle} style
    */
   draw(
     ctx: CanvasRenderingContext2D,

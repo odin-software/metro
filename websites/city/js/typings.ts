@@ -1,5 +1,5 @@
-import Graph from "./math/graph";
-import Point from "./primitives/point";
+import Graph from "./math/graph.js";
+import Point from "./primitives/point.js";
 
 // Primitives
 export type PointStyle = {

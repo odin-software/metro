@@ -1,14 +1,13 @@
 import Point from "../primitives/point.js";
 import Segment from "../primitives/segment.js";
 
+/**
+ * Representation of a graph. It has points, segments and methods
+ * to interact with those.
+ */
 class Graph {
-  /**
-   * Representation of a graph. It has points, segments and methods
-   * to interact with those.
-   * @constructor
-   * @param {Point[]} [points=[]]
-   * @param {Segment[]} [segments=[]]
-   */
+  points: Point[];
+  segments: Segment[];
   constructor(points = [], segments = []) {
     this.points = points;
     this.segments = segments;
@@ -122,7 +121,7 @@ class Graph {
 
   draw(ctx) {
     for (const seg of this.segments) {
-      seg.draw(ctx);
+      seg.draw(ctx, {});
     }
 
     for (const point of this.points) {

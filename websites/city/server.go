@@ -40,6 +40,10 @@ func Server() {
 		stations := bs.ListStations()
 		return c.JSON(http.StatusOK, stations)
 	})
+	server.GET("/edges", func(c echo.Context) error {
+		stations := bs.ListStations()
+		return c.JSON(http.StatusOK, stations)
+	})
 
 	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)
 	server.Logger.Fatal(server.Start(port))

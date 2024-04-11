@@ -4,6 +4,7 @@ import Point from "./primitives/point.js";
 import Graph from "./math/graph.js";
 
 import { initWs } from "./ws/trains.js";
+import { getStations } from "./load.js";
 
 const canvas = document.getElementById("cityCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -13,11 +14,12 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
 const ctx = canvas.getContext("2d");
-const stations = await (await fetch("http://localhost:2221/stations")).json();
-const worldString = localStorage.getItem("world");
-const worldInfo = worldString ? JSON.parse(worldString) : null;
-
-const world = worldInfo ? World.load(worldInfo) : new World(new Graph());
+const stations = await getStations();
+const world = new World(
+  new Graph(
+    stations.map((st) => new Point(st.position.x, st.position.y, st.name))
+  )
+);
 
 const viewport = new Viewport(canvas, world.zoom, world.offset);
 
@@ -41,12 +43,10 @@ function animate() {
   const gm = viewport.getMouseFromPoint(mouse);
   world.update(ctx, gm);
   world.draw(ctx);
-  if (stations) {
-    stations.forEach((st) => {
-      const p = new Point(st.position.x, st.position.y);
-      p.draw(ctx, { size: 14, color: "white" });
-    });
-  }
+  stations.forEach((st) => {
+    const p = new Point(st.position.x, st.position.y);
+    p.draw(ctx, { size: 14, color: "white" });
+  });
   trains.forEach((tr) => {
     const p = new Point(tr.x, tr.y);
     p.draw(ctx, { size: 30, color: "white" });
