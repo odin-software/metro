@@ -26,7 +26,7 @@ func Server() {
 		},
 	))
 
-	server.Static("/ce-js", "websites/city/js")
+	server.Static("/ce-js", "websites/city/dist")
 	server.Static("/ce-css", "websites/city/css")
 	server.Static("/ce-images", "websites/city/images")
 

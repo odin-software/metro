@@ -1,38 +1,26 @@
 import Graph from "./math/graph.js";
 import Point from "./primitives/point.js";
 import Segment from "./primitives/segment.js";
+import { WorldInfo } from "./typings.js";
 
 class World {
-  /**
-   * Representation of the world. It has the graph contained, also the initial
-   * zoom.
-   * @constructor
-   * @param {?Graph} [graph]
-   */
-  constructor(graph) {
+  graph: Graph;
+  zoom: number;
+  offset: Point;
+
+  constructor(graph: Graph | null) {
     this.graph = graph ? graph : new Graph();
     this.zoom = 1;
     this.offset = new Point(0, 0);
   }
 
   /**
-   * @typedef GraphInfo
-   * @property {Point[]} points
-   * @property {Segment[]} segments
-   */
-  /**
-   * @typedef WorldInfo
-   * @property {GraphInfo} graph
-   * @property {number} zoom
-   * @property {Point} offset
-   */
-  /**
    * Loads a world and returns it.
    * @param {WorldInfo} info
    * @returns
    */
-  static load(info) {
-    const world = new World();
+  static load(info: WorldInfo) {
+    const world = new World(null);
 
     world.graph = Graph.load(info.graph);
 

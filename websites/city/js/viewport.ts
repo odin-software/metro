@@ -1,19 +1,25 @@
 import Point from "./primitives/point.js";
 
+/**
+ * Class related to the viewport of the application.
+ * It manages the transformations made to the world by
+ * dragging to see somewhere else, it also gives the correct
+ * mouse location when trying to click on the canvas asociated to
+ * this viewport.
+*/
 class Viewport {
-  /**
-   * Class related to the viewport of the application.
-   * It manages the transformations made to the world by
-   * dragging to see somewhere else, it also gives the correct
-   * mouse location when trying to click on the canvas asociated to
-   * this viewport.
-   * @constructor
-   * @param {HTMLCanvasElement} canvas - The canvas to associate the viewport with.
-   * @param {number} zoom - The initial zoom level of the viewport, defaults to 1.
-   * @param {?Point} offset - The world offset according to where the middle of the points
-   * in the graph are located.
-   */
-  constructor(canvas, zoom = 1, offset = null) {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  zoom: number;
+  center: Point;
+  offset: Point;
+  drag: {
+    start: Point;
+    end: Point;
+    offset: Point;
+    active: boolean;
+  }
+  constructor(canvas: HTMLCanvasElement, zoom: number = 1, offset: Point | null = null) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
 

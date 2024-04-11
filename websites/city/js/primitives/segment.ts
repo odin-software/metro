@@ -1,14 +1,16 @@
 import Point from "./point.js";
 import { dot, magnitude, normalize } from "../math/utils.js";
+import { SegmentStyle } from "../typings.js";
 
+/**
+ * The Segment class represents a connection between two points inside a graph.
+ */
 class Segment {
-  /**
-   * The Segment class represents a connection between two points inside a graph.
-   * @param {Point} p1
-   * @param {Point} p2
-   * @param {boolean} [oneWay=false]
-   */
-  constructor(p1, p2, oneWay = false) {
+  p1: Point;
+  p2: Point;
+  oneWay: boolean;
+
+  constructor(p1: Point, p2: Point, oneWay: boolean = false) {
     this.p1 = p1;
     this.p2 = p2;
     this.oneWay = oneWay;
@@ -18,7 +20,7 @@ class Segment {
    * Length of the segment, which is the distance between the two points connected.
    * @returns {number}
    */
-  length() {
+  length(): number {
     return this.p1.distanceTo(this.p2);
   }
 
@@ -26,7 +28,7 @@ class Segment {
    * The direction vector of the two points of this segment.
    * @returns {Point}
    */
-  directionVector() {
+  directionVector(): Point {
     return normalize(Point.sub(this.p2, this.p1));
   }
 
@@ -35,7 +37,7 @@ class Segment {
    * @param {Segment} seg
    * @returns {boolean}
    */
-  equals(seg) {
+  equals(seg: Segment): boolean {
     return this.includes(seg.p1) && this.includes(seg.p2);
   }
 
@@ -44,7 +46,7 @@ class Segment {
    * @param {Point} point
    * @returns {boolean}
    */
-  includes(point) {
+  includes(point: Point): boolean {
     return this.p1.equals(point) || this.p2.equals(point);
   }
 
@@ -53,7 +55,7 @@ class Segment {
    * @param {Point} point
    * @returns {number}
    */
-  distanceToPoint(point) {
+  distanceToPoint(point: Point): number {
     const proj = this.projectPoint(point);
     if (proj.offset > 0 && proj.offset < 1) {
       return proj.point.distanceTo(point);
@@ -68,7 +70,7 @@ class Segment {
    * @param {Point} point
    * @returns
    */
-  projectPoint(point) {
+  projectPoint(point: Point) {
     const a = Point.sub(point, this.p1);
     const b = Point.sub(this.p2, this.p1);
     const normB = normalize(b);
@@ -90,9 +92,12 @@ class Segment {
   /**
    * Function to draw a Segment with options on styling.
    * @param {CanvasRenderingContext2D} ctx
-   * @param {Styles} style
+   * @param {SegmentStyle} style
    */
-  draw(ctx, { width = 2, color = "white", dash = [] } = {}) {
+  draw(
+    ctx: CanvasRenderingContext2D,
+    { width = 2, color = "white", dash = [] }: SegmentStyle
+  ) {
     ctx.beginPath();
     ctx.lineWidth = width;
     ctx.strokeStyle = color;

@@ -26,7 +26,7 @@ export function getNearestSegment(loc, segments, maxDist = Number.MAX_VALUE) {
   return nearest;
 }
 
-export function perpendicular(p) {
+export function perpendicular(p: Point) {
   return new Point(-p.y, p.x);
 }
 
@@ -42,7 +42,7 @@ export function translate(loc, angle, offset) {
  * @param {Point} p
  * @returns {number}
  */
-export function angle(p) {
+export function angle(p: Point): number {
   return Math.atan2(p.y, p.x);
 }
 
@@ -52,7 +52,7 @@ export function angle(p) {
  * @param {Point} p
  * @returns {Point}
  */
-export function normalize(p) {
+export function normalize(p: Point): Point {
   return Point.scale(p, 1 / magnitude(p));
 }
 
@@ -62,7 +62,7 @@ export function normalize(p) {
  * @param {Point} p
  * @returns {number}
  */
-export function magnitude(p) {
+export function magnitude(p: Point): number {
   return Math.hypot(p.x, p.y);
 }
 
@@ -79,7 +79,7 @@ export function magnitude(p) {
  * @param {Point} p2
  * @returns {number} answer
  */
-export function dot(p1, p2) {
+export function dot(p1: Point, p2: Point): number {
   return p1.x * p2.x + p1.y * p2.y;
 }
 
