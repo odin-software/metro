@@ -13,6 +13,15 @@ type RequestEdge = {
   Toid: number;
 };
 
+type RequestEdgePoint = {
+  ID: number;
+  Edgeid: number;
+  X: number;
+  Y: number;
+  Z: number;
+  Odr: number;
+};
+
 type Train = {
   id: number;
 };

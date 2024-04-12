@@ -1,4 +1,4 @@
-import Point from "../primitives/point";
+import Point from "../primitives/point.js";
 import { Station } from "./station";
 
 export class Edge {
@@ -30,7 +30,10 @@ export class Edge {
     return this.start.equals(node) || this.end.equals(node);
   }
 
-  draw(ctx: CanvasRenderingContext2D, { color, dash }: EdgeStyling) {
+  draw(
+    ctx: CanvasRenderingContext2D,
+    { color = "white", dash = [22, 11], width = 2 }: EdgeStyling | undefined
+  ) {
     ctx.beginPath();
     ctx.lineWidth = width;
     ctx.strokeStyle = color;
@@ -47,4 +50,5 @@ export class Edge {
 type EdgeStyling = {
   color: string;
   dash: number[];
+  width: number;
 };

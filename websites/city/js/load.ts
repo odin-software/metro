@@ -1,4 +1,8 @@
-import { GET_EDGES_URL, GET_STATIONS_URL } from "./utils/consts.js";
+import {
+  GET_EDGES_URL,
+  GET_EDGE_POINTS_URL,
+  GET_STATIONS_URL,
+} from "./utils/consts.js";
 
 async function fetchMetro<T>(url: string): Promise<T> {
   const response = await fetch(url);
@@ -16,6 +20,14 @@ export async function getStations() {
 
 export async function getEdges() {
   const response = await fetchMetro<RequestEdge[]>(GET_EDGES_URL);
+
+  return response;
+}
+
+export async function getEdgesPoints(id: number) {
+  const response = await fetchMetro<RequestEdgePoint[] | null>(
+    GET_EDGE_POINTS_URL(id)
+  );
 
   return response;
 }

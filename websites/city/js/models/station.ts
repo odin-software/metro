@@ -1,4 +1,4 @@
-import Point from "../primitives/point";
+import Point from "../primitives/point.js";
 
 export class Station {
   id: number;
@@ -24,6 +24,6 @@ export class Station {
   }
 
   draw(ctx: CanvasRenderingContext2D) {
-    this.position.draw(ctx, {});
+    this.position.draw(ctx, { color: "red", size: 19 });
   }
 }

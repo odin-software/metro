@@ -3,6 +3,7 @@ package city
 import (
 	"fmt"
 	"net/http"
+	"strconv"
 
 	"github.com/a-h/templ"
 	"github.com/labstack/echo/v4"
@@ -42,6 +43,15 @@ func Server() {
 	})
 	server.GET("/edges", func(c echo.Context) error {
 		edges := bs.ListEdges()
+		return c.JSON(http.StatusOK, edges)
+	})
+	server.GET("/edges/:id", func(c echo.Context) error {
+		stringId := c.Param("id")
+		id, err := strconv.Atoi(stringId)
+		if err != nil {
+			return c.NoContent(400)
+		}
+		edges := bs.ListEdgePoints(int64(id))
 		return c.JSON(http.StatusOK, edges)
 	})
 

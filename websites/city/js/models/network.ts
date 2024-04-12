@@ -1,3 +1,4 @@
+import { getEdges, getEdgesPoints, getStations } from "../load.js";
 import Point from "../primitives/point.js";
 import Segment from "../primitives/segment.js";
 import { Edge } from "./edge.js";
@@ -17,11 +18,35 @@ export class Network {
   }
 
   /**
-   * String representation of this networkj.
+   * String representation of this network.
    * @returns {string}
    */
   hash(): string {
     return JSON.stringify(this);
+  }
+
+  /**
+   * Loads the network from the server.
+   */
+  static async load() {
+    const stationsResponse = await getStations();
+    const edgesResponse = await getEdges();
+    const stations = stationsResponse.map(
+      (st) => new Station(st.id, st.name, st.position.x, st.position.y)
+    );
+    const edges = await Promise.all(
+      edgesResponse.map(async (e) => {
+        const st1 = stations.find((st) => st.id === e.Fromid);
+        const st2 = stations.find((st) => st.id === e.Toid);
+        const eps = await getEdgesPoints(e.ID);
+        return new Edge(
+          st1,
+          st2,
+          eps ? eps.map((ep) => new Point(ep.X, ep.Y)) : []
+        );
+      })
+    );
+    return new Network(stations, edges);
   }
 
   /**
@@ -44,7 +69,7 @@ export class Network {
   /**
    * Tries to add a node in the network if it doesn't exist.
    * @param {Station} node
-   * @returns {boolean}
+   * @returns {boolean} whether it was added or not
    */
   tryAddNode(node: Station): boolean {
     if (this.containsNode(node)) {
@@ -59,9 +84,9 @@ export class Network {
    * @param {Station} node
    */
   removeNode(node: Station) {
-    const segs = this.getEdgesWithNode(node);
-    for (const seg of segs) {
-      this.removeSegment(seg);
+    const edges = this.getEdgesWithNode(node);
+    for (const edge of edges) {
+      this.removeEdge(edge);
     }
     const index = this.nodes.indexOf(node);
     this.nodes.splice(index, 1);
@@ -76,29 +101,37 @@ export class Network {
   }
 
   /**
-   *
+   * Checks if the edge exist in the network.
    * @param edge
    * @returns
    */
   containsEdge(edge: Edge) {
-    return this.edges.find((edge) => edge.equals(edge));
+    return this.edges.some((edge) => edge.equals(edge));
   }
 
-  tryAddSegment(segment) {
-    if (this.containsSegment(segment)) {
+  /**
+   * Tries to add an edge in the network if it doesn't exist.
+   * @param {Edge} edge
+   * @returns {boolean} whether it was added or not
+   */
+  tryAddEdge(edge: Edge): boolean {
+    if (this.containsEdge(edge)) {
       return false;
     }
-    if (segment.p1.equals(segment.p2)) {
+    if (edge.start.equals(edge.end)) {
       return false;
     }
-
-    this.segments.push(segment);
+    this.edges.push(edge);
     return true;
   }
 
-  removeSegment(segment) {
-    const index = this.segments.indexOf(segment);
-    this.segments.splice(index, 1);
+  /**
+   * Removes an edge from the network.
+   * @param {Edge} edge
+   */
+  removeEdge(edge: Edge) {
+    const index = this.edges.indexOf(edge);
+    this.edges.splice(index, 1);
   }
 
   /**
@@ -110,20 +143,20 @@ export class Network {
   }
 
   /**
-   * Resets the graph by unloading the points and segments array.
+   * Resets the graph by unloading the nodes and edges array.
    */
   dispose() {
-    this.points.length = 0;
-    this.segments.length = 0;
+    this.nodes.length = 0;
+    this.edges.length = 0;
   }
 
-  draw(ctx) {
-    for (const seg of this.segments) {
-      seg.draw(ctx, {});
+  draw(ctx: CanvasRenderingContext2D) {
+    for (const edge of this.edges) {
+      edge.draw(ctx, undefined);
     }
 
-    for (const point of this.points) {
-      point.draw(ctx, { size: 20, color: "white" });
+    for (const node of this.nodes) {
+      node.draw(ctx);
     }
   }
 }
