@@ -6,7 +6,7 @@ import Point from "./primitives/point.js";
  * dragging to see somewhere else, it also gives the correct
  * mouse location when trying to click on the canvas asociated to
  * this viewport.
-*/
+ */
 class Viewport {
   canvas: HTMLCanvasElement;
   ctx: CanvasRenderingContext2D;
@@ -18,8 +18,13 @@ class Viewport {
     end: Point;
     offset: Point;
     active: boolean;
-  }
-  constructor(canvas: HTMLCanvasElement, zoom: number = 1, offset: Point | null = null) {
+  };
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    zoom: number = 1,
+    offset: Point | null = null
+  ) {
     this.canvas = canvas;
     this.ctx = canvas.getContext("2d");
 
@@ -51,7 +56,7 @@ class Viewport {
    * @param {Point} p actual point of the mouse
    * @returns {Point}
    */
-  getMouseFromPoint(p) {
+  getMouseFromPoint(p: Point): Point {
     const fp = new Point(
       (p.x - this.center.x) * this.zoom - this.offset.x,
       (p.y - this.center.y) * this.zoom - this.offset.y

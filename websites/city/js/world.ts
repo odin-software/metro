@@ -33,19 +33,20 @@ class World {
   /**
    * Set of intructions to run on each tick.
    * @param {CanvasRenderingContext2D} ctx
-   * @param {*} vp - mouse point
+   * @param {Point} vp - mouse point
    */
-  update(ctx, vp) {
+  update(ctx: CanvasRenderingContext2D, vp: Point) {
     for (const point of this.graph.points) {
       if (point.distanceTo(vp) < 60) {
         ctx.fillStyle = "white";
         ctx.font = "48px Arial";
-        ctx.fillText(point.name, point.x - 140, point.y - 50);
+        ctx.textAlign = "center";
+        ctx.fillText(point.name, point.x, point.y - 50);
       }
     }
   }
 
-  draw(ctx) {
+  draw(ctx: CanvasRenderingContext2D) {
     for (const seg of this.graph.segments) {
       seg.draw(ctx, { color: "white", width: 2, dash: [30, 5] });
     }
