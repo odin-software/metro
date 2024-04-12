@@ -1,7 +1,32 @@
+import Point from "./primitives/point.js";
+
+/**
+ * Class related to the viewport of the application.
+ * It manages the transformations made to the world by
+ * dragging to see somewhere else, it also gives the correct
+ * mouse location when trying to click on the canvas asociated to
+ * this viewport.
+ */
 class Viewport {
-  constructor(canvas, zoom = 1, offset = null) {
+  canvas: HTMLCanvasElement;
+  ctx: CanvasRenderingContext2D;
+  zoom: number;
+  center: Point;
+  offset: Point;
+  drag: {
+    start: Point;
+    end: Point;
+    offset: Point;
+    active: boolean;
+  };
+
+  constructor(
+    canvas: HTMLCanvasElement,
+    zoom: number = 1,
+    offset: Point | null = null
+  ) {
     this.canvas = canvas;
-    this.ctx = canvas.getContext('2d');
+    this.ctx = canvas.getContext("2d");
 
     this.zoom = zoom;
     this.center = new Point(canvas.width / 2, canvas.height / 2);
@@ -10,26 +35,32 @@ class Viewport {
       start: new Point(0, 0),
       end: new Point(0, 0),
       offset: new Point(0, 0),
-      active: false
-    }
+      active: false,
+    };
 
     this.#addEventListeners();
   }
 
   getMouse(e, substractDragOffset = false) {
     const p = new Point(
-      (e.offsetX - this.center.x) * this.zoom - this.offset.x, 
+      (e.offsetX - this.center.x) * this.zoom - this.offset.x,
       (e.offsetY - this.center.y) * this.zoom - this.offset.y
     );
 
     return substractDragOffset ? Point.sub(p, this.drag.offset) : p;
   }
 
-  getMouseFromPoint(p) {
+  /**
+   * Getting point that represents the real coordinate taking account
+   * the offset of the viewport.
+   * @param {Point} p actual point of the mouse
+   * @returns {Point}
+   */
+  getMouseFromPoint(p: Point): Point {
     const fp = new Point(
       (p.x - this.center.x) * this.zoom - this.offset.x,
       (p.y - this.center.y) * this.zoom - this.offset.y
-    )
+    );
 
     return fp;
   }
@@ -39,6 +70,9 @@ class Viewport {
   }
 
   reset() {
+    if (!this.ctx) {
+      throw new Error("viewport.reset - context is 'null'");
+    }
     this.ctx.restore();
 
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
@@ -52,10 +86,10 @@ class Viewport {
   }
 
   #addEventListeners() {
-    this.canvas.addEventListener('mousewheel', e =>  this.#onMouseWheel(e));
-    this.canvas.addEventListener('mousedown', e =>  this.#onMouseDown(e));
-    this.canvas.addEventListener('mousemove', e =>  this.#onMouseMove(e));
-    this.canvas.addEventListener('mouseup', e =>  this.#onMouseUp(e));
+    this.canvas.addEventListener("mousewheel", (e) => this.#onMouseWheel(e));
+    this.canvas.addEventListener("mousedown", (e) => this.#onMouseDown(e));
+    this.canvas.addEventListener("mousemove", (e) => this.#onMouseMove(e));
+    this.canvas.addEventListener("mouseup", (e) => this.#onMouseUp(e));
   }
 
   #onMouseWheel(e) {
@@ -86,8 +120,10 @@ class Viewport {
         start: new Point(0, 0),
         end: new Point(0, 0),
         offset: new Point(0, 0),
-        active: false
+        active: false,
       };
     }
   }
 }
+
+export default Viewport;

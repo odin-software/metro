@@ -26,7 +26,7 @@ func Server() {
 		},
 	))
 
-	server.Static("/ce-js", "websites/city/js")
+	server.Static("/ce-js", "websites/city/dist")
 	server.Static("/ce-css", "websites/city/css")
 	server.Static("/ce-images", "websites/city/images")
 
@@ -37,6 +37,10 @@ func Server() {
 		return Render(c, http.StatusOK, Editor())
 	})
 	server.GET("/stations", func(c echo.Context) error {
+		stations := bs.ListStations()
+		return c.JSON(http.StatusOK, stations)
+	})
+	server.GET("/edges", func(c echo.Context) error {
 		stations := bs.ListStations()
 		return c.JSON(http.StatusOK, stations)
 	})
