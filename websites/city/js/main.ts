@@ -19,7 +19,11 @@ canvas.height = window.innerHeight;
 
 const ctx = canvas.getContext("2d");
 const world = new World(await Network.load());
-const viewport = new Viewport(canvas, world.zoom, world.offset);
+const viewport = new Viewport(
+  canvas,
+  world.zoom,
+  world.network.getCenterPoint().invertSign()
+);
 
 let trains = [];
 

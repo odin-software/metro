@@ -50,6 +50,22 @@ export class Network {
   }
 
   /**
+   * Get a center point of the network to use as offset of the viewport.
+   */
+  getCenterPoint(): Point {
+    const x =
+      this.nodes.reduce((prev, cur) => {
+        return cur.position.x + prev;
+      }, 0) / this.nodes.length;
+    const y =
+      this.nodes.reduce((prev, cur) => {
+        return cur.position.y + prev;
+      }, 0) / this.nodes.length;
+    console.log(x, y);
+    return new Point(x, y);
+  }
+
+  /**
    * Adds a node to the network.
    * @param {Station} node
    */

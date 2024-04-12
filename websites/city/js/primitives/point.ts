@@ -66,6 +66,13 @@ class Point {
   }
 
   /**
+   * Invert sign of components.
+   */
+  invertSign(): Point {
+    return new Point(-this.x, -this.y);
+  }
+
+  /**
    * Function to draw a Point with options on styling.
    * @param {CanvasRenderingContext2D} ctx
    * @param {?PointStyle} style
