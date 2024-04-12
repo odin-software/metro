@@ -9,13 +9,13 @@ async function fetchMetro<T>(url: string): Promise<T> {
 }
 
 export async function getStations() {
-  const response = await fetchMetro<Station[]>(GET_STATIONS_URL);
+  const response = await fetchMetro<RequestStation[]>(GET_STATIONS_URL);
 
   return response;
 }
 
 export async function getEdges() {
-  const response = await fetchMetro<Edge[]>(GET_EDGES_URL);
+  const response = await fetchMetro<RequestEdge[]>(GET_EDGES_URL);
 
   return response;
 }

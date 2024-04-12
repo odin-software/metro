@@ -68,11 +68,16 @@ class Point {
   /**
    * Function to draw a Point with options on styling.
    * @param {CanvasRenderingContext2D} ctx
-   * @param {PointStyle} style
+   * @param {?PointStyle} style
    */
   draw(
     ctx: CanvasRenderingContext2D,
-    { size = 18, color = "black", outline = false, fill = false }: PointStyle
+    {
+      size = 18,
+      color = "black",
+      outline = false,
+      fill = false,
+    }: Partial<PointStyle>
   ) {
     const radius = size / 2;
     ctx.beginPath();

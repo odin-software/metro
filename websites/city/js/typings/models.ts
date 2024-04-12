@@ -1,4 +1,4 @@
-type Station = {
+type RequestStation = {
   id: number;
   position: {
     x: number;
@@ -7,7 +7,7 @@ type Station = {
   name: string;
 };
 
-type Edge = {
+type RequestEdge = {
   ID: number;
   Fromid: number;
   Toid: number;
