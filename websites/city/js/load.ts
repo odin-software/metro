@@ -1,15 +1,21 @@
 import { GET_EDGES_URL, GET_STATIONS_URL } from "./utils/consts.js";
 
-export async function getStations() {
-  const response = await fetch(GET_STATIONS_URL);
-  const data: Station[] = await response.json();
+async function fetchMetro<T>(url: string): Promise<T> {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(response.statusText);
+  }
+  return await (response.json() as Promise<T>);
+}
 
-  return data;
+export async function getStations() {
+  const response = await fetchMetro<Station[]>(GET_STATIONS_URL);
+
+  return response;
 }
 
 export async function getEdges() {
-  const response = await fetch(GET_EDGES_URL);
-  const data: Edge[] = await response.json();
+  const response = await fetchMetro<Edge[]>(GET_EDGES_URL);
 
-  return data;
+  return response;
 }

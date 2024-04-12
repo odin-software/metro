@@ -12,3 +12,7 @@ type Edge = {
   Fromid: number;
   Toid: number;
 };
+
+type Train = {
+  id: number;
+};

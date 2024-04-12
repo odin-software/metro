@@ -1,7 +1,8 @@
 import { setTrains } from "../main.js";
+import { TRAINS_WS_FEED } from "../utils/consts.js";
 
 export function initWs() {
-  const ws = new WebSocket("ws://localhost:2223/trains");
+  const ws = new WebSocket(TRAINS_WS_FEED);
 
   ws.onmessage = (ev) => {
     const parsed = JSON.parse(ev.data);
