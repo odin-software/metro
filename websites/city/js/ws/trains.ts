@@ -7,4 +7,19 @@ export function initWs() {
     const parsed = JSON.parse(ev.data);
     setTrains(parsed);
   };
+
+  ws.onclose = function (e) {
+    console.warn(
+      "Socket connection is closed. Reconnection attempt in 2 seconds",
+      e.reason
+    );
+    setTimeout(function () {
+      initWs();
+    }, 2000);
+  };
+
+  ws.onerror = function (err) {
+    console.error("Socket encountered error, closing.");
+    ws.close();
+  };
 }

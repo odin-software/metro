@@ -4,7 +4,8 @@ import Point from "./primitives/point.js";
 import Graph from "./math/graph.js";
 
 import { initWs } from "./ws/trains.js";
-import { getStations } from "./load.js";
+import { getEdges, getStations } from "./load.js";
+import Segment from "./primitives/segment.js";
 
 const canvas = document.getElementById("cityCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -15,9 +16,19 @@ canvas.height = window.innerHeight;
 
 const ctx = canvas.getContext("2d");
 const stations = await getStations();
+const edges = await getEdges();
+
 const world = new World(
   new Graph(
-    stations.map((st) => new Point(st.position.x, st.position.y, st.name))
+    stations.map((st) => new Point(st.position.x, st.position.y, st.name)),
+    edges.map((e) => {
+      const st1 = stations.find((st) => st.id === e.Fromid);
+      const st2 = stations.find((st) => st.id === e.Toid);
+      return new Segment(
+        new Point(st1.position.x, st1.position.y),
+        new Point(st2.position.x, st2.position.y)
+      );
+    })
   )
 );
 

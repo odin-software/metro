@@ -41,8 +41,8 @@ func Server() {
 		return c.JSON(http.StatusOK, stations)
 	})
 	server.GET("/edges", func(c echo.Context) error {
-		stations := bs.ListStations()
-		return c.JSON(http.StatusOK, stations)
+		edges := bs.ListEdges()
+		return c.JSON(http.StatusOK, edges)
 	})
 
 	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)

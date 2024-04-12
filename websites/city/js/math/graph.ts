@@ -8,6 +8,7 @@ import Segment from "../primitives/segment.js";
 class Graph {
   points: Point[];
   segments: Segment[];
+
   constructor(points = [], segments = []) {
     this.points = points;
     this.segments = segments;
