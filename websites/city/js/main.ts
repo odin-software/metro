@@ -22,7 +22,6 @@ const viewport = new Viewport(
 );
 
 let trains = [];
-
 const mouse = new Point(0, 0);
 
 canvas.addEventListener("mousemove", (event) => {
