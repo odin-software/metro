@@ -1,14 +1,10 @@
 import Viewport from "./viewport.js";
 import { World } from "./models/world.js";
 import Point from "./primitives/point.js";
-import Graph from "./math/graph.js";
 
 import { initWs } from "./ws/trains.js";
-import { getEdges, getEdgesPoints, getStations } from "./load.js";
-import Segment from "./primitives/segment.js";
 import { Network } from "./models/network.js";
-import { Station } from "./models/station.js";
-import { Edge } from "./models/edge.js";
+import { pauseLoop, playLoop } from "./load.js";
 
 const canvas = document.getElementById("cityCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -32,6 +28,12 @@ const mouse = new Point(0, 0);
 canvas.addEventListener("mousemove", (event) => {
   mouse.x = event.clientX;
   mouse.y = event.clientY;
+});
+document.querySelector("#pauseBtn").addEventListener("click", async () => {
+  pauseLoop();
+});
+document.querySelector("#playBtn").addEventListener("click", async () => {
+  playLoop();
 });
 
 initWs();

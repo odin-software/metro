@@ -1,6 +1,8 @@
 import {
   GET_EDGES_URL,
   GET_EDGE_POINTS_URL,
+  GET_PAUSE_LOOP,
+  GET_PLAY_LOOP,
   GET_STATIONS_URL,
 } from "./utils/consts.js";
 
@@ -30,4 +32,12 @@ export async function getEdgesPoints(id: number) {
   );
 
   return response;
+}
+
+export function playLoop() {
+  fetch(GET_PLAY_LOOP);
+}
+
+export function pauseLoop() {
+  fetch(GET_PAUSE_LOOP);
 }

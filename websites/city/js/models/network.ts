@@ -61,7 +61,6 @@ export class Network {
       this.nodes.reduce((prev, cur) => {
         return cur.position.y + prev;
       }, 0) / this.nodes.length;
-    console.log(x, y);
     return new Point(x, y);
   }
 
