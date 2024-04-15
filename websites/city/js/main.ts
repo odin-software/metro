@@ -5,6 +5,7 @@ import Point from "./primitives/point.js";
 import { initWs } from "./ws/trains.js";
 import { Network } from "./models/network.js";
 import { pauseLoop, playLoop } from "./load.js";
+import { initEventsWs } from "./ws/events.js";
 
 const canvas = document.getElementById("cityCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -22,7 +23,9 @@ const viewport = new Viewport(
 );
 
 let trains = [];
+let logs = [];
 const mouse = new Point(0, 0);
+const list = document.querySelector("#logsList") as HTMLUListElement;
 
 canvas.addEventListener("mousemove", (event) => {
   mouse.x = event.clientX;
@@ -36,6 +39,7 @@ document.querySelector("#playBtn").addEventListener("click", async () => {
 });
 
 initWs();
+initEventsWs();
 animate();
 
 function animate() {
@@ -56,4 +60,15 @@ function animate() {
 
 export function setTrains(wsTrains) {
   trains = wsTrains;
+}
+export function setLogs(wsLogs) {
+  logs = wsLogs;
+  list.innerHTML = "";
+
+  for (let i = 0; i < logs.length; i++) {
+    const li = document.createElement("li");
+    const p = document.createTextNode(logs[i]);
+    li.appendChild(p);
+    list.appendChild(li);
+  }
 }

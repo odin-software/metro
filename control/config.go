@@ -18,6 +18,7 @@ type Config struct {
 	TerminalMapDuration time.Duration
 	TerminalMapEnabled  bool
 	TrainWaitInStation  time.Duration
+	WSLogsDuration      time.Duration
 	WSTrainDuration     time.Duration
 }
 
@@ -35,5 +36,6 @@ var DefaultConfig = Config{
 	TerminalMapDuration: 800 * time.Millisecond,
 	TerminalMapEnabled:  false,
 	TrainWaitInStation:  3000 * time.Millisecond,
+	WSLogsDuration:      4000 * time.Millisecond,
 	WSTrainDuration:     200 * time.Millisecond,
 }

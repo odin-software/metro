@@ -1,12 +1,12 @@
-import { setTrains } from "../main.js";
-import { TRAINS_WS_FEED } from "../utils/consts.js";
+import { setLogs } from "../main.js";
+import { LOGS_WS_FEED } from "../utils/consts.js";
 
-export function initWs() {
-  const ws = new WebSocket(TRAINS_WS_FEED);
+export function initEventsWs() {
+  const ws = new WebSocket(LOGS_WS_FEED);
 
   ws.onmessage = (ev) => {
     const parsed = JSON.parse(ev.data);
-    setTrains(parsed);
+    setLogs(parsed);
   };
 
   ws.onclose = function (e) {
@@ -15,7 +15,7 @@ export function initWs() {
       e.reason
     );
     setTimeout(function () {
-      initWs();
+      initEventsWs();
     }, 2000);
   };
 

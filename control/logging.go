@@ -7,7 +7,6 @@ import (
 	"time"
 )
 
-// Logs created by day.
 type Loporter struct {
 	currentDay time.Time
 	log        *log.Logger
@@ -73,5 +72,5 @@ func Log(message string) {
 		LPT.log.SetOutput(wr)
 	}
 
-	LPT.log.Println(message)
+	LPT.log.Print(message)
 }
