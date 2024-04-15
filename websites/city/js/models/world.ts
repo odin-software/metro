@@ -21,9 +21,9 @@ export class World {
     for (const node of this.network.nodes) {
       if (node.position.distanceTo(vp) < 60) {
         ctx.fillStyle = "white";
-        ctx.font = "48px Arial";
+        ctx.font = "28px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(node.name, node.position.x, node.position.y - 50);
+        ctx.fillText(node.name, node.position.x, node.position.y - 25);
       }
     }
   }

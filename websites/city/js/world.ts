@@ -39,9 +39,9 @@ class World {
     for (const point of this.graph.points) {
       if (point.distanceTo(vp) < 60) {
         ctx.fillStyle = "white";
-        ctx.font = "48px Arial";
+        ctx.font = "28px Arial";
         ctx.textAlign = "center";
-        ctx.fillText(point.name, point.x, point.y - 50);
+        ctx.fillText(point.name, point.x, point.y - 24);
       }
     }
   }

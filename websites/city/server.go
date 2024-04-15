@@ -10,6 +10,7 @@ import (
 	"github.com/labstack/echo/v4/middleware"
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/baso"
+	"github.com/odin-software/metro/internal/sematick"
 )
 
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {
@@ -18,7 +19,7 @@ func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	return t.Render(ctx.Request().Context(), ctx.Response().Writer)
 }
 
-func Server() {
+func Server(tick *sematick.Ticker) {
 	server := echo.New()
 	bs := baso.NewBaso()
 	server.Use(middleware.LoggerWithConfig(
@@ -53,6 +54,15 @@ func Server() {
 		}
 		edges := bs.ListEdgePoints(int64(id))
 		return c.JSON(http.StatusOK, edges)
+	})
+
+	server.GET("/pause", func(c echo.Context) error {
+		tick.Pause()
+		return c.NoContent(http.StatusOK)
+	})
+	server.GET("/resume", func(c echo.Context) error {
+		tick.Resume()
+		return c.NoContent(http.StatusOK)
 	})
 
 	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)

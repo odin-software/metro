@@ -70,5 +70,5 @@ func main() {
 	go reporter.Server()
 	go virtual.Server()
 	go events.Main()
-	city.Server()
+	city.Server(loopTick)
 }
