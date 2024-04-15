@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/broadcast"
 )
 
@@ -70,19 +71,23 @@ func (tr *Train) addToQueue(sts []Vector) {
 	tr.q.QList(sts)
 }
 
-func (tr *Train) broadcastArrival(stationId int64) {
+func (tr *Train) broadcastArrival(stationId int64, stationName string) {
 	msg := broadcast.ADMessage[Train]{
 		StationID: stationId,
 		Train:     *tr,
 	}
+	logMsg := fmt.Sprintf("%s arrived at station: %s", tr.Name, stationName)
+	control.Log(logMsg)
 	tr.arrivals <- msg
 }
 
-func (tr *Train) broadcastDeparture(stationId int64) {
+func (tr *Train) broadcastDeparture(stationId int64, stationName string) {
 	msg := broadcast.ADMessage[Train]{
 		StationID: stationId,
 		Train:     *tr,
 	}
+	logMsg := fmt.Sprintf("%s departed from station: %s", tr.Name, stationName)
+	control.Log(logMsg)
 	tr.departures <- msg
 }
 
@@ -125,7 +130,7 @@ func (tr *Train) Tick() {
 		}
 		tr.addToQueue(path)
 
-		tr.broadcastDeparture(tr.Current.ID)
+		tr.broadcastDeparture(tr.Current.ID, tr.Current.Name)
 	}
 
 	// Update velocity based of direction of next location
@@ -161,7 +166,7 @@ func (tr *Train) Tick() {
 			tr.Next = nil
 
 			// Broadcast arrival
-			tr.broadcastArrival(tr.Current.ID)
+			tr.broadcastArrival(tr.Current.ID, tr.Current.Name)
 
 			time.Sleep(3 * time.Second)
 			return

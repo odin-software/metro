@@ -9,6 +9,7 @@ import (
 
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/baso"
+	"github.com/odin-software/metro/internal/loglytics"
 	"golang.org/x/net/websocket"
 )
 
@@ -43,6 +44,30 @@ func (s *Server) handleTrains(ws *websocket.Conn) {
 		}
 		ws.Write([]byte(payload))
 		time.Sleep(control.DefaultConfig.WSTrainDuration)
+	}
+}
+
+func (s *Server) handleLogs(ws *websocket.Conn) {
+	s.conmux.Lock()
+
+	fmt.Println(ws.RemoteAddr(), "is now connected to the logs feed.")
+
+	s.conns[ws] = true
+	s.conmux.Unlock()
+
+	go s.readLoop(ws)
+
+	for {
+		files := loglytics.GetOrderedLogFiles()
+		lines := loglytics.GetLastLines(files[len(files)-1], 6)
+
+		payload, err := json.Marshal(lines)
+		if err != nil {
+			fmt.Println(err)
+		}
+		ws.Write([]byte(payload))
+
+		time.Sleep(control.DefaultConfig.WSLogsDuration)
 	}
 }
 

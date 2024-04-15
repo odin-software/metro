@@ -9,3 +9,4 @@ export const GET_PLAY_LOOP = `${CITY_BASE}/resume`;
 export const GET_PAUSE_LOOP = `${CITY_BASE}/pause`;
 
 export const TRAINS_WS_FEED = `${EVENTS_BASE_URL}/trains`;
+export const LOGS_WS_FEED = `${EVENTS_BASE_URL}/logs`;

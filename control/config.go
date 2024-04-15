@@ -1,13 +1,11 @@
 package control
 
 import (
-	"strconv"
 	"time"
-
-	"github.com/odin-software/metro/internal/models"
 )
 
 type Config struct {
+	LogsDirectory       string
 	LoopDuration        time.Duration
 	LoopDurationOffset  time.Duration
 	LoopStartingState   int
@@ -16,14 +14,16 @@ type Config struct {
 	PortReporter        int
 	PortVirtual         int
 	ReflexDuration      time.Duration
+	StdLogs             bool
 	TerminalMapDuration time.Duration
 	TerminalMapEnabled  bool
-	TrainLogs           bool
 	TrainWaitInStation  time.Duration
+	WSLogsDuration      time.Duration
 	WSTrainDuration     time.Duration
 }
 
 var DefaultConfig = Config{
+	LogsDirectory:       "logs/",
 	LoopDuration:        20 * time.Millisecond,
 	LoopDurationOffset:  -1 * time.Millisecond,
 	LoopStartingState:   1,
@@ -32,13 +32,10 @@ var DefaultConfig = Config{
 	PortReporter:        2222,
 	PortVirtual:         2224,
 	ReflexDuration:      200 * time.Millisecond,
+	StdLogs:             false,
 	TerminalMapDuration: 800 * time.Millisecond,
 	TerminalMapEnabled:  false,
-	TrainLogs:           false,
 	TrainWaitInStation:  3000 * time.Millisecond,
+	WSLogsDuration:      4000 * time.Millisecond,
 	WSTrainDuration:     200 * time.Millisecond,
-}
-
-var StationHashFunction = func(station models.Station) string {
-	return strconv.FormatInt(station.ID, 10)
 }
