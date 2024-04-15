@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"time"
 
+	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/broadcast"
 )
 
@@ -75,6 +76,7 @@ func (tr *Train) broadcastArrival(stationId int64) {
 		StationID: stationId,
 		Train:     *tr,
 	}
+	control.Log("TrainArrived")
 	tr.arrivals <- msg
 }
 

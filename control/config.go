@@ -1,13 +1,11 @@
 package control
 
 import (
-	"strconv"
 	"time"
-
-	"github.com/odin-software/metro/internal/models"
 )
 
 type Config struct {
+	LogsDirectory       string
 	LoopDuration        time.Duration
 	LoopDurationOffset  time.Duration
 	LoopStartingState   int
@@ -24,6 +22,7 @@ type Config struct {
 }
 
 var DefaultConfig = Config{
+	LogsDirectory:       "logs/",
 	LoopDuration:        20 * time.Millisecond,
 	LoopDurationOffset:  -1 * time.Millisecond,
 	LoopStartingState:   1,
@@ -37,8 +36,4 @@ var DefaultConfig = Config{
 	TrainLogs:           false,
 	TrainWaitInStation:  3000 * time.Millisecond,
 	WSTrainDuration:     200 * time.Millisecond,
-}
-
-var StationHashFunction = func(station models.Station) string {
-	return strconv.FormatInt(station.ID, 10)
 }

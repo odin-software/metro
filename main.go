@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"strconv"
 	"time"
 
 	"github.com/odin-software/metro/control"
+	"github.com/odin-software/metro/data"
 	"github.com/odin-software/metro/internal/broadcast"
 	"github.com/odin-software/metro/internal/models"
 	"github.com/odin-software/metro/internal/sematick"
@@ -15,6 +17,10 @@ import (
 	"github.com/odin-software/metro/websites/virtual-world"
 )
 
+var StationHashFunction = func(station models.Station) string {
+	return strconv.FormatInt(station.ID, 10)
+}
+
 func main() {
 	// Setup
 	loopTick := sematick.NewTicker(
@@ -24,6 +30,7 @@ func main() {
 	reflexTick := time.NewTicker(control.DefaultConfig.ReflexDuration)
 	mapTick := time.NewTicker(control.DefaultConfig.TerminalMapDuration)
 	ctx, cancel := context.WithCancel(context.Background())
+	control.InitLogger()
 	defer cancel()
 
 	// Creating the broadcast channels for the trains.
@@ -33,16 +40,16 @@ func main() {
 	bcDep := broadcast.NewBroadcastServer(ctx, departures)
 
 	// Creating the city graph.
-	cityNetwork := models.NewNetwork(control.StationHashFunction)
+	cityNetwork := models.NewNetwork(StationHashFunction)
 
 	// Loading stations, lines, edges from the database.
-	stations := control.LoadStations(bcArr, bcDep)
-	lines := control.LoadLines()
+	stations := data.LoadStations(bcArr, bcDep)
+	lines := data.LoadLines()
 	cityNetwork.InsertVertices(stations)
-	control.LoadEdges(&cityNetwork)
+	data.LoadEdges(&cityNetwork)
 
 	// Creating the train with lines and channels to communicate.
-	trains := control.LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
+	trains := data.LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
 
 	// Starting the goroutines for the trains.
 	for i := 0; i < len(trains); i++ {
@@ -62,7 +69,7 @@ func main() {
 	// Reflect what's on memory on the DB.
 	go func() {
 		for range reflexTick.C {
-			control.DumpTrainsData(trains)
+			data.DumpTrainsData(trains)
 		}
 	}()
 

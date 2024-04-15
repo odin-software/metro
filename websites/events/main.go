@@ -19,6 +19,7 @@ func Main() {
 	router := http.NewServeMux()
 
 	router.Handle("GET /trains", websocket.Handler(server.handleTrains))
+	router.Handle("GET /events", websocket.Handler(server.handleTrains))
 	router.Handle("GET /", handleBase())
 
 	port := fmt.Sprintf(":%d", control.DefaultConfig.PortEvents)

@@ -3,7 +3,7 @@ package baso
 import (
 	"log"
 
-	models "github.com/odin-software/metro/internal/models"
+	"github.com/odin-software/metro/internal/models"
 )
 
 func (bs *Baso) ListMakes() []models.Make {
