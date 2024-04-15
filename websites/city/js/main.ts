@@ -48,7 +48,7 @@ function animate() {
   world.draw(ctx);
   trains.forEach((tr) => {
     const p = new Point(tr.x, tr.y);
-    p.draw(ctx, { size: 30, color: "white" });
+    p.draw(ctx, { size: 24, color: "white" });
   });
 
   requestAnimationFrame(animate);
