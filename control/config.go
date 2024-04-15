@@ -14,9 +14,9 @@ type Config struct {
 	PortReporter        int
 	PortVirtual         int
 	ReflexDuration      time.Duration
+	StdLogs             bool
 	TerminalMapDuration time.Duration
 	TerminalMapEnabled  bool
-	TrainLogs           bool
 	TrainWaitInStation  time.Duration
 	WSTrainDuration     time.Duration
 }
@@ -31,9 +31,9 @@ var DefaultConfig = Config{
 	PortReporter:        2222,
 	PortVirtual:         2224,
 	ReflexDuration:      200 * time.Millisecond,
+	StdLogs:             false,
 	TerminalMapDuration: 800 * time.Millisecond,
 	TerminalMapEnabled:  false,
-	TrainLogs:           false,
 	TrainWaitInStation:  3000 * time.Millisecond,
 	WSTrainDuration:     200 * time.Millisecond,
 }

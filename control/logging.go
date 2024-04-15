@@ -34,7 +34,12 @@ func InitLogger() {
 		log.Panicf("error opening file: %v", err)
 	}
 
-	wr := io.MultiWriter(f, os.Stdout)
+	var wr io.Writer
+	if DefaultConfig.StdLogs {
+		wr = io.MultiWriter(f, os.Stdout)
+	} else {
+		wr = io.MultiWriter(f)
+	}
 	_log := log.New(wr, "INFO: ", log.LstdFlags)
 
 	LPT = Loporter{
@@ -58,7 +63,13 @@ func Log(message string) {
 		if err != nil {
 			log.Panicf("error opening file: %v", err)
 		}
-		wr := io.MultiWriter(newFile, os.Stdout)
+
+		var wr io.Writer
+		if DefaultConfig.StdLogs {
+			wr = io.MultiWriter(newFile, os.Stdout)
+		} else {
+			wr = io.MultiWriter(newFile)
+		}
 		LPT.log.SetOutput(wr)
 	}
 
