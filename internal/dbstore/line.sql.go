@@ -150,6 +150,71 @@ func (q *Queries) GetLineTrains(ctx context.Context, lineid sql.NullInt64) ([]Ge
 	return items, nil
 }
 
+const getPointsFromLine = `-- name: GetPointsFromLine :many
+SELECT
+	IFNULL(ep.x, st.x) x,
+	IFNULL(ep.y, st.y) y,
+	IFNULL(ep.z, st.z) z,
+	cj.is_station
+FROM
+	line ln
+	JOIN station_line sl ON ln.id = sl.lineId
+	JOIN station st ON sl.stationId = st.id
+	LEFT JOIN station_line sln ON sln.lineId = ln.id
+		AND sln.odr = sl.odr + 1
+	LEFT JOIN edge ed ON ed.fromId = sl.stationId
+		AND ed.toId = sln.stationId
+	CROSS JOIN (
+		SELECT
+			1 is_station
+	UNION
+	SELECT
+		0) cj
+	LEFT JOIN edge_point ep ON ed.id = ep.edgeId
+		AND cj.is_station = 0
+WHERE
+	ln.id = ?
+ORDER BY
+	sl.odr,
+	cj.is_station DESC,
+	ep.odr
+`
+
+type GetPointsFromLineRow struct {
+	X         interface{}
+	Y         interface{}
+	Z         interface{}
+	IsStation int64
+}
+
+func (q *Queries) GetPointsFromLine(ctx context.Context, id int64) ([]GetPointsFromLineRow, error) {
+	rows, err := q.db.QueryContext(ctx, getPointsFromLine, id)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []GetPointsFromLineRow
+	for rows.Next() {
+		var i GetPointsFromLineRow
+		if err := rows.Scan(
+			&i.X,
+			&i.Y,
+			&i.Z,
+			&i.IsStation,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getStationsFromLine = `-- name: GetStationsFromLine :many
 SELECT
 	st.id,

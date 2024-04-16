@@ -1,6 +1,7 @@
 import {
   GET_EDGES_URL,
   GET_EDGE_POINTS_URL,
+  GET_LINES_URL,
   GET_PAUSE_LOOP,
   GET_PLAY_LOOP,
   GET_STATIONS_URL,
@@ -30,6 +31,12 @@ export async function getEdgesPoints(id: number) {
   const response = await fetchMetro<RequestEdgePoint[] | null>(
     GET_EDGE_POINTS_URL(id)
   );
+
+  return response;
+}
+
+export async function getLines() {
+  const response = await fetchMetro<RequestLine[]>(GET_LINES_URL);
 
   return response;
 }

@@ -16,6 +16,35 @@ FROM
 WHERE
 	lineId = ?;
 
+-- name: GetPointsFromLine :many
+SELECT
+	IFNULL(ep.x, st.x) x,
+	IFNULL(ep.y, st.y) y,
+	IFNULL(ep.z, st.z) z,
+	cj.is_station
+FROM
+	line ln
+	JOIN station_line sl ON ln.id = sl.lineId
+	JOIN station st ON sl.stationId = st.id
+	LEFT JOIN station_line sln ON sln.lineId = ln.id
+		AND sln.odr = sl.odr + 1
+	LEFT JOIN edge ed ON ed.fromId = sl.stationId
+		AND ed.toId = sln.stationId
+	CROSS JOIN (
+		SELECT
+			1 is_station
+	UNION
+	SELECT
+		0) cj
+	LEFT JOIN edge_point ep ON ed.id = ep.edgeId
+		AND cj.is_station = 0
+WHERE
+	ln.id = ?
+ORDER BY
+	sl.odr,
+	cj.is_station DESC,
+	ep.odr;
+
 -- name: GetLineById :one
 SELECT id, name FROM line
 WHERE id = ?

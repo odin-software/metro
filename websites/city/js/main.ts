@@ -4,8 +4,9 @@ import Point from "./primitives/point.js";
 
 import { initWs } from "./ws/trains.js";
 import { Network } from "./models/network.js";
-import { pauseLoop, playLoop } from "./load.js";
+import { getLines, pauseLoop, playLoop } from "./load.js";
 import { initEventsWs } from "./ws/events.js";
+import { Line } from "./models/line.js";
 
 const canvas = document.getElementById("cityCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -21,6 +22,8 @@ const viewport = new Viewport(
   world.zoom,
   world.network.getCenterPoint().invertSign()
 );
+const lines = await getLines();
+console.log(lines);
 
 let trains = [];
 let logs = [];
@@ -53,6 +56,10 @@ function animate() {
   trains.forEach((tr) => {
     const p = new Point(tr.x, tr.y);
     p.draw(ctx, { size: 24, color: "white" });
+  });
+  lines.forEach((ln) => {
+    const line = new Line(ln.points.map((l) => new Point(l.x, l.y)));
+    line.draw(ctx, { color: "yellow" });
   });
 
   requestAnimationFrame(animate);

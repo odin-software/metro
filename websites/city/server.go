@@ -42,6 +42,10 @@ func Server(tick *sematick.Ticker) {
 		stations := bs.ListStations()
 		return c.JSON(http.StatusOK, stations)
 	})
+	server.GET("/lines", func(c echo.Context) error {
+		lines := bs.ListLinesWithPoints()
+		return c.JSON(http.StatusOK, lines)
+	})
 	server.GET("/edges", func(c echo.Context) error {
 		edges := bs.ListEdges()
 		return c.JSON(http.StatusOK, edges)

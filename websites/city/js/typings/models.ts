@@ -22,6 +22,14 @@ type RequestEdgePoint = {
   Odr: number;
 };
 
+type RequestLine = {
+  name: string;
+  points: {
+    x: number;
+    y: number;
+  }[];
+};
+
 type Train = {
   id: number;
 };
