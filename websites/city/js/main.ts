@@ -23,7 +23,6 @@ const viewport = new Viewport(
   world.network.getCenterPoint().invertSign()
 );
 const lines = await getLines();
-console.log(lines);
 
 let trains = [];
 let logs = [];
