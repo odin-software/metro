@@ -30,6 +30,26 @@ export class Edge {
     return this.start.equals(node) || this.end.equals(node);
   }
 
+  /**
+   * DRAFT:
+   * Checks if a edge has the same points as this one.
+   * @param {Edge} edge
+   * @returns {boolean}
+   */
+  equalsDraft(edge: Edge): boolean {
+    return this.includesDraft(edge.start) && this.includesDraft(edge.end);
+  }
+
+  /**
+   * DRAFT:
+   * Returns true if a node is included in one of this edge's point.
+   * @param {Station} node
+   * @returns {boolean}
+   */
+  includesDraft(node: Station): boolean {
+    return this.start.equalsDraft(node) || this.end.equalsDraft(node);
+  }
+
   draw(
     ctx: CanvasRenderingContext2D,
     { color = "white", dash = [22, 11], width = 2 } = {}

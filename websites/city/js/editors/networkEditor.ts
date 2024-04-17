@@ -81,6 +81,9 @@ export class NetworkEditor {
         return;
       }
       const st = Station.draft(this.mouse.x, this.mouse.y);
+      console.log(this.selected);
+      console.log(this.network.edges);
+      console.log(st);
       this.network.addNode(st);
       this.#selectPoint(st);
       this.selected = st;
@@ -112,7 +115,7 @@ export class NetworkEditor {
 
   #selectPoint(st: Station) {
     if (this.selected) {
-      this.network.tryAddEdge(new Edge(this.selected, st, []));
+      this.network.tryAddEdgeDraft(new Edge(this.selected, st, []));
     }
   }
 

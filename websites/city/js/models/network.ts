@@ -125,6 +125,16 @@ export class Network {
   }
 
   /**
+   * DRAFT:
+   * Checks if the edge exist checking the draft way in the network.
+   * @param edge
+   * @returns
+   */
+  containsDraftEdge(edge: Edge) {
+    return this.edges.some((ed) => ed.equalsDraft(edge));
+  }
+
+  /**
    * Tries to add an edge in the network if it doesn't exist.
    * @param {Edge} edge
    * @returns {boolean} whether it was added or not
@@ -134,6 +144,22 @@ export class Network {
       return false;
     }
     if (edge.start.equals(edge.end)) {
+      return false;
+    }
+    this.edges.push(edge);
+    return true;
+  }
+
+  /**
+   * Tries to add an edge in the network if it doesn't exist.
+   * @param {Edge} edge
+   * @returns {boolean} whether it was added or not
+   */
+  tryAddEdgeDraft(edge: Edge): boolean {
+    if (this.containsDraftEdge(edge)) {
+      return false;
+    }
+    if (edge.start.equalsDraft(edge.end)) {
       return false;
     }
     this.edges.push(edge);
