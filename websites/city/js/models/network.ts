@@ -10,6 +10,7 @@ import { Station } from "./station.js";
 export class Network {
   nodes: Station[];
   edges: Edge[];
+  draft: Station[];
 
   constructor(nodes: Station[] = [], edges: Edge[] = []) {
     this.nodes = nodes;
@@ -120,7 +121,7 @@ export class Network {
    * @returns
    */
   containsEdge(edge: Edge) {
-    return this.edges.some((edge) => edge.equals(edge));
+    return this.edges.some((ed) => ed.equals(edge));
   }
 
   /**
@@ -172,7 +173,7 @@ export class Network {
 
   draw(ctx: CanvasRenderingContext2D) {
     for (const edge of this.edges) {
-      edge.draw(ctx, undefined);
+      edge.draw(ctx);
     }
 
     for (const node of this.nodes) {

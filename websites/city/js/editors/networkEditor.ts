@@ -95,9 +95,7 @@ export class NetworkEditor {
       this.network.nodes.map((st) => st.position),
       10 * this.viewport.zoom
     );
-    if (val) {
-      this.hovered = this.network.getNodeFromPosition(val);
-    }
+    this.hovered = val ? this.network.getNodeFromPosition(val) : null;
     if (this.dragging) {
       this.selected.position.x = this.mouse.x;
       this.selected.position.y = this.mouse.y;
