@@ -1,5 +1,4 @@
 import Point from "../primitives/point.js";
-import { Station } from "./station";
 
 export class Line {
   edgePoints: Point[];

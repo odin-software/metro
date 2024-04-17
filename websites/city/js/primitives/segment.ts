@@ -1,6 +1,5 @@
 import Point from "./point.js";
 import { dot, magnitude, normalize } from "../math/utils.js";
-import { SegmentStyle } from "../typings.js";
 
 /**
  * The Segment class represents a connection between two points inside a graph.
@@ -85,11 +84,10 @@ class Segment {
   /**
    * Function to draw a Segment with options on styling.
    * @param {CanvasRenderingContext2D} ctx
-   * @param {?SegmentStyle} style
    */
   draw(
     ctx: CanvasRenderingContext2D,
-    { width = 2, color = "white", dash = [] }: SegmentStyle
+    { width = 2, color = "white", dash = [] } = {}
   ) {
     ctx.beginPath();
     ctx.lineWidth = width;

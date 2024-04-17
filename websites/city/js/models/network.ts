@@ -1,6 +1,5 @@
 import { getEdges, getEdgesPoints, getStations } from "../load.js";
 import Point from "../primitives/point.js";
-import Segment from "../primitives/segment.js";
 import { Edge } from "./edge.js";
 import { Station } from "./station.js";
 
@@ -11,10 +10,14 @@ import { Station } from "./station.js";
 export class Network {
   nodes: Station[];
   edges: Edge[];
+  draftNodes: Station[];
+  draftEdges: Edge[];
 
   constructor(nodes: Station[] = [], edges: Edge[] = []) {
     this.nodes = nodes;
     this.edges = edges;
+    this.draftNodes = [];
+    this.draftEdges = [];
   }
 
   /**
@@ -73,6 +76,23 @@ export class Network {
   }
 
   /**
+   * Adds a node to the draft node list on the network.
+   * @param {Station} node
+   */
+  addDraftNode(node: Station) {
+    this.draftNodes.push(node);
+  }
+
+  /**
+   * Checks if a node is a draft in the network.
+   * @param {Station} node
+   * @returns {boolean}
+   */
+  checkNodeIsDraft(node: Station): boolean {
+    return this.draftNodes.some((n) => n.equalsDraft(node));
+  }
+
+  /**
    * Checks if a node is contained within the network.
    * @param {Station} node
    * @returns {boolean}
@@ -100,11 +120,32 @@ export class Network {
    */
   removeNode(node: Station) {
     const edges = this.getEdgesWithNode(node);
+    const draftEdges = this.getDraftEdgesWithNode(node);
     for (const edge of edges) {
       this.removeEdge(edge);
     }
+    for (const edge of draftEdges) {
+      this.removeDraftEdge(edge);
+    }
     const index = this.nodes.indexOf(node);
     this.nodes.splice(index, 1);
+  }
+
+  /**
+   * Removes a draft node and it's related edges from the network.
+   * @param {Station} node
+   */
+  removeDraftNode(node: Station) {
+    const edges = this.getEdgesWithNode(node);
+    const draftEdges = this.getDraftEdgesWithNode(node);
+    for (const edge of edges) {
+      this.removeEdge(edge);
+    }
+    for (const edge of draftEdges) {
+      this.removeDraftEdge(edge);
+    }
+    const index = this.draftNodes.indexOf(node);
+    this.draftNodes.splice(index, 1);
   }
 
   /**
@@ -121,7 +162,17 @@ export class Network {
    * @returns
    */
   containsEdge(edge: Edge) {
-    return this.edges.some((edge) => edge.equals(edge));
+    return this.edges.some((ed) => ed.equals(edge));
+  }
+
+  /**
+   * DRAFT:
+   * Checks if the edge exist checking the draft way in the network.
+   * @param edge
+   * @returns
+   */
+  containsDraftEdge(edge: Edge) {
+    return this.edges.some((ed) => ed.equalsDraft(edge));
   }
 
   /**
@@ -141,12 +192,37 @@ export class Network {
   }
 
   /**
+   * Tries to add an edge in the network if it doesn't exist.
+   * @param {Edge} edge
+   * @returns {boolean} whether it was added or not
+   */
+  tryAddEdgeDraft(edge: Edge): boolean {
+    if (this.containsDraftEdge(edge)) {
+      return false;
+    }
+    if (edge.start.equalsDraft(edge.end)) {
+      return false;
+    }
+    this.draftEdges.push(edge);
+    return true;
+  }
+
+  /**
    * Removes an edge from the network.
    * @param {Edge} edge
    */
   removeEdge(edge: Edge) {
     const index = this.edges.indexOf(edge);
     this.edges.splice(index, 1);
+  }
+
+  /**
+   * Removes a draft edge from the network.
+   * @param {Edge} edge
+   */
+  removeDraftEdge(edge: Edge) {
+    const index = this.draftEdges.indexOf(edge);
+    this.draftEdges.splice(index, 1);
   }
 
   /**
@@ -158,6 +234,14 @@ export class Network {
   }
 
   /**
+   * Gets the edges that have the node in either the start or the end.
+   * @param node
+   */
+  getDraftEdgesWithNode(node: Station): Edge[] {
+    return this.draftEdges.filter((edge) => edge.includesDraft(node));
+  }
+
+  /**
    * Resets the graph by unloading the nodes and edges array.
    */
   dispose() {
@@ -165,9 +249,31 @@ export class Network {
     this.edges.length = 0;
   }
 
+  /**
+   * Finds a node from its position vector.
+   * @param pos
+   * @returns
+   */
+  getNodeFromPosition(pos: Point): Station {
+    return this.nodes.find(
+      (node) => node.position.x === pos.x && node.position.y === pos.y
+    );
+  }
+
+  /**
+   * Finds a draft node from its position vector.
+   * @param pos
+   * @returns
+   */
+  getDraftNodeFromPosition(pos: Point): Station {
+    return this.draftNodes.find(
+      (node) => node.position.x === pos.x && node.position.y === pos.y
+    );
+  }
+
   draw(ctx: CanvasRenderingContext2D) {
     for (const edge of this.edges) {
-      edge.draw(ctx, undefined);
+      edge.draw(ctx);
     }
 
     for (const node of this.nodes) {

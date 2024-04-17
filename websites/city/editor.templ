@@ -12,14 +12,14 @@ templ Editor() {
 			<canvas id="editorCanvas"></canvas>
 			<div id="controls">
 				<button onclick="dispose()">🗑️</button>
-				<button onclick="save()">💾</button>
+				<button id="saveBtn" onclick="save()">💾</button>
 				<label for="fileInput" class="file-input-label">
 					📂
 					<input type="file" id="fileInput" accept=".world" onchange="load(event)"/>
 				</label>
 				<button onclick="openOsmPanel()">🗺️</button>
 				&nbsp;
-				<button id="graphBtn" onclick="setMode('graph')">️🌐</button>
+				<button id="graphBtn">️🌐</button>
 				<button id="startBtn" onclick="setMode('start')">️🏎️</button>
 				<div id="osmPanel" style="display:none;">
 					<textarea id="osmDataContainer" placeholder="Paste OSM data here" rows="10" cols="50"></textarea>
@@ -29,19 +29,16 @@ templ Editor() {
 					</div>
 				</div>
 			</div>
-			<script src="/ce-js/primitives/point.js"></script>
-			<script src="/ce-js/primitives/segment.js"></script>
-			<script src="/ce-js/math/graph.js"></script>
-			<script src="/ce-js/math/utils.js"></script>
-			<script src="/ce-js/math/osm.js"></script>
-			<script src="/ce-js/markings/marking.js"></script>
-			<script src="/ce-js/markings/start.js"></script>
-			<script src="/ce-js/viewport.js"></script>
-			<script src="/ce-js/world.js"></script>
-			<script src="/ce-js/editors/graphEditor.js"></script>
-			<script src="/ce-js/editors/markingEditor.js"></script>
-			<script src="/ce-js/editors/startEditor.js"></script>
-			<script src="/ce-js/editor-main.js"></script>
+			<script type="module" src="/ce-js/primitives/point.js"></script>
+			<script type="module" src="/ce-js/primitives/segment.js"></script>
+			<script type="module" src="/ce-js/math/graph.js"></script>
+			<script type="module" src="/ce-js/math/utils.js"></script>
+			<script type="module" src="/ce-js/viewport.js"></script>
+			<script type="module" src="/ce-js/world.js"></script>
+			<script type="module" src="/ce-js/load.js"></script>
+			<script type="module" src="/ce-js/utils/consts.js"></script>
+			<script type="module" src="/ce-js/editors/networkEditor.js"></script>
+			<script type="module" src="/ce-js/editor-main.js"></script>
 		</body>
 	</html>
 }
