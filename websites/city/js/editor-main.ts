@@ -40,7 +40,7 @@ function animate() {
   }
   viewport.reset();
   const viewPoint = Point.scale(viewport.getOffset(), -1);
-  world.draw(ctx);
+  world.draw(ctx, true);
 
   ctx.globalAlpha = 0.5;
   for (const tool of Object.values(tools)) {

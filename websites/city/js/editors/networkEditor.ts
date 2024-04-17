@@ -81,10 +81,7 @@ export class NetworkEditor {
         return;
       }
       const st = Station.draft(this.mouse.x, this.mouse.y);
-      console.log(this.selected);
-      console.log(this.network.edges);
-      console.log(st);
-      this.network.addNode(st);
+      this.network.addDraftNode(st);
       this.#selectPoint(st);
       this.selected = st;
       this.hovered = st;
@@ -93,12 +90,21 @@ export class NetworkEditor {
 
   #handleMouseMove(e: MouseEvent) {
     this.mouse = this.viewport.getMouse(e, true);
-    const val = getNearestPoint(
+    const valInNodes = getNearestPoint(
       this.mouse,
       this.network.nodes.map((st) => st.position),
       10 * this.viewport.zoom
     );
-    this.hovered = val ? this.network.getNodeFromPosition(val) : null;
+    const valInDrafts = getNearestPoint(
+      this.mouse,
+      this.network.draftNodes.map((st) => st.position),
+      10 * this.viewport.zoom
+    );
+    this.hovered = valInNodes
+      ? this.network.getNodeFromPosition(valInNodes)
+      : valInDrafts
+      ? this.network.getDraftNodeFromPosition(valInDrafts)
+      : null;
     if (this.dragging) {
       this.selected.position.x = this.mouse.x;
       this.selected.position.y = this.mouse.y;
@@ -106,7 +112,11 @@ export class NetworkEditor {
   }
 
   #removePoint(st: Station) {
-    this.network.removeNode(st);
+    if (this.network.checkNodeIsDraft(st)) {
+      this.network.removeDraftNode(st);
+    } else {
+      this.network.removeNode(st);
+    }
     this.hovered = null;
     if (this.selected === st) {
       this.selected = null;
