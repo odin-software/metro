@@ -19,6 +19,9 @@ const viewport = new Viewport(
   world.network.getCenterPoint().invertSign()
 );
 const graphBtn = document.getElementById("graphBtn");
+graphBtn.addEventListener("click", async () => {
+  setMode("graph");
+});
 
 const tools = {
   graph: {

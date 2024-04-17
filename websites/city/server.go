@@ -33,9 +33,11 @@ func Server(tick *sematick.Ticker) {
 	server.Static("/ce-images", "websites/city/images")
 
 	server.GET("/", func(c echo.Context) error {
+		tick.Resume()
 		return Render(c, http.StatusOK, Index())
 	})
 	server.GET("/editor", func(c echo.Context) error {
+		tick.Pause()
 		return Render(c, http.StatusOK, Editor())
 	})
 
