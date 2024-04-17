@@ -1,6 +1,5 @@
 import { getEdges, getEdgesPoints, getStations } from "../load.js";
 import Point from "../primitives/point.js";
-import Segment from "../primitives/segment.js";
 import { Edge } from "./edge.js";
 import { Station } from "./station.js";
 
@@ -163,6 +162,12 @@ export class Network {
   dispose() {
     this.nodes.length = 0;
     this.edges.length = 0;
+  }
+
+  getNodeFromPosition(pos: Point): Station {
+    return this.nodes.find(
+      (node) => node.position.x === pos.x && node.position.y === pos.y
+    );
   }
 
   draw(ctx: CanvasRenderingContext2D) {

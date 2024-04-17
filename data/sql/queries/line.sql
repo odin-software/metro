@@ -28,8 +28,9 @@ FROM
 	JOIN station st ON sl.stationId = st.id
 	LEFT JOIN station_line sln ON sln.lineId = ln.id
 		AND sln.odr = sl.odr + 1
-	LEFT JOIN edge ed ON ed.fromId = sl.stationId
-		AND ed.toId = sln.stationId
+	LEFT JOIN edge ed ON (ed.fromId = sl.stationId
+		AND ed.toId = sln.stationId) OR (ed.fromId = sln.stationId
+		AND ed.toId = sl.stationId)
 	CROSS JOIN (
 		SELECT
 			1 is_station
@@ -40,6 +41,8 @@ FROM
 		AND cj.is_station = 0
 WHERE
 	ln.id = ?
+	AND (cj.is_station = 1
+		OR ep.id IS NOT NULL)
 ORDER BY
 	sl.odr,
 	cj.is_station DESC,

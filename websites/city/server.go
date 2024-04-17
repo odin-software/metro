@@ -38,6 +38,7 @@ func Server(tick *sematick.Ticker) {
 	server.GET("/editor", func(c echo.Context) error {
 		return Render(c, http.StatusOK, Editor())
 	})
+
 	server.GET("/stations", func(c echo.Context) error {
 		stations := bs.ListStations()
 		return c.JSON(http.StatusOK, stations)

@@ -1,5 +1,3 @@
-import { PointStyle } from "../typings";
-
 /**
  * The Point class represents a vector, it contains static methods
  * for basic vector calculations.
@@ -75,16 +73,10 @@ class Point {
   /**
    * Function to draw a Point with options on styling.
    * @param {CanvasRenderingContext2D} ctx
-   * @param {?PointStyle} style
    */
   draw(
     ctx: CanvasRenderingContext2D,
-    {
-      size = 18,
-      color = "black",
-      outline = false,
-      fill = false,
-    }: Partial<PointStyle>
+    { size = 18, color = "black", outline = false, fill = false } = {}
   ) {
     const radius = size / 2;
     ctx.beginPath();

@@ -32,7 +32,7 @@ export class Edge {
 
   draw(
     ctx: CanvasRenderingContext2D,
-    { color = "white", dash = [22, 11], width = 2 }: EdgeStyling | undefined
+    { color = "white", dash = [22, 11], width = 2 } = {}
   ) {
     ctx.beginPath();
     ctx.lineWidth = width;
@@ -46,9 +46,3 @@ export class Edge {
     ctx.stroke();
   }
 }
-
-type EdgeStyling = {
-  color: string;
-  dash: number[];
-  width: number;
-};

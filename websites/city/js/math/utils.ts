@@ -1,6 +1,10 @@
 import Point from "../primitives/point.js";
 
-export function getNearestPoint(loc, points, maxDist = Number.MAX_VALUE) {
+export function getNearestPoint(
+  loc: Point,
+  points: Point[],
+  maxDist = Number.MAX_VALUE
+) {
   let minDist = Infinity;
   let nearest = null;
   for (const point of points) {
