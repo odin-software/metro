@@ -52,6 +52,12 @@ export class Network {
     return new Network(stations, edges);
   }
 
+  // async saveDrafts() {
+  //   const newStations = await Promise.all(
+  //     this.draftNodes.forEach(async (n) => {})
+  //   );
+  // }
+
   /**
    * Get a center point of the network to use as offset of the viewport.
    */

@@ -13,6 +13,13 @@ import (
 	"github.com/odin-software/metro/internal/sematick"
 )
 
+type CreateStationReq struct {
+	Name string  `json:"name"`
+	X    float64 `json:"x"`
+	Y    float64 `json:"y"`
+	Z    float64 `json:"z"`
+}
+
 func Render(ctx echo.Context, statusCode int, t templ.Component) error {
 	ctx.Response().Writer.WriteHeader(statusCode)
 	ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
@@ -61,6 +68,22 @@ func Server(tick *sematick.Ticker) {
 		}
 		edges := bs.ListEdgePoints(int64(id))
 		return c.JSON(http.StatusOK, edges)
+	})
+
+	server.POST("/stations", func(c echo.Context) error {
+		stReq := new([]CreateStationReq)
+		if err := c.Bind(stReq); err != nil {
+			return err
+		}
+
+		for _, r := range *stReq {
+			err := bs.CreateStation(r.Name, r.X, r.Y, 0.0)
+			if err != nil {
+				return err
+			}
+		}
+
+		return c.NoContent(http.StatusCreated)
 	})
 
 	server.GET("/pause", func(c echo.Context) error {

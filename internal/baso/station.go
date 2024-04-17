@@ -1,8 +1,10 @@
 package baso
 
 import (
+	"database/sql"
 	"log"
 
+	"github.com/odin-software/metro/internal/dbstore"
 	"github.com/odin-software/metro/internal/models"
 )
 
@@ -32,4 +34,24 @@ func (bs *Baso) GetStationById(id int64) models.Station {
 		Name:     station.Name,
 		Position: models.NewVector(station.X.Float64, station.Y.Float64),
 	}
+}
+
+func (bs *Baso) CreateStation(name string, x, y, z float64) error {
+	_, err := bs.queries.CreateStation(bs.ctx, dbstore.CreateStationParams{
+		Name: name,
+		X: sql.NullFloat64{
+			Float64: x,
+			Valid:   true,
+		},
+		Y: sql.NullFloat64{
+			Float64: y,
+			Valid:   true,
+		},
+		Z: sql.NullFloat64{
+			Float64: 0,
+			Valid:   true,
+		},
+	})
+
+	return err
 }

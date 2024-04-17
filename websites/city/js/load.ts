@@ -48,3 +48,10 @@ export function playLoop() {
 export function pauseLoop() {
   fetch(GET_PAUSE_LOOP);
 }
+
+export async function createStation(
+  name: string,
+  x: number,
+  y: number,
+  z: number
+) {}
