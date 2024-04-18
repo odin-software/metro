@@ -1,4 +1,9 @@
-import { getEdges, getEdgesPoints, getStations } from "../load.js";
+import {
+  createStations,
+  getEdges,
+  getEdgesPoints,
+  getStations,
+} from "../load.js";
 import Point from "../primitives/point.js";
 import { Edge } from "./edge.js";
 import { Station } from "./station.js";
@@ -50,6 +55,18 @@ export class Network {
       })
     );
     return new Network(stations, edges);
+  }
+
+  async saveDrafts() {
+    const stationsToCreate = this.draftNodes.map((val) => {
+      return {
+        name: val.name,
+        x: val.position.x,
+        y: val.position.y,
+        z: 0,
+      };
+    });
+    await createStations(stationsToCreate);
   }
 
   /**

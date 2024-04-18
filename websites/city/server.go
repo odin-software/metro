@@ -1,77 +1,143 @@
 package city
 
 import (
-	"fmt"
+	"encoding/json"
 	"net/http"
 	"strconv"
+	"sync"
 
-	"github.com/a-h/templ"
-	"github.com/labstack/echo/v4"
-	"github.com/labstack/echo/v4/middleware"
-	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/baso"
 	"github.com/odin-software/metro/internal/sematick"
 )
 
-func Render(ctx echo.Context, statusCode int, t templ.Component) error {
-	ctx.Response().Writer.WriteHeader(statusCode)
-	ctx.Response().Header().Set(echo.HeaderContentType, echo.MIMETextHTML)
-	return t.Render(ctx.Request().Context(), ctx.Response().Writer)
+type Server struct {
+	basoMux sync.Mutex
+	baso    *baso.Baso
+	ticker  *sematick.Ticker
 }
 
-func Server(tick *sematick.Ticker) {
-	server := echo.New()
-	bs := baso.NewBaso()
-	server.Use(middleware.LoggerWithConfig(
-		middleware.LoggerConfig{
-			Format: control.LoggingFormat,
-		},
-	))
+func NewServer(tick *sematick.Ticker) *Server {
+	return &Server{
+		baso:   baso.NewBaso(),
+		ticker: tick,
+	}
+}
 
-	server.Static("/ce-js", "websites/city/dist")
-	server.Static("/ce-css", "websites/city/css")
-	server.Static("/ce-images", "websites/city/images")
+func InternalServerErrorHandler(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusInternalServerError)
+	w.Write([]byte("500 Internal Server Error"))
+}
 
-	server.GET("/", func(c echo.Context) error {
-		tick.Resume()
-		return Render(c, http.StatusOK, Index())
-	})
-	server.GET("/editor", func(c echo.Context) error {
-		tick.Pause()
-		return Render(c, http.StatusOK, Editor())
-	})
+func BadRequestErrorHandler(w http.ResponseWriter, req *http.Request, msg string) {
+	w.WriteHeader(http.StatusBadRequest)
+	w.Write([]byte(msg))
+}
 
-	server.GET("/stations", func(c echo.Context) error {
-		stations := bs.ListStations()
-		return c.JSON(http.StatusOK, stations)
-	})
-	server.GET("/lines", func(c echo.Context) error {
-		lines := bs.ListLinesWithPoints()
-		return c.JSON(http.StatusOK, lines)
-	})
-	server.GET("/edges", func(c echo.Context) error {
-		edges := bs.ListEdges()
-		return c.JSON(http.StatusOK, edges)
-	})
-	server.GET("/edges/:id", func(c echo.Context) error {
-		stringId := c.Param("id")
-		id, err := strconv.Atoi(stringId)
-		if err != nil {
-			return c.NoContent(400)
-		}
-		edges := bs.ListEdgePoints(int64(id))
-		return c.JSON(http.StatusOK, edges)
-	})
+func NotFoundHandler(w http.ResponseWriter, req *http.Request) {
+	w.WriteHeader(http.StatusNotFound)
+	w.Write([]byte("404 Not Found"))
+}
 
-	server.GET("/pause", func(c echo.Context) error {
-		tick.Pause()
-		return c.NoContent(http.StatusOK)
-	})
-	server.GET("/resume", func(c echo.Context) error {
-		tick.Resume()
-		return c.NoContent(http.StatusOK)
-	})
+func JsonHandler(w http.ResponseWriter, req *http.Request, data any) {
+	jsonData, err := json.Marshal(data)
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
 
-	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)
-	server.Logger.Fatal(server.Start(port))
+	w.Header().Add("Content-Type", "application/json")
+	w.WriteHeader(http.StatusOK)
+	w.Write(jsonData)
+}
+
+func (s *Server) GetAllStations(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	stations, err := s.baso.ListStations()
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
+	if len(stations) == 0 {
+		NotFoundHandler(w, req)
+	}
+
+	JsonHandler(w, req, stations)
+}
+
+func (s *Server) CreateStations(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	var reqStations []baso.CreateStation
+	err := json.NewDecoder(req.Body).Decode(&reqStations)
+	if err != nil {
+		BadRequestErrorHandler(w, req, "Malformed request body.")
+		return
+	}
+
+	err = s.baso.CreateStations(reqStations)
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) GetLines(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	lines, err := s.baso.ListLinesWithPoints()
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
+	if len(lines) == 0 {
+		NotFoundHandler(w, req)
+	}
+
+	JsonHandler(w, req, lines)
+}
+
+func (s *Server) GetEdges(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	edges, err := s.baso.ListEdges()
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
+	if len(edges) == 0 {
+		NotFoundHandler(w, req)
+	}
+
+	JsonHandler(w, req, edges)
+}
+
+func (s *Server) GetEdgePoints(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	stringId := req.PathValue("id")
+	id, err := strconv.Atoi(stringId)
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
+
+	edgePoints, err := s.baso.ListEdgePoints(int64(id))
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
+	if len(edgePoints) == 0 {
+		NotFoundHandler(w, req)
+		return
+	}
+
+	JsonHandler(w, req, edgePoints)
 }

@@ -40,16 +40,16 @@ func (bs *Baso) ListLinesWithStations() []models.Line {
 	return result
 }
 
-func (bs *Baso) ListLinesWithPoints() []LineWithEdges {
+func (bs *Baso) ListLinesWithPoints() ([]LineWithEdges, error) {
 	lines, err := bs.queries.ListLines(bs.ctx)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
 	result := make([]LineWithEdges, 0)
 	for _, line := range lines {
 		points, err := bs.queries.GetPointsFromLine(bs.ctx, line.ID)
 		if err != nil {
-			log.Fatal(err)
+			return nil, err
 		}
 		vectors := make([]models.Vector, 0)
 		for _, p := range points {
@@ -64,5 +64,5 @@ func (bs *Baso) ListLinesWithPoints() []LineWithEdges {
 			Points: vectors,
 		})
 	}
-	return result
+	return result, nil
 }

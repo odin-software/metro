@@ -4,7 +4,7 @@ templ Editor() {
 	<html>
 		<head>
 			<title>City Editor</title>
-			<link rel="stylesheet" href="/ce-css/editor.css"/>
+			<link rel="stylesheet" href="/css/editor.css"/>
 		</head>
 		<body>
 			// Canvas
@@ -12,7 +12,7 @@ templ Editor() {
 			<canvas id="editorCanvas"></canvas>
 			<div id="controls">
 				<button onclick="dispose()">🗑️</button>
-				<button id="saveBtn" onclick="save()">💾</button>
+				<button id="saveBtn">💾</button>
 				<label for="fileInput" class="file-input-label">
 					📂
 					<input type="file" id="fileInput" accept=".world" onchange="load(event)"/>
@@ -29,16 +29,16 @@ templ Editor() {
 					</div>
 				</div>
 			</div>
-			<script type="module" src="/ce-js/primitives/point.js"></script>
-			<script type="module" src="/ce-js/primitives/segment.js"></script>
-			<script type="module" src="/ce-js/math/graph.js"></script>
-			<script type="module" src="/ce-js/math/utils.js"></script>
-			<script type="module" src="/ce-js/viewport.js"></script>
-			<script type="module" src="/ce-js/world.js"></script>
-			<script type="module" src="/ce-js/load.js"></script>
-			<script type="module" src="/ce-js/utils/consts.js"></script>
-			<script type="module" src="/ce-js/editors/networkEditor.js"></script>
-			<script type="module" src="/ce-js/editor-main.js"></script>
+			<script type="module" src="/js/primitives/point.js"></script>
+			<script type="module" src="/js/primitives/segment.js"></script>
+			<script type="module" src="/js/math/graph.js"></script>
+			<script type="module" src="/js/math/utils.js"></script>
+			<script type="module" src="/js/viewport.js"></script>
+			<script type="module" src="/js/world.js"></script>
+			<script type="module" src="/js/load.js"></script>
+			<script type="module" src="/js/utils/consts.js"></script>
+			<script type="module" src="/js/editors/networkEditor.js"></script>
+			<script type="module" src="/js/editor-main.js"></script>
 		</body>
 	</html>
 }

@@ -7,6 +7,13 @@ type RequestStation = {
   name: string;
 };
 
+type RequestCreateStation = {
+  name: string;
+  x: number;
+  y: number;
+  z: number;
+};
+
 type RequestEdge = {
   ID: number;
   Fromid: number;

@@ -9,7 +9,7 @@ import {
 
 async function fetchMetro<T>(url: string): Promise<T> {
   const response = await fetch(url);
-  if (!response.ok) {
+  if (!response.ok && !(response.status === 404)) {
     throw new Error(response.statusText);
   }
   return await (response.json() as Promise<T>);
@@ -27,12 +27,16 @@ export async function getEdges() {
   return response;
 }
 
-export async function getEdgesPoints(id: number) {
-  const response = await fetchMetro<RequestEdgePoint[] | null>(
-    GET_EDGE_POINTS_URL(id)
-  );
+export async function getEdgesPoints(
+  id: number
+): Promise<RequestEdgePoint[] | null> {
+  const response = await fetch(GET_EDGE_POINTS_URL(id));
 
-  return response;
+  if (!response.ok) {
+    return null;
+  }
+
+  return await (response.json() as Promise<RequestEdgePoint[]>);
 }
 
 export async function getLines() {
@@ -47,4 +51,18 @@ export function playLoop() {
 
 export function pauseLoop() {
   fetch(GET_PAUSE_LOOP);
+}
+
+export async function createStations(sts: RequestCreateStation[]) {
+  const response = await fetch(GET_STATIONS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(sts),
+  });
+
+  if (!response.ok) {
+    throw new Error("couldn't create stations");
+  }
 }
