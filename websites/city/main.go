@@ -33,6 +33,10 @@ func Main(ticker *sematick.Ticker) {
 		ticker.Pause()
 		w.WriteHeader(http.StatusNoContent)
 	})
+	mux.HandleFunc("GET /resume", func(w http.ResponseWriter, r *http.Request) {
+		ticker.Resume()
+		w.WriteHeader(http.StatusNoContent)
+	})
 
 	// Pages
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
@@ -43,15 +47,6 @@ func Main(ticker *sematick.Ticker) {
 		ticker.Pause()
 		Editor().Render(r.Context(), w)
 	})
-
-	// server.GET("/pause", func(c echo.Context) error {
-	// 	tick.Pause()
-	// 	return c.NoContent(http.StatusOK)
-	// })
-	// server.GET("/resume", func(c echo.Context) error {
-	// 	tick.Resume()
-	// 	return c.NoContent(http.StatusOK)
-	// })
 
 	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)
 	log.Printf("server is listening at %s", port)

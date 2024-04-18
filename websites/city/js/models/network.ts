@@ -1,4 +1,9 @@
-import { getEdges, getEdgesPoints, getStations } from "../load.js";
+import {
+  createStations,
+  getEdges,
+  getEdgesPoints,
+  getStations,
+} from "../load.js";
 import Point from "../primitives/point.js";
 import { Edge } from "./edge.js";
 import { Station } from "./station.js";
@@ -52,11 +57,17 @@ export class Network {
     return new Network(stations, edges);
   }
 
-  // async saveDrafts() {
-  //   const newStations = await Promise.all(
-  //     this.draftNodes.forEach(async (n) => {})
-  //   );
-  // }
+  async saveDrafts() {
+    const stationsToCreate = this.draftNodes.map((val) => {
+      return {
+        name: val.name,
+        x: val.position.x,
+        y: val.position.y,
+        z: 0,
+      };
+    });
+    await createStations(stationsToCreate);
+  }
 
   /**
    * Get a center point of the network to use as offset of the viewport.

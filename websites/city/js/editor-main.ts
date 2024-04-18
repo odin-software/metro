@@ -22,6 +22,10 @@ const graphBtn = document.getElementById("graphBtn");
 graphBtn.addEventListener("click", async () => {
   setMode("graph");
 });
+const saveBtn = document.getElementById("saveBtn");
+saveBtn.addEventListener("click", async () => {
+  await world.network.saveDrafts();
+});
 
 const tools = {
   graph: {

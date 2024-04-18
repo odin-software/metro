@@ -53,9 +53,16 @@ export function pauseLoop() {
   fetch(GET_PAUSE_LOOP);
 }
 
-export async function createStation(
-  name: string,
-  x: number,
-  y: number,
-  z: number
-) {}
+export async function createStations(sts: RequestCreateStation[]) {
+  const response = await fetch(GET_STATIONS_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(sts),
+  });
+
+  if (!response.ok) {
+    throw new Error("couldn't create stations");
+  }
+}
