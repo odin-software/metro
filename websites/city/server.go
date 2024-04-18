@@ -61,6 +61,7 @@ func (s *Server) GetAllStations(w http.ResponseWriter, req *http.Request) {
 	}
 	if len(stations) == 0 {
 		NotFoundHandler(w, req)
+		return
 	}
 
 	JsonHandler(w, req, stations)
@@ -97,6 +98,7 @@ func (s *Server) GetLines(w http.ResponseWriter, req *http.Request) {
 	}
 	if len(lines) == 0 {
 		NotFoundHandler(w, req)
+		return
 	}
 
 	JsonHandler(w, req, lines)
@@ -113,6 +115,7 @@ func (s *Server) GetEdges(w http.ResponseWriter, req *http.Request) {
 	}
 	if len(edges) == 0 {
 		NotFoundHandler(w, req)
+		return
 	}
 
 	JsonHandler(w, req, edges)

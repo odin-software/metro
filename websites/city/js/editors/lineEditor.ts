@@ -5,7 +5,7 @@ import { Station } from "../models/station.js";
 import Point from "../primitives/point.js";
 import Viewport from "../viewport.js";
 
-export class NetworkEditor {
+export class LineEditor {
   viewport: Viewport;
   canvas: HTMLCanvasElement;
   network: Network;

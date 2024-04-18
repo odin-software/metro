@@ -2,12 +2,13 @@ Tasks to do:
 
 - [] Getting the config values from environment variables.
 - [x] Make logging of trains arrivals and departures configurable.
-- [] Fix missing station on line 2 (visual).
-- [] City Server needs to remove `echo` and start using routers.
-- [] Fix editor.
+- [x] Fix missing station on line 2 (visual).
+- [x] City Server needs to remove `echo` and start using routers.
+- [x] Fix editor.
 - [] Remove templ.
 - [] Check what to do with the sqlite driver and having it downloaded.
 - [] Research and implement a small LLM for the reporter.
+- [] Generate random big maps.
 
 Things to check:
 

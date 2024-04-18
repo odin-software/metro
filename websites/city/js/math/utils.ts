@@ -87,7 +87,15 @@ export function dot(p1: Point, p2: Point): number {
   return p1.x * p2.x + p1.y * p2.y;
 }
 
-export function lerp(a, b, t) {
+/**
+ * Lerp returns the intermediate step between two numbers based
+ * on a number from 0 to 1 in terms of percentage.
+ * @param a
+ * @param b
+ * @param t 0-1
+ * @returns
+ */
+export function lerp(a: number, b: number, t: number) {
   return a + (b - a) * t;
 }
 
