@@ -9,7 +9,7 @@ import {
 
 async function fetchMetro<T>(url: string): Promise<T> {
   const response = await fetch(url);
-  if (!response.ok) {
+  if (!response.ok && !(response.status === 404)) {
     throw new Error(response.statusText);
   }
   return await (response.json() as Promise<T>);

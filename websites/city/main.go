@@ -5,14 +5,13 @@ import (
 	"log"
 	"net/http"
 
-	"github.com/a-h/templ"
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/sematick"
 )
 
-func Main(tick *sematick.Ticker) {
+func Main(ticker *sematick.Ticker) {
 	mux := http.NewServeMux()
-	server := NewServer(tick)
+	server := NewServer(ticker)
 
 	// Static directories
 	jsFs := http.FileServer(http.Dir("websites/city/dist"))
@@ -20,31 +19,25 @@ func Main(tick *sematick.Ticker) {
 	mux.Handle("/js/", http.StripPrefix("/js/", jsFs))
 	mux.Handle("/css/", http.StripPrefix("/css/", cssFs))
 
-	// Pages
-	mux.Handle("/", templ.Handler(Index()))
-	mux.Handle("GET /editor", templ.Handler(Editor()))
-
 	// Stations endpoints
 	mux.HandleFunc("GET /stations", server.GetAllStations)
+	mux.HandleFunc("POST /stations", server.CreateStations)
 
-	// Stations endpoints
-	// server.GET("/", func(c echo.Context) error {
-	// 	tick.Resume()
-	// 	return Render(c, http.StatusOK, Index())
-	// })
-	// server.GET("/editor", func(c echo.Context) error {
-	// 	tick.Pause()
-	// 	return Render(c, http.StatusOK, Editor())
-	// })
+	// Lines endpoints
+	mux.HandleFunc("GET /lines", server.GetLines)
+	mux.HandleFunc("GET /edges", server.GetEdges)
+	mux.HandleFunc("GET /edges/{id}", server.GetEdgePoints)
 
-	// server.GET("/stations", func(c echo.Context) error {
-	// 	stations := bs.ListStations()
-	// 	return c.JSON(http.StatusOK, stations)
-	// })
-	// server.GET("/lines", func(c echo.Context) error {
-	// 	lines := bs.ListLinesWithPoints()
-	// 	return c.JSON(http.StatusOK, lines)
-	// })
+	// Pages
+	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		ticker.Resume()
+		Index().Render(r.Context(), w)
+	})
+	mux.HandleFunc("/editor", func(w http.ResponseWriter, r *http.Request) {
+		ticker.Pause()
+		Editor().Render(r.Context(), w)
+	})
+
 	// server.GET("/edges", func(c echo.Context) error {
 	// 	edges := bs.ListEdges()
 	// 	return c.JSON(http.StatusOK, edges)
@@ -57,22 +50,6 @@ func Main(tick *sematick.Ticker) {
 	// 	}
 	// 	edges := bs.ListEdgePoints(int64(id))
 	// 	return c.JSON(http.StatusOK, edges)
-	// })
-
-	// server.POST("/stations", func(c echo.Context) error {
-	// 	stReq := new([]CreateStationReq)
-	// 	if err := c.Bind(stReq); err != nil {
-	// 		return err
-	// 	}
-
-	// 	for _, r := range *stReq {
-	// 		err := bs.CreateStation(r.Name, r.X, r.Y, 0.0)
-	// 		if err != nil {
-	// 			return err
-	// 		}
-	// 	}
-
-	// 	return c.NoContent(http.StatusCreated)
 	// })
 
 	// server.GET("/pause", func(c echo.Context) error {

@@ -13,6 +13,7 @@ import (
 type Baso struct {
 	ctx     context.Context
 	queries *dbstore.Queries
+	db      *sql.DB
 }
 
 func NewBaso() *Baso {
@@ -27,5 +28,6 @@ func NewBaso() *Baso {
 	return &Baso{
 		ctx:     ctx,
 		queries: queries,
+		db:      d,
 	}
 }

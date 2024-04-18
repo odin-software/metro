@@ -11,7 +11,10 @@ import (
 
 func LoadStations(arrs broadcast.BroadcastServer[broadcast.ADMessage[models.Train]], deps broadcast.BroadcastServer[broadcast.ADMessage[models.Train]]) []*models.Station {
 	db := baso.NewBaso()
-	stations := db.ListStations()
+	stations, err := db.ListStations()
+	if err != nil {
+		log.Fatal(err)
+	}
 	result := make([]*models.Station, 0)
 	for _, station := range stations {
 		result = append(
@@ -82,9 +85,15 @@ func LoadTrains(
 
 func LoadEdges(cn *models.Network[models.Station]) {
 	db := baso.NewBaso()
-	edges := db.ListEdges()
+	edges, err := db.ListEdges()
+	if err != nil {
+		log.Fatal(err)
+	}
 	for _, edge := range edges {
-		edgePoints := db.ListEdgePoints(edge.ID)
+		edgePoints, err := db.ListEdgePoints(edge.ID)
+		if err != nil {
+			log.Fatal(err)
+		}
 		station1 := db.GetStationById(edge.Fromid)
 		station2 := db.GetStationById(edge.Toid)
 		eps := make([]models.Vector, 0)
