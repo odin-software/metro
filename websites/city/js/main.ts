@@ -2,11 +2,13 @@ import Viewport from "./viewport.js";
 import { World } from "./models/world.js";
 import Point from "./primitives/point.js";
 
+import Store from "./store/store.js";
 import { initWs } from "./ws/trains.js";
 import { Network } from "./models/network.js";
 import { getLines, pauseLoop, playLoop } from "./load.js";
 import { initEventsWs } from "./ws/events.js";
 import { Line } from "./models/line.js";
+import { TrainStore } from "./typings/store.js";
 
 const canvas = document.getElementById("cityCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -14,6 +16,8 @@ if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
 }
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
+
+const trainsStore = new Store<TrainStore>({}, { trains: [] });
 
 const ctx = canvas.getContext("2d");
 const world = new World(await Network.load());
