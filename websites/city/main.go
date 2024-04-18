@@ -28,6 +28,12 @@ func Main(ticker *sematick.Ticker) {
 	mux.HandleFunc("GET /edges", server.GetEdges)
 	mux.HandleFunc("GET /edges/{id}", server.GetEdgePoints)
 
+	// Ticker endpoints
+	mux.HandleFunc("GET /pause", func(w http.ResponseWriter, r *http.Request) {
+		ticker.Pause()
+		w.WriteHeader(http.StatusNoContent)
+	})
+
 	// Pages
 	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
 		ticker.Resume()
@@ -37,20 +43,6 @@ func Main(ticker *sematick.Ticker) {
 		ticker.Pause()
 		Editor().Render(r.Context(), w)
 	})
-
-	// server.GET("/edges", func(c echo.Context) error {
-	// 	edges := bs.ListEdges()
-	// 	return c.JSON(http.StatusOK, edges)
-	// })
-	// server.GET("/edges/:id", func(c echo.Context) error {
-	// 	stringId := c.Param("id")
-	// 	id, err := strconv.Atoi(stringId)
-	// 	if err != nil {
-	// 		return c.NoContent(400)
-	// 	}
-	// 	edges := bs.ListEdgePoints(int64(id))
-	// 	return c.JSON(http.StatusOK, edges)
-	// })
 
 	// server.GET("/pause", func(c echo.Context) error {
 	// 	tick.Pause()
