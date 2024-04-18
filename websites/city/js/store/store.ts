@@ -7,12 +7,12 @@ export default class Store<T> {
   status: string;
   events: PubSub;
 
-  constructor(params, initialState: T) {
+  constructor(params) {
     let self = this;
 
     self.actions = {};
     self.mutations = {};
-    self.state = initialState;
+    self.state = params.state;
     self.status = "resting";
 
     self.events = new PubSub();
@@ -27,7 +27,7 @@ export default class Store<T> {
     self.state = new Proxy(params.state || {}, {
       set(state, key, value, _) {
         state[key] = value;
-        console.log(`stateChange: ${String(key)}: ${value}`);
+        // console.log(`stateChange: ${String(key)}: ${value}`);
 
         self.events.publish("stateChange", self.state);
 
@@ -52,12 +52,12 @@ export default class Store<T> {
       return false;
     }
 
-    console.groupCollapsed(`ACTION: ${actionKey}`);
+    // console.groupCollapsed(`ACTION: ${actionKey}`);
 
     self.status = "action";
     self.actions[actionKey](self, payload);
 
-    console.groupEnd();
+    // console.groupEnd();
 
     return true;
   }
@@ -66,7 +66,7 @@ export default class Store<T> {
     let self = this;
 
     if (typeof self.mutations[mutationKey] !== "function") {
-      console.error(`Mutationk "${mutationKey} doesn't exists.`);
+      console.error(`Mutation "${mutationKey} doesn't exists.`);
       return false;
     }
 

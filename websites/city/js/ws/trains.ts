@@ -1,12 +1,16 @@
-import { setTrains } from "../main.js";
+import { Train } from "../models/train.js";
+import Store from "../store/store.js";
+import { TrainStore } from "../typings/store.js";
 import { TRAINS_WS_FEED } from "../utils/consts.js";
 
-export function initWs() {
+export function initWs(trainStore: Store<TrainStore>) {
   const ws = new WebSocket(TRAINS_WS_FEED);
 
   ws.onmessage = (ev) => {
-    const parsed = JSON.parse(ev.data);
-    setTrains(parsed);
+    const parsed = JSON.parse(ev.data) as RequestTrain[];
+    trainStore.dispatch("updateAllTrains", {
+      trains: Train.FromRequestToModel(parsed),
+    });
   };
 
   ws.onclose = function (e) {
@@ -15,7 +19,7 @@ export function initWs() {
       e.reason
     );
     setTimeout(function () {
-      initWs();
+      initWs(trainStore);
     }, 2000);
   };
 

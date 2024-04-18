@@ -9,6 +9,7 @@ import { getLines, pauseLoop, playLoop } from "./load.js";
 import { initEventsWs } from "./ws/events.js";
 import { Line } from "./models/line.js";
 import { TrainStore } from "./typings/store.js";
+import { trainStoreParams } from "./store/trains.js";
 
 const canvas = document.getElementById("cityCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -17,7 +18,7 @@ if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight;
 
-const trainsStore = new Store<TrainStore>({}, { trains: [] });
+const trainStore = new Store<TrainStore>(trainStoreParams);
 
 const ctx = canvas.getContext("2d");
 const world = new World(await Network.load());
@@ -44,7 +45,7 @@ document.querySelector("#playBtn").addEventListener("click", async () => {
   playLoop();
 });
 
-initWs();
+initWs(trainStore);
 initEventsWs();
 animate();
 
@@ -56,10 +57,11 @@ function animate() {
   const gm = viewport.getMouseFromPoint(mouse);
   world.update(ctx, gm);
   world.draw(ctx);
-  trains.forEach((tr) => {
-    const p = new Point(tr.x, tr.y);
-    p.draw(ctx, { size: 24, color: "white" });
-  });
+  if (trainStore.state.trains.length > 0) {
+    trainStore.state.trains.forEach((tr) => {
+      tr.draw(ctx);
+    });
+  }
   lines.forEach((ln) => {
     const line = new Line(ln.points.map((l) => new Point(l.x, l.y)));
     line.draw(ctx, { color: "yellow" });

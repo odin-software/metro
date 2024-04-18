@@ -25,6 +25,12 @@ export class Train {
     this.make = make;
   }
 
+  static FromRequestToModel(parsed: RequestTrain[]): Train[] {
+    return parsed.map(
+      (p) => new Train(p.id, p.name, p.x, p.y, p.currentId, p.line, p.make)
+    );
+  }
+
   draw(ctx: CanvasRenderingContext2D) {
     this.position.draw(ctx, { size: 24, color: "white" });
   }
