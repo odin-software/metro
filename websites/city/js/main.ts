@@ -29,7 +29,6 @@ const viewport = new Viewport(
 );
 const lines = await getLines();
 
-let trains = [];
 let logs = [];
 const mouse = new Point(0, 0);
 const list = document.querySelector("#logsList") as HTMLUListElement;
@@ -70,9 +69,6 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-export function setTrains(wsTrains) {
-  trains = wsTrains;
-}
 export function setLogs(wsLogs) {
   logs = wsLogs;
   list.innerHTML = "";

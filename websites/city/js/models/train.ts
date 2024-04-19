@@ -25,7 +25,7 @@ export class Train {
     this.make = make;
   }
 
-  static FromRequestToModel(parsed: RequestTrain[]): Train[] {
+  static FromRequestToModels(parsed: RequestTrain[]): Train[] {
     return parsed.map(
       (p) => new Train(p.id, p.name, p.x, p.y, p.currentId, p.line, p.make)
     );

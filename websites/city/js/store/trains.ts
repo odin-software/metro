@@ -1,5 +1,5 @@
-import { TrainStore } from "../typings/store";
 import Store from "./store";
+import { TrainStore } from "../typings/store";
 
 export const trainStoreParams = {
   state: {

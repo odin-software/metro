@@ -9,7 +9,7 @@ export function initWs(trainStore: Store<TrainStore>) {
   ws.onmessage = (ev) => {
     const parsed = JSON.parse(ev.data) as RequestTrain[];
     trainStore.dispatch("updateAllTrains", {
-      trains: Train.FromRequestToModel(parsed),
+      trains: Train.FromRequestToModels(parsed),
     });
   };
 

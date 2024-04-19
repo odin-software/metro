@@ -1,3 +1,4 @@
+import { Dialog } from "./components/dialog.js";
 import { NetworkEditor } from "./editors/networkEditor.js";
 import { Network } from "./models/network.js";
 import World from "./models/world.js";
@@ -10,6 +11,9 @@ if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
 }
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight - 150;
+
+const dialog = new Dialog();
+dialog.render();
 
 const ctx = canvas.getContext("2d");
 const world = new World(await Network.load());
