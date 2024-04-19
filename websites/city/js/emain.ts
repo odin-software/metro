@@ -4,6 +4,7 @@ import { Network } from "./models/network.js";
 import World from "./models/world.js";
 import Point from "./primitives/point.js";
 import Viewport from "./viewport.js";
+import DialogStore from "./store/dialog.js";
 
 const canvas = document.getElementById("editorCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -13,7 +14,6 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight - 150;
 
 const dialog = new Dialog();
-dialog.render();
 
 const ctx = canvas.getContext("2d");
 const world = new World(await Network.load());
@@ -28,7 +28,12 @@ graphBtn.addEventListener("click", async () => {
 });
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async () => {
-  await world.network.saveDrafts();
+  DialogStore.commit("openDialog", {
+    open: true,
+    title: "HELLO!!",
+    body: "Hajskdf",
+  });
+  // await world.network.saveDrafts();
 });
 
 const tools = {

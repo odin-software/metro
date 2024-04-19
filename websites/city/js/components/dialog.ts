@@ -1,16 +1,27 @@
 import { DialogStore } from "../typings/store.js";
 import { Component } from "./component.js";
-import DgStore from "../store/dialog.js";
+import DialogStoreValue from "../store/dialog.js";
 
 export class Dialog extends Component<DialogStore> {
   constructor() {
     super({
-      store: DgStore,
+      store: DialogStoreValue,
       element: document.querySelector("#dialog"),
     });
+
+    this.render();
   }
 
   render() {
-    console.log(DgStore);
+    if (this.element) {
+      const title = this.element.querySelector(".jw-modal-body h1");
+      title.innerHTML = DialogStoreValue.state.title;
+      if (DialogStoreValue.state.open) {
+        this.element.classList.add("open");
+      } else {
+        this.element.classList.remove("open");
+      }
+    }
+    console.log(DialogStoreValue);
   }
 }

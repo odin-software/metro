@@ -6,4 +6,6 @@ export type TrainStore = {
 
 export type DialogStore = {
   open: boolean;
+  title: string;
+  body: string;
 };

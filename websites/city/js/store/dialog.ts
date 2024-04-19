@@ -4,6 +4,8 @@ import { DialogStore } from "../typings/store.js";
 export const dialogStoreParams = {
   state: {
     open: false,
+    title: "",
+    body: "",
   },
   actions: {
     openDialog: (context: Store<DialogStore>, payload) => {
@@ -14,7 +16,9 @@ export const dialogStoreParams = {
     openDialog: (state, payload) => {
       return {
         ...state,
-        open: payload,
+        open: payload.open,
+        title: payload.title,
+        body: payload.body,
       };
     },
   },
