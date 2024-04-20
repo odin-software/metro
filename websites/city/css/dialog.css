@@ -1,4 +1,4 @@
-.jw-modal {
+.confirm-dialog {
   display: none;
 
   position: fixed;
@@ -11,15 +11,32 @@
   overflow: auto;
 }
 
-.jw-modal.open {
+.confirm-dialog.open {
   display: block;
 }
 
-.jw-modal-body {
+.confirm-dialog-body {
   padding: 20px;
   background: #fff;
 }
 
-body.jw-modal.open {
+.confirm-dialog-title {
+  color: #000;
+}
+
+.confirm-dialog-text {
+  color: #000;
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.confirm-dialog-yes {
+  border: #000;
+}
+
+.confirm-dialog-no {
+  border: #000;
+}
+
+body.confirm-dialog.open {
   overflow: hidden;
 }

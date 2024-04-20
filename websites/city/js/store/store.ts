@@ -27,7 +27,7 @@ export default class Store<T> {
     self.state = new Proxy(params.state || {}, {
       set(state, key, value, _) {
         state[key] = value;
-        // console.log(`stateChange: ${String(key)}: ${value}`);
+        console.log(`stateChange: ${String(key)}: ${value}`);
 
         self.events.publish("stateChange", self.state);
 
@@ -52,12 +52,12 @@ export default class Store<T> {
       return false;
     }
 
-    // console.groupCollapsed(`ACTION: ${actionKey}`);
+    console.groupCollapsed(`ACTION: ${actionKey}`);
 
     self.status = "action";
     self.actions[actionKey](self, payload);
 
-    // console.groupEnd();
+    console.groupEnd();
 
     return true;
   }

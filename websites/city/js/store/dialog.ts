@@ -6,19 +6,32 @@ export const dialogStoreParams = {
     open: false,
     title: "",
     body: "",
+    yesBtn: () => {},
+    noBtn: () => {},
   },
   actions: {
+    closeDialog: (context: Store<DialogStore>, payload) => {
+      context.commit("closeDialog", payload);
+    },
     openDialog: (context: Store<DialogStore>, payload) => {
       context.commit("openDialog", payload);
     },
   },
   mutations: {
+    closeDialog: (state, payload) => {
+      return {
+        ...state,
+        open: false,
+      };
+    },
     openDialog: (state, payload) => {
       return {
         ...state,
         open: payload.open,
-        title: payload.title,
-        body: payload.body,
+        // title: payload.title,
+        // body: payload.body,
+        // yesBtn: payload.yesBtn,
+        // noBtn: payload.noBtn,
       };
     },
   },

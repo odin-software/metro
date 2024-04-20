@@ -5,6 +5,7 @@ import World from "./models/world.js";
 import Point from "./primitives/point.js";
 import Viewport from "./viewport.js";
 import DialogStore from "./store/dialog.js";
+import NetworkStore from "./store/network.js";
 
 const canvas = document.getElementById("editorCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -28,12 +29,13 @@ graphBtn.addEventListener("click", async () => {
 });
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async () => {
-  DialogStore.commit("openDialog", {
+  DialogStore.dispatch("openDialog", {
     open: true,
-    title: "HELLO!!",
-    body: "Hajskdf",
+    title: "Saving Drafts",
+    body: `Are you sure you want to save ${NetworkStore.state.network.draftNodes.length} stations?`,
+    yesBtn: () => world.network.saveDrafts(),
+    noBtn: () => DialogStore.dispatch("closeDialog", {}),
   });
-  // await world.network.saveDrafts();
 });
 
 const tools = {

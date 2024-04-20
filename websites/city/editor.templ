@@ -11,11 +11,12 @@ templ Editor() {
 			// Canvas
 			<h1>City Editor</h1>
 			<canvas id="editorCanvas"></canvas>
-			<div id="dialog" class="jw-modal">
-				<div class="jw-modal-body">
-					<h1>A custom modal popup</h1>
-					<button type="button" class="jw-modal-close">yes</button>
-					<button type="button" class="jw-modal-close">no</button>
+			<div id="dialog" class="confirm-dialog">
+				<div class="confirm-dialog-body">
+					<h1 class="confirm-dialog-title">A custom modal popup</h1>
+					<p class="confirm-dialog-text"></p>
+					<button id="yesBtn" type="button" class="confirm-dialog-yes">yes</button>
+					<button id="noBtn" type="button" class="confirm-dialog-no">no</button>
 				</div>
 			</div>
 			<div id="controls">
