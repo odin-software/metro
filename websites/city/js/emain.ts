@@ -29,12 +29,16 @@ graphBtn.addEventListener("click", async () => {
 });
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async () => {
-  DialogStore.dispatch("openDialog", {
+  DialogStore.setState({
     open: true,
     title: "Saving Drafts",
     body: `Are you sure you want to save ${NetworkStore.state.network.draftNodes.length} stations?`,
     yesBtn: () => world.network.saveDrafts(),
-    noBtn: () => DialogStore.dispatch("closeDialog", {}),
+    noBtn: () =>
+      DialogStore.setState({
+        ...DialogStore.state,
+        open: false,
+      }),
   });
 });
 

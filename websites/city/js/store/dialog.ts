@@ -28,10 +28,10 @@ export const dialogStoreParams = {
       return {
         ...state,
         open: payload.open,
-        // title: payload.title,
-        // body: payload.body,
-        // yesBtn: payload.yesBtn,
-        // noBtn: payload.noBtn,
+        title: payload.title,
+        body: payload.body,
+        yesBtn: payload.yesBtn,
+        noBtn: payload.noBtn,
       };
     },
   },

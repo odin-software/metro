@@ -30,11 +30,11 @@
 }
 
 .confirm-dialog-yes {
-  border: #000;
+  border: 2px solid #000;
 }
 
 .confirm-dialog-no {
-  border: #000;
+  border: 2px solid #000;
 }
 
 body.confirm-dialog.open {

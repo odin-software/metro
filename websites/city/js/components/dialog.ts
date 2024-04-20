@@ -3,6 +3,9 @@ import { Component } from "./component.js";
 import DialogStoreValue from "../store/dialog.js";
 
 export class Dialog extends Component<DialogStore> {
+  yesF: () => void;
+  noF: () => void;
+
   constructor() {
     super({
       store: DialogStoreValue,
@@ -20,15 +23,18 @@ export class Dialog extends Component<DialogStore> {
         ".confirm-dialog-body #yesBtn"
       );
       const noButton = this.element.querySelector(
-        ".confirm-dialog-body #yesBtn"
+        ".confirm-dialog-body #noBtn"
       );
 
       title.innerHTML = DialogStoreValue.state.title;
       body.innerHTML = DialogStoreValue.state.body;
-      yesButton.addEventListener("click", () =>
-        DialogStoreValue.state.yesBtn()
-      );
-      noButton.addEventListener("click", () => DialogStoreValue.state.noBtn());
+      yesButton.removeEventListener("click", this.yesF);
+      noButton.removeEventListener("click", this.noF);
+      yesButton.addEventListener("click", DialogStoreValue.state.yesBtn);
+      noButton.addEventListener("click", DialogStoreValue.state.noBtn);
+
+      this.yesF = DialogStoreValue.state.yesBtn;
+      this.noF = DialogStoreValue.state.yesBtn;
 
       if (DialogStoreValue.state.open) {
         this.element.classList.add("open");

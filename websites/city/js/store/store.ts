@@ -1,10 +1,9 @@
 import PubSub from "../lib/pubsub.js";
 
 export default class Store<T> {
+  state: T;
   actions: Record<string, Function>;
   mutations: Record<string, Function>;
-  state: T;
-  status: string;
   events: PubSub;
 
   constructor(params) {
@@ -13,7 +12,6 @@ export default class Store<T> {
     self.actions = {};
     self.mutations = {};
     self.state = params.state;
-    self.status = "resting";
 
     self.events = new PubSub();
 
@@ -23,57 +21,31 @@ export default class Store<T> {
     if (params.hasOwnProperty("mutations")) {
       self.mutations = params.mutations;
     }
+  }
 
-    self.state = new Proxy(params.state || {}, {
-      set(state, key, value, _) {
-        state[key] = value;
-        console.log(`stateChange: ${String(key)}: ${value}`);
-
-        self.events.publish("stateChange", self.state);
-
-        if (self.status !== "mutation") {
-          console.warn(
-            `You should use a mutation to change set ${String(key)}`
-          );
-        }
-
-        self.status = "resting";
-
-        return true;
-      },
-    });
+  setState(newState: T) {
+    // TODO: Fix this so it can deep clone the object with
+    // `structuredClone` and attach the functions to the state.
+    this.state = newState;
+    this.events.publish("stateChange", this.state);
   }
 
   dispatch(actionKey: string, payload): boolean {
-    let self = this;
-
-    if (typeof self.actions[actionKey] !== "function") {
+    if (typeof this.actions[actionKey] !== "function") {
       console.error(`Action "${actionKey} doesn't exists.`);
       return false;
     }
-
-    console.groupCollapsed(`ACTION: ${actionKey}`);
-
-    self.status = "action";
-    self.actions[actionKey](self, payload);
-
-    console.groupEnd();
-
+    this.actions[actionKey](this, payload);
     return true;
   }
 
   commit(mutationKey: string, payload): boolean {
-    let self = this;
-
-    if (typeof self.mutations[mutationKey] !== "function") {
+    if (typeof this.mutations[mutationKey] !== "function") {
       console.error(`Mutation "${mutationKey} doesn't exists.`);
       return false;
     }
-
-    self.status = "mutation";
-    let newState = self.mutations[mutationKey](self.state, payload);
-    self.state = Object.assign(self.state, newState);
-
+    let newState = this.mutations[mutationKey](this.state, payload);
+    this.setState(newState);
     return true;
   }
 }
