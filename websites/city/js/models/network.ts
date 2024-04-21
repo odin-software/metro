@@ -58,15 +58,21 @@ export class Network {
   }
 
   async saveDrafts() {
-    const stationsToCreate = this.draftNodes.map((val) => {
-      return {
-        name: val.name,
-        x: val.position.x,
-        y: val.position.y,
-        z: 0,
-      };
-    });
-    await createStations(stationsToCreate);
+    try {
+      const stationsToCreate = this.draftNodes.map((val) => {
+        return {
+          name: val.name,
+          x: val.position.x,
+          y: val.position.y,
+          z: 0,
+        };
+      });
+      await createStations(stationsToCreate);
+      this.nodes.push(...this.draftNodes);
+      this.draftNodes.length = 0;
+    } catch (err) {
+      console.error(err);
+    }
   }
 
   /**

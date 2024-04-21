@@ -5,7 +5,6 @@ import World from "./models/world.js";
 import Point from "./primitives/point.js";
 import Viewport from "./viewport.js";
 import DialogStore from "./store/dialog.js";
-import NetworkStore from "./store/network.js";
 
 const canvas = document.getElementById("editorCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -23,22 +22,23 @@ const viewport = new Viewport(
   world.zoom,
   world.network.getCenterPoint().invertSign()
 );
+
 const graphBtn = document.getElementById("graphBtn");
 graphBtn.addEventListener("click", async () => {
   setMode("graph");
 });
+
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async () => {
-  DialogStore.setState({
+  DialogStore.commit("openDialog", {
     open: true,
     title: "Saving Drafts",
-    body: `Are you sure you want to save ${NetworkStore.state.network.draftNodes.length} stations?`,
-    yesBtn: () => world.network.saveDrafts(),
-    noBtn: () =>
-      DialogStore.setState({
-        ...DialogStore.state,
-        open: false,
-      }),
+    body: `Are you sure you want to save <b>${world.network.draftNodes.length}</b> stations?<br />`,
+    yesBtn: () => {
+      world.network.saveDrafts();
+      DialogStore.dispatch("closeDialog", {});
+    },
+    noBtn: () => DialogStore.dispatch("closeDialog", {}),
   });
 });
 
