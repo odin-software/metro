@@ -9,6 +9,24 @@ import (
 	"context"
 )
 
+const createEdge = `-- name: CreateEdge :one
+INSERT INTO edge (fromId, toId) 
+VALUES (?, ?)
+RETURNING id
+`
+
+type CreateEdgeParams struct {
+	Fromid int64
+	Toid   int64
+}
+
+func (q *Queries) CreateEdge(ctx context.Context, arg CreateEdgeParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, createEdge, arg.Fromid, arg.Toid)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const getEdgePoints = `-- name: GetEdgePoints :many
 SELECT id, edgeId, X, Y, Z, odr
 FROM edge_point

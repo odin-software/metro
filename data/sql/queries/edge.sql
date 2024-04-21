@@ -7,3 +7,8 @@ SELECT id, edgeId, X, Y, Z, odr
 FROM edge_point
 WHERE edgeId = ?
 ORDER BY odr;
+
+-- name: CreateEdge :one
+INSERT INTO edge (fromId, toId) 
+VALUES (?, ?)
+RETURNING id;

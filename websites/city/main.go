@@ -23,10 +23,13 @@ func Main(ticker *sematick.Ticker) {
 	mux.HandleFunc("GET /stations", server.GetAllStations)
 	mux.HandleFunc("POST /stations", server.CreateStations)
 
-	// Lines endpoints
-	mux.HandleFunc("GET /lines", server.GetLines)
+	// Edges endpoints
 	mux.HandleFunc("GET /edges", server.GetEdges)
 	mux.HandleFunc("GET /edges/{id}", server.GetEdgePoints)
+	mux.HandleFunc("POST /edges", server.CreateEdges)
+
+	// Lines endpoints
+	mux.HandleFunc("GET /lines", server.GetLines)
 
 	// Ticker endpoints
 	mux.HandleFunc("GET /pause", func(w http.ResponseWriter, r *http.Request) {

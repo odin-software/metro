@@ -78,13 +78,13 @@ func (s *Server) CreateStations(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	err = s.baso.CreateStations(reqStations)
+	newStations, err := s.baso.CreateStations(reqStations)
 	if err != nil {
 		InternalServerErrorHandler(w, req)
 		return
 	}
 
-	w.WriteHeader(http.StatusOK)
+	JsonHandler(w, req, newStations)
 }
 
 func (s *Server) GetLines(w http.ResponseWriter, req *http.Request) {
@@ -115,6 +115,26 @@ func (s *Server) GetEdges(w http.ResponseWriter, req *http.Request) {
 	}
 	if len(edges) == 0 {
 		NotFoundHandler(w, req)
+		return
+	}
+
+	JsonHandler(w, req, edges)
+}
+
+func (s *Server) CreateEdges(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	var reqEdges []baso.CreateEdge
+	err := json.NewDecoder(req.Body).Decode(&reqEdges)
+	if err != nil {
+		BadRequestErrorHandler(w, req, "Malformed request body.")
+		return
+	}
+
+	edges, err := s.baso.CreateEdges(reqEdges)
+	if err != nil {
+		BadRequestErrorHandler(w, req, "an id from the edge does not exists")
 		return
 	}
 
