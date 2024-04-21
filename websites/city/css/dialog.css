@@ -22,6 +22,10 @@
   background: #fff;
 }
 
+.confirm-dialog-body ul {
+  text-align: left;
+}
+
 .confirm-dialog-title {
   color: #000;
 }

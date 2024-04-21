@@ -5,6 +5,7 @@ import World from "./models/world.js";
 import Point from "./primitives/point.js";
 import Viewport from "./viewport.js";
 import DialogStore from "./store/dialog.js";
+import { saveDraftTemplate } from "./utils/template.js";
 
 const canvas = document.getElementById("editorCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -33,7 +34,10 @@ saveBtn.addEventListener("click", async () => {
   DialogStore.commit("openDialog", {
     open: true,
     title: "Saving Drafts",
-    body: `Are you sure you want to save <b>${world.network.draftNodes.length}</b> stations?<br />`,
+    body: saveDraftTemplate(
+      world.network.draftNodes.length,
+      world.network.draftEdges.length
+    ),
     yesBtn: () => {
       world.network.saveDrafts();
       DialogStore.dispatch("closeDialog", {});

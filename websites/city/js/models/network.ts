@@ -1,4 +1,5 @@
 import {
+  createEdges,
   createStations,
   getEdges,
   getEdgesPoints,
@@ -67,9 +68,26 @@ export class Network {
           z: 0,
         };
       });
-      await createStations(stationsToCreate);
+      const newStations = await createStations(stationsToCreate);
+      const edgesToCreate = this.draftEdges.map((val) => {
+        return {
+          fromId: newStations.find(
+            (newSt) =>
+              val.start.position.x === newSt.position.x &&
+              val.start.position.y === newSt.position.y
+          ).id,
+          toId: newStations.find(
+            (newSt) =>
+              val.end.position.x === newSt.position.x &&
+              val.end.position.y === newSt.position.y
+          ).id,
+        };
+      });
+      await createEdges(edgesToCreate);
       this.nodes.push(...this.draftNodes);
       this.draftNodes.length = 0;
+      this.edges.push(...this.draftEdges);
+      this.draftEdges.length = 0;
     } catch (err) {
       console.error(err);
     }

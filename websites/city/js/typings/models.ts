@@ -31,6 +31,11 @@ type RequestEdge = {
   Toid: number;
 };
 
+type RequestCreateEdge = {
+  fromId: number;
+  toId: number;
+};
+
 type RequestEdgePoint = {
   ID: number;
   Edgeid: number;
