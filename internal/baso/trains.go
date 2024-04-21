@@ -8,6 +8,7 @@ import (
 )
 
 type TrainsWithIds struct {
+	ID               int64   `json:"id"`
 	Name             string  `json:"name"`
 	X                float64 `json:"x"`
 	Y                float64 `json:"y"`
@@ -27,6 +28,7 @@ func (bs *Baso) ListTrainsFull() []TrainsWithIds {
 		result = append(
 			result,
 			TrainsWithIds{
+				ID:               train.ID,
 				Name:             train.Name,
 				X:                train.X,
 				Y:                train.Y,

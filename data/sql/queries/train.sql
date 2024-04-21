@@ -4,6 +4,7 @@ ORDER BY id;
 
 -- name: GetAllTrainsFull :many
 SELECT
+	tr.id,
 	tr.name,
 	tr.x,
 	tr.y,

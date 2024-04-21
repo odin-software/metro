@@ -95,6 +95,7 @@ func (q *Queries) GetAllTrains(ctx context.Context) ([]GetAllTrainsRow, error) {
 
 const getAllTrainsFull = `-- name: GetAllTrainsFull :many
 SELECT
+	tr.id,
 	tr.name,
 	tr.x,
 	tr.y,
@@ -109,6 +110,7 @@ JOIN station st ON tr.currentId = st.id
 `
 
 type GetAllTrainsFullRow struct {
+	ID        int64
 	Name      string
 	X         float64
 	Y         float64
@@ -128,6 +130,7 @@ func (q *Queries) GetAllTrainsFull(ctx context.Context) ([]GetAllTrainsFullRow, 
 	for rows.Next() {
 		var i GetAllTrainsFullRow
 		if err := rows.Scan(
+			&i.ID,
 			&i.Name,
 			&i.X,
 			&i.Y,

@@ -2,7 +2,6 @@ package baso
 
 import (
 	"database/sql"
-	"log"
 
 	"github.com/odin-software/metro/internal/dbstore"
 	"github.com/odin-software/metro/internal/models"
@@ -31,16 +30,16 @@ func (bs *Baso) ListStations() ([]models.Station, error) {
 	return result, nil
 }
 
-func (bs *Baso) GetStationById(id int64) models.Station {
+func (bs *Baso) GetStationById(id int64) (models.Station, error) {
 	station, err := bs.queries.GetStationById(bs.ctx, id)
 	if err != nil {
-		log.Fatal(err)
+		return models.Station{}, err
 	}
 	return models.Station{
 		ID:       station.ID,
 		Name:     station.Name,
 		Position: models.NewVector(station.X.Float64, station.Y.Float64),
-	}
+	}, err
 }
 
 func (bs *Baso) CreateStation(name string, x, y, z float64) error {
@@ -63,10 +62,10 @@ func (bs *Baso) CreateStation(name string, x, y, z float64) error {
 	return err
 }
 
-func (bs *Baso) CreateStations(sts []CreateStation) error {
+func (bs *Baso) CreateStations(sts []CreateStation) ([]models.Station, error) {
 	tx, err := bs.db.Begin()
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer tx.Rollback()
 	qtx := bs.queries.WithTx(tx)
@@ -88,9 +87,19 @@ func (bs *Baso) CreateStations(sts []CreateStation) error {
 			},
 		})
 		if err != nil {
-			return err
+			return nil, err
 		}
 	}
 
-	return tx.Commit()
+	err = tx.Commit()
+	if err != nil {
+		return nil, err
+	}
+
+	newStations, err := bs.ListStations()
+	if err != nil {
+		return nil, err
+	}
+
+	return newStations, nil
 }

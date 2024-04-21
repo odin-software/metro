@@ -6,8 +6,8 @@ export class World {
   zoom: number;
   offset: Point;
 
-  constructor(graph: Network | null) {
-    this.network = graph ? graph : new Network();
+  constructor(network: Network | null) {
+    this.network = network ? network : new Network();
     this.zoom = 1;
     this.offset = new Point(0, 0);
   }

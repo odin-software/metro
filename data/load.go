@@ -94,8 +94,14 @@ func LoadEdges(cn *models.Network[models.Station]) {
 		if err != nil {
 			log.Fatal(err)
 		}
-		station1 := db.GetStationById(edge.Fromid)
-		station2 := db.GetStationById(edge.Toid)
+		station1, err := db.GetStationById(edge.Fromid)
+		if err != nil {
+			log.Fatal(err)
+		}
+		station2, err := db.GetStationById(edge.Toid)
+		if err != nil {
+			log.Fatal(err)
+		}
 		eps := make([]models.Vector, 0)
 		for _, ep := range edgePoints {
 			eps = append(eps, models.NewVector(ep.X, ep.Y))

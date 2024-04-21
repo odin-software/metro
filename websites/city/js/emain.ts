@@ -1,8 +1,11 @@
+import { Dialog } from "./components/dialog.js";
 import { NetworkEditor } from "./editors/networkEditor.js";
 import { Network } from "./models/network.js";
 import World from "./models/world.js";
 import Point from "./primitives/point.js";
 import Viewport from "./viewport.js";
+import DialogStore from "./store/dialog.js";
+import { saveDraftTemplate } from "./utils/template.js";
 
 const canvas = document.getElementById("editorCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -11,6 +14,8 @@ if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
 canvas.width = window.innerWidth;
 canvas.height = window.innerHeight - 150;
 
+const dialog = new Dialog();
+
 const ctx = canvas.getContext("2d");
 const world = new World(await Network.load());
 const viewport = new Viewport(
@@ -18,13 +23,27 @@ const viewport = new Viewport(
   world.zoom,
   world.network.getCenterPoint().invertSign()
 );
+
 const graphBtn = document.getElementById("graphBtn");
 graphBtn.addEventListener("click", async () => {
   setMode("graph");
 });
+
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async () => {
-  await world.network.saveDrafts();
+  DialogStore.commit("openDialog", {
+    open: true,
+    title: "Saving Drafts",
+    body: saveDraftTemplate(
+      world.network.draftNodes.length,
+      world.network.draftEdges.length
+    ),
+    yesBtn: async () => {
+      await world.network.saveDrafts();
+      DialogStore.dispatch("closeDialog", {});
+    },
+    noBtn: () => DialogStore.dispatch("closeDialog", {}),
+  });
 });
 
 const tools = {
@@ -53,25 +72,6 @@ function animate() {
   ctx.globalAlpha = 1;
 
   requestAnimationFrame(animate);
-}
-
-function save() {
-  world.zoom = viewport.zoom;
-  world.offset = viewport.getOffset();
-
-  const element = document.createElement("a");
-  element.setAttribute(
-    "href",
-    "data:application/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(world))
-  );
-
-  const fileName = "name.world";
-  element.setAttribute("download", fileName);
-
-  element.click();
-
-  localStorage.setItem("world", JSON.stringify(world));
 }
 
 function dispose() {

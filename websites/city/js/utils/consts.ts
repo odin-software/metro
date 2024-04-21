@@ -1,3 +1,4 @@
+// Endpoints constants
 export const CITY_BASE = "http://localhost:2221";
 export const EVENTS_BASE_URL = "ws://localhost:2223";
 

@@ -1,3 +1,14 @@
+type RequestTrain = {
+  id: number;
+  name: string;
+  x: number;
+  y: number;
+  z: number;
+  currentId: number;
+  make: string;
+  line: string;
+};
+
 type RequestStation = {
   id: number;
   position: {
@@ -20,6 +31,11 @@ type RequestEdge = {
   Toid: number;
 };
 
+type RequestCreateEdge = {
+  fromId: number;
+  toId: number;
+};
+
 type RequestEdgePoint = {
   ID: number;
   Edgeid: number;
@@ -35,8 +51,4 @@ type RequestLine = {
     x: number;
     y: number;
   }[];
-};
-
-type Train = {
-  id: number;
 };

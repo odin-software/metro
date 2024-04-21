@@ -65,4 +65,20 @@ export async function createStations(sts: RequestCreateStation[]) {
   if (!response.ok) {
     throw new Error("couldn't create stations");
   }
+
+  return (await response.json()) as Promise<RequestStation[]>;
+}
+
+export async function createEdges(edges: RequestCreateEdge[]) {
+  const response = await fetch(GET_EDGES_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(edges),
+  });
+
+  if (!response.ok) {
+    throw new Error("couldn't create stations");
+  }
 }
