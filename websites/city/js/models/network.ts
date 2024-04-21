@@ -318,6 +318,18 @@ export class Network {
     );
   }
 
+  /**
+   * Finds the nodes that are connected to the one passed
+   * to this function.
+   */
+  getConnectedNodes(node: Station): Station[] {
+    const connected = this.edges.filter((edge) => edge.includes(node));
+    const final = connected.map((cn) =>
+      cn.start.equals(node) ? cn.end : cn.start
+    );
+    return final;
+  }
+
   draw(ctx: CanvasRenderingContext2D, draft = false) {
     for (const edge of this.edges) {
       edge.draw(ctx, { color: "white", dash: [], width: 1 });

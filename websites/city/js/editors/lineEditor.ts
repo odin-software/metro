@@ -10,6 +10,7 @@ export class LineEditor {
   canvas: HTMLCanvasElement;
   network: Network;
   ctx: CanvasRenderingContext2D;
+  frames: number;
 
   selected: Station | null;
   hovered: Station | null;
@@ -25,6 +26,7 @@ export class LineEditor {
     this.canvas = viewport.canvas;
     this.network = network;
     this.ctx = viewport.canvas.getContext("2d");
+    this.frames = 0;
 
     this.selected = null;
     this.hovered = null;
@@ -102,12 +104,15 @@ export class LineEditor {
     }
 
     if (this.selected) {
-      const mockStation = Station.draft(this.mouse.x, this.mouse.y);
-      const intent = this.hovered ? this.hovered : mockStation;
-      new Edge(this.selected, intent, []).draw(this.ctx, { dash: [3, 3] });
+      const nodes = this.network.getConnectedNodes(this.selected);
+      const animatedSize = Math.abs(Math.sin(this.frames) * 20);
+      nodes.forEach((nd) =>
+        nd.draw(this.ctx, { size: animatedSize, color: "green" })
+      );
       this.selected.position.draw(this.ctx, {
         outline: true,
       });
+      this.frames += 0.04;
     }
   }
 

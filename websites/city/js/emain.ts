@@ -81,7 +81,6 @@ function animate() {
     line.draw(ctx, { color: "yellow" });
   });
 
-  ctx.globalAlpha = 0.5;
   for (const tool of Object.values(tools)) {
     tool.editor.display();
   }
