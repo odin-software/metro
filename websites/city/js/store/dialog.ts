@@ -18,13 +18,13 @@ export const dialogStoreParams = {
     },
   },
   mutations: {
-    closeDialog: (state, payload) => {
+    closeDialog: (state: DialogStore, _payload) => {
       return {
         ...state,
         open: false,
       };
     },
-    openDialog: (state, payload) => {
+    openDialog: (state: DialogStore, payload) => {
       return {
         ...state,
         open: payload.open,

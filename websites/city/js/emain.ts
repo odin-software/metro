@@ -38,8 +38,8 @@ saveBtn.addEventListener("click", async () => {
       world.network.draftNodes.length,
       world.network.draftEdges.length
     ),
-    yesBtn: () => {
-      world.network.saveDrafts();
+    yesBtn: async () => {
+      await world.network.saveDrafts();
       DialogStore.dispatch("closeDialog", {});
     },
     noBtn: () => DialogStore.dispatch("closeDialog", {}),
@@ -72,25 +72,6 @@ function animate() {
   ctx.globalAlpha = 1;
 
   requestAnimationFrame(animate);
-}
-
-function save() {
-  world.zoom = viewport.zoom;
-  world.offset = viewport.getOffset();
-
-  const element = document.createElement("a");
-  element.setAttribute(
-    "href",
-    "data:application/json;charset=utf-8," +
-      encodeURIComponent(JSON.stringify(world))
-  );
-
-  const fileName = "name.world";
-  element.setAttribute("download", fileName);
-
-  element.click();
-
-  localStorage.setItem("world", JSON.stringify(world));
 }
 
 function dispose() {
