@@ -13,7 +13,6 @@ export class LineEditor {
 
   selected: Station | null;
   hovered: Station | null;
-  dragging: boolean;
   mouse: Point | null;
 
   boundMouseDown: (e: MouseEvent) => void;
@@ -29,7 +28,6 @@ export class LineEditor {
 
     this.selected = null;
     this.hovered = null;
-    this.dragging = false;
     this.mouse = null;
     // this.selectedSegment = null;
     // this.dragOffset = null;
@@ -48,7 +46,6 @@ export class LineEditor {
   #addEventListeners() {
     this.boundMouseDown = (e) => this.#handleMouseDown(e);
     this.boundMouseMove = (e) => this.#handleMouseMove(e);
-    this.boundMouseUp = (_) => (this.dragging = false);
     this.boundContextMenu = (e) => e.preventDefault();
     this.canvas.addEventListener("mousedown", this.boundMouseDown);
     this.canvas.addEventListener("mousemove", this.boundMouseMove);
@@ -59,7 +56,6 @@ export class LineEditor {
   #removeEventListeners() {
     this.canvas.removeEventListener("mousedown", this.boundMouseDown);
     this.canvas.removeEventListener("mousemove", this.boundMouseMove);
-    this.canvas.removeEventListener("mouseup", this.boundMouseUp);
     this.canvas.removeEventListener("contextmenu", this.boundContextMenu);
   }
 
@@ -68,8 +64,6 @@ export class LineEditor {
       // right click
       if (this.selected) {
         this.selected = null;
-      } else if (this.hovered) {
-        this.#removePoint(this.hovered);
       }
     }
     if (e.button == 0) {
@@ -77,14 +71,8 @@ export class LineEditor {
       if (this.hovered) {
         this.#selectPoint(this.hovered);
         this.selected = this.hovered;
-        this.dragging = true;
         return;
       }
-      const st = Station.draft(this.mouse.x, this.mouse.y);
-      this.network.addNode(st);
-      this.#selectPoint(st);
-      this.selected = st;
-      this.hovered = st;
     }
   }
 
@@ -96,18 +84,6 @@ export class LineEditor {
       10 * this.viewport.zoom
     );
     this.hovered = val ? this.network.getNodeFromPosition(val) : null;
-    if (this.dragging) {
-      this.selected.position.x = this.mouse.x;
-      this.selected.position.y = this.mouse.y;
-    }
-  }
-
-  #removePoint(st: Station) {
-    this.network.removeNode(st);
-    this.hovered = null;
-    if (this.selected === st) {
-      this.selected = null;
-    }
   }
 
   #selectPoint(st: Station) {
@@ -117,7 +93,7 @@ export class LineEditor {
   }
 
   display() {
-    this.network.draw(this.ctx);
+    // this.network.draw(this.ctx, true);
 
     if (this.hovered) {
       this.hovered.position.draw(this.ctx, {
@@ -139,6 +115,5 @@ export class LineEditor {
     this.network.dispose();
     this.selected = null;
     this.hovered = null;
-    this.dragging = false;
   }
 }

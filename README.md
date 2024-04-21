@@ -1,4 +1,4 @@
-# Metro v0.0.3
+# Metro v0.0.4
 
 Metro is a simulation project of a transport system and the complex interactions between the different components of the system. The project is developed in Go, and has a web interface to interact with the system.
 

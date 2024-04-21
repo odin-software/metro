@@ -16,12 +16,18 @@ import { Station } from "./station.js";
 export class Network {
   nodes: Station[];
   edges: Edge[];
+  lines: Record<string, Station[]>;
   draftNodes: Station[];
   draftEdges: Edge[];
 
-  constructor(nodes: Station[] = [], edges: Edge[] = []) {
+  constructor(
+    nodes: Station[] = [],
+    edges: Edge[] = [],
+    lines: Record<string, Station[]> = {}
+  ) {
     this.nodes = nodes;
     this.edges = edges;
+    this.lines = lines;
     this.draftNodes = [];
     this.draftEdges = [];
   }
@@ -312,13 +318,20 @@ export class Network {
     );
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
+  draw(ctx: CanvasRenderingContext2D, draft = false) {
     for (const edge of this.edges) {
-      edge.draw(ctx);
+      edge.draw(ctx, { color: "white", dash: [], width: 1 });
     }
-
     for (const node of this.nodes) {
       node.draw(ctx);
+    }
+    if (draft) {
+      for (const edge of this.draftEdges) {
+        edge.draw(ctx, { color: "white", dash: [], width: 1 });
+      }
+      for (const node of this.draftNodes) {
+        node.draw(ctx);
+      }
     }
   }
 }

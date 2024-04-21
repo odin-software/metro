@@ -44,7 +44,7 @@ export class Station {
     return station.name == this.name;
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    this.position.draw(ctx, { color: "red", size: 19 });
+  draw(ctx: CanvasRenderingContext2D, { color = "red", size = 19 } = {}) {
+    this.position.draw(ctx, { color: color, size: size });
   }
 }

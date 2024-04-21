@@ -6,6 +6,9 @@ import Point from "./primitives/point.js";
 import Viewport from "./viewport.js";
 import DialogStore from "./store/dialog.js";
 import { saveDraftTemplate } from "./utils/template.js";
+import { Line } from "./models/line.js";
+import { getLines } from "./load.js";
+import { LineEditor } from "./editors/lineEditor.js";
 
 const canvas = document.getElementById("editorCanvas");
 if (!canvas || !(canvas instanceof HTMLCanvasElement)) {
@@ -23,10 +26,15 @@ const viewport = new Viewport(
   world.zoom,
   world.network.getCenterPoint().invertSign()
 );
+const lines = await getLines();
 
 const graphBtn = document.getElementById("graphBtn");
 graphBtn.addEventListener("click", async () => {
   setMode("graph");
+});
+const lineBtn = document.getElementById("lineBtn");
+lineBtn.addEventListener("click", async () => {
+  setMode("line");
 });
 
 const saveBtn = document.getElementById("saveBtn");
@@ -51,9 +59,13 @@ const tools = {
     button: graphBtn,
     editor: new NetworkEditor(viewport, world.network),
   },
+  line: {
+    button: lineBtn,
+    editor: new LineEditor(viewport, world.network),
+  },
 };
 
-setMode("graph");
+setMode("line");
 
 animate();
 
@@ -63,7 +75,11 @@ function animate() {
   }
   viewport.reset();
   const viewPoint = Point.scale(viewport.getOffset(), -1);
-  world.draw(ctx, true);
+  // world.draw(ctx, true);
+  lines.forEach((ln) => {
+    const line = new Line(ln.points.map((l) => new Point(l.x, l.y)));
+    line.draw(ctx, { color: "yellow" });
+  });
 
   ctx.globalAlpha = 0.5;
   for (const tool of Object.values(tools)) {
@@ -78,7 +94,7 @@ function dispose() {
   tools["graph"].editor.dispose();
 }
 
-function setMode(mode) {
+function setMode(mode: string) {
   disableEditors();
   tools[mode].button.style.backgroundColor = "white";
   tools[mode].button.style.filter = "";
