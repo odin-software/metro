@@ -5,6 +5,7 @@ import (
 	"log"
 	"reflect"
 
+	"github.com/odin-software/metro/internal/dbstore"
 	models "github.com/odin-software/metro/internal/models"
 )
 
@@ -65,4 +66,28 @@ func (bs *Baso) ListLinesWithPoints() ([]LineWithEdges, error) {
 		})
 	}
 	return result, nil
+}
+
+func (bs *Baso) CreateLine(name string) (int64, error) {
+	line, err := bs.queries.CreateLine(bs.ctx, name)
+	return line, err
+}
+
+func (bs *Baso) CreateStationLine(stationId, lineId, odr int64) (int64, error) {
+	stl, err := bs.queries.CreateStationLine(bs.ctx, dbstore.CreateStationLineParams{
+		Stationid: sql.NullInt64{
+			Int64: stationId,
+			Valid: true,
+		},
+		Lineid: sql.NullInt64{
+			Int64: lineId,
+			Valid: true,
+		},
+		Odr: sql.NullInt64{
+			Int64: odr,
+			Valid: true,
+		},
+	})
+
+	return stl, err
 }

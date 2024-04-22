@@ -16,6 +16,14 @@ type Server struct {
 	ticker  *sematick.Ticker
 }
 
+type CreateLine struct {
+	Name     string `json:"name"`
+	Stations []struct {
+		StationId int64 `json:"stationId"`
+		Odr       int64 `json:"odr"`
+	} `json:"stations"`
+}
+
 func NewServer(tick *sematick.Ticker) *Server {
 	return &Server{
 		baso:   baso.NewBaso(),
@@ -102,6 +110,36 @@ func (s *Server) GetLines(w http.ResponseWriter, req *http.Request) {
 	}
 
 	JsonHandler(w, req, lines)
+}
+
+func (s *Server) CreateLine(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	var reqLine CreateLine
+	err := json.NewDecoder(req.Body).Decode(&reqLine)
+	if err != nil {
+		BadRequestErrorHandler(w, req, "Malformed request body.")
+		return
+	}
+
+	id, err := s.baso.CreateLine(reqLine.Name)
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+	}
+
+	for _, st := range reqLine.Stations {
+		_, err := s.baso.GetStationById(st.StationId)
+		if err != nil {
+			BadRequestErrorHandler(w, req, "Station sent does not exist.")
+		}
+		_, err = s.baso.CreateStationLine(st.StationId, id, st.Odr)
+		if err != nil {
+			InternalServerErrorHandler(w, req)
+		}
+	}
+
+	w.WriteHeader(http.StatusOK)
 }
 
 func (s *Server) GetEdges(w http.ResponseWriter, req *http.Request) {

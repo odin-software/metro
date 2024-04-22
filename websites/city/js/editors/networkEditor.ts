@@ -130,7 +130,7 @@ export class NetworkEditor {
   }
 
   display() {
-    this.network.draw(this.ctx, true);
+    // this.network.draw(this.ctx, true);
 
     if (this.hovered) {
       this.hovered.position.draw(this.ctx, {

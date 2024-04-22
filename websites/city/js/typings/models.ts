@@ -36,6 +36,14 @@ type RequestCreateEdge = {
   toId: number;
 };
 
+type RequestCreateLine = {
+  name: string;
+  stations: {
+    stationId: number;
+    odr: number;
+  }[];
+};
+
 type RequestEdgePoint = {
   ID: number;
   Edgeid: number;

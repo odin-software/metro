@@ -330,6 +330,18 @@ export class Network {
     return final;
   }
 
+  /**
+   * Checks if the these two nodes are connected.
+   * @param node
+   * @param connection
+   */
+  areConnected(node: Station, connection: Station) {
+    const edges = this.edges.filter((edge) => edge.includes(node));
+    return edges.some(
+      (e) => e.start.equals(connection) || e.end.equals(connection)
+    );
+  }
+
   draw(ctx: CanvasRenderingContext2D, draft = false) {
     for (const edge of this.edges) {
       edge.draw(ctx, { color: "white", dash: [], width: 1 });

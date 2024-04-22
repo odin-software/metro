@@ -1,15 +1,18 @@
 import { getNearestPoint } from "../math/utils.js";
-import { Edge } from "../models/edge.js";
 import { Network } from "../models/network.js";
 import { Station } from "../models/station.js";
 import Point from "../primitives/point.js";
 import Viewport from "../viewport.js";
+import DialogStore from "../store/dialog.js";
+import { createLine } from "../load.js";
 
 export class LineEditor {
   viewport: Viewport;
   canvas: HTMLCanvasElement;
   network: Network;
   ctx: CanvasRenderingContext2D;
+  line: Station[];
+  lineName: string;
   frames: number;
 
   selected: Station | null;
@@ -28,6 +31,8 @@ export class LineEditor {
     this.ctx = viewport.canvas.getContext("2d");
     this.frames = 0;
 
+    this.line = [];
+    this.lineName = "";
     this.selected = null;
     this.hovered = null;
     this.mouse = null;
@@ -63,8 +68,21 @@ export class LineEditor {
 
   #handleMouseDown(e: MouseEvent) {
     if (e.button == 2) {
-      // right click
-      if (this.selected) {
+      if (this.line.length > 2) {
+        DialogStore.dispatch("openDialog", {
+          open: true,
+          title: "Line",
+          body: `Line ${this.lineName}`,
+          yesBtn: async () => {
+            const createLineReq = this.#createLineRequest();
+            await createLine(createLineReq);
+            this.line.length = 0;
+            DialogStore.dispatch("closeDialog", {});
+          },
+          noBtn: () => DialogStore.dispatch("closeDialog", {}),
+        });
+      } else if (this.selected) {
+        // right click
         this.selected = null;
       }
     }
@@ -89,13 +107,30 @@ export class LineEditor {
   }
 
   #selectPoint(st: Station) {
-    if (this.selected) {
-      this.network.tryAddEdgeDraft(new Edge(this.selected, st, []));
+    if (this.selected && this.network.areConnected(this.selected, st)) {
+      if (this.line.length == 0) {
+        this.lineName = `${Math.random() * 1293}`;
+        this.line.push(this.selected);
+      }
+      this.line.push(st);
     }
   }
 
+  #createLineRequest(): RequestCreateLine {
+    const obj: RequestCreateLine = {
+      name: this.lineName,
+      stations: this.line.map((val, idx) => {
+        return {
+          stationId: val.id,
+          odr: idx + 1,
+        };
+      }),
+    };
+    return obj;
+  }
+
   display() {
-    // this.network.draw(this.ctx, true);
+    this.network.draw(this.ctx, true);
 
     if (this.hovered) {
       this.hovered.position.draw(this.ctx, {
