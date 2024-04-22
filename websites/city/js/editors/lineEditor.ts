@@ -77,6 +77,7 @@ export class LineEditor {
             const createLineReq = this.#createLineRequest();
             await createLine(createLineReq);
             this.line.length = 0;
+            this.selected = null;
             DialogStore.dispatch("closeDialog", {});
           },
           noBtn: () => DialogStore.dispatch("closeDialog", {}),
