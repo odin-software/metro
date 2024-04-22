@@ -29,20 +29,7 @@ export class World {
   }
 
   draw(ctx: CanvasRenderingContext2D, draft = false) {
-    for (const edge of this.network.edges) {
-      edge.draw(ctx, { color: "white", dash: [], width: 1 });
-    }
-    for (const node of this.network.nodes) {
-      node.draw(ctx);
-    }
-    if (draft) {
-      for (const edge of this.network.draftEdges) {
-        edge.draw(ctx, { color: "white", dash: [], width: 1 });
-      }
-      for (const node of this.network.draftNodes) {
-        node.draw(ctx);
-      }
-    }
+    this.network.draw(ctx, draft);
   }
 }
 

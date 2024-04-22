@@ -41,6 +41,25 @@ func (q *Queries) CreateLine(ctx context.Context, name string) (int64, error) {
 	return id, err
 }
 
+const createStationLine = `-- name: CreateStationLine :one
+INSERT INTO station_line (stationId, lineId, odr)
+VALUES (?, ?, ?)
+RETURNING id
+`
+
+type CreateStationLineParams struct {
+	Stationid sql.NullInt64
+	Lineid    sql.NullInt64
+	Odr       sql.NullInt64
+}
+
+func (q *Queries) CreateStationLine(ctx context.Context, arg CreateStationLineParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, createStationLine, arg.Stationid, arg.Lineid, arg.Odr)
+	var id int64
+	err := row.Scan(&id)
+	return id, err
+}
+
 const deleteLine = `-- name: DeleteLine :exec
 DELETE FROM line 
 WHERE id = ?

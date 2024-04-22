@@ -82,3 +82,17 @@ export async function createEdges(edges: RequestCreateEdge[]) {
     throw new Error("couldn't create stations");
   }
 }
+
+export async function createLine(sts: RequestCreateLine) {
+  const response = await fetch(GET_LINES_URL, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify(sts),
+  });
+
+  if (!response.ok) {
+    throw new Error("couldn't create line");
+  }
+}

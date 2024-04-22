@@ -16,12 +16,18 @@ import { Station } from "./station.js";
 export class Network {
   nodes: Station[];
   edges: Edge[];
+  lines: Record<string, Station[]>;
   draftNodes: Station[];
   draftEdges: Edge[];
 
-  constructor(nodes: Station[] = [], edges: Edge[] = []) {
+  constructor(
+    nodes: Station[] = [],
+    edges: Edge[] = [],
+    lines: Record<string, Station[]> = {}
+  ) {
     this.nodes = nodes;
     this.edges = edges;
+    this.lines = lines;
     this.draftNodes = [];
     this.draftEdges = [];
   }
@@ -312,13 +318,44 @@ export class Network {
     );
   }
 
-  draw(ctx: CanvasRenderingContext2D) {
-    for (const edge of this.edges) {
-      edge.draw(ctx);
-    }
+  /**
+   * Finds the nodes that are connected to the one passed
+   * to this function.
+   */
+  getConnectedNodes(node: Station): Station[] {
+    const connected = this.edges.filter((edge) => edge.includes(node));
+    const final = connected.map((cn) =>
+      cn.start.equals(node) ? cn.end : cn.start
+    );
+    return final;
+  }
 
+  /**
+   * Checks if the these two nodes are connected.
+   * @param node
+   * @param connection
+   */
+  areConnected(node: Station, connection: Station) {
+    const edges = this.edges.filter((edge) => edge.includes(node));
+    return edges.some(
+      (e) => e.start.equals(connection) || e.end.equals(connection)
+    );
+  }
+
+  draw(ctx: CanvasRenderingContext2D, draft = false) {
+    for (const edge of this.edges) {
+      edge.draw(ctx, { color: "white", dash: [], width: 1 });
+    }
     for (const node of this.nodes) {
       node.draw(ctx);
+    }
+    if (draft) {
+      for (const edge of this.draftEdges) {
+        edge.draw(ctx, { color: "white", dash: [], width: 1 });
+      }
+      for (const node of this.draftNodes) {
+        node.draw(ctx);
+      }
     }
   }
 }

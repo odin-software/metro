@@ -63,6 +63,11 @@ INSERT INTO line (name)
 VALUES (?)
 RETURNING id;
 
+-- name: CreateStationLine :one
+INSERT INTO station_line (stationId, lineId, odr)
+VALUES (?, ?, ?)
+RETURNING id;
+
 -- name: UpdateLine :one
 UPDATE line
 SET name = ?
