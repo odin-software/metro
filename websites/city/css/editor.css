@@ -36,3 +36,10 @@ input[type="file"] {
   background-color: rgba(0, 0, 0, 0.7);
   padding: 5000px;
 }
+
+#trainDiv {
+  position: absolute;
+  color: white;
+  text-align: left;
+  top: 85%;
+}

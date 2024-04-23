@@ -5,6 +5,7 @@ import {
   GET_PAUSE_LOOP,
   GET_PLAY_LOOP,
   GET_STATIONS_URL,
+  GET_TRAINS_URL,
 } from "./utils/consts.js";
 
 async function fetchMetro<T>(url: string): Promise<T> {
@@ -41,6 +42,12 @@ export async function getEdgesPoints(
 
 export async function getLines() {
   const response = await fetchMetro<RequestLine[]>(GET_LINES_URL);
+
+  return response;
+}
+
+export async function getTrains() {
+  const response = await fetchMetro<RequestTrain[]>(GET_TRAINS_URL);
 
   return response;
 }

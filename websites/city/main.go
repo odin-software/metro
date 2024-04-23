@@ -32,6 +32,9 @@ func Main(ticker *sematick.Ticker) {
 	mux.HandleFunc("GET /lines", server.GetLines)
 	mux.HandleFunc("POST /lines", server.CreateLine)
 
+	// Trains ednpoints
+	mux.HandleFunc("GET /trains", server.GetTrains)
+
 	// Ticker endpoints
 	mux.HandleFunc("GET /pause", func(w http.ResponseWriter, r *http.Request) {
 		ticker.Pause()

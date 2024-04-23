@@ -202,3 +202,16 @@ func (s *Server) GetEdgePoints(w http.ResponseWriter, req *http.Request) {
 
 	JsonHandler(w, req, edgePoints)
 }
+
+func (s *Server) GetTrains(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	trains := s.baso.ListTrainsFull()
+	if len(trains) == 0 {
+		NotFoundHandler(w, req)
+		return
+	}
+
+	JsonHandler(w, req, trains)
+}

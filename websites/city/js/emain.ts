@@ -7,7 +7,7 @@ import Viewport from "./viewport.js";
 import DialogStore from "./store/dialog.js";
 import { saveDraftTemplate } from "./utils/template.js";
 import { Line } from "./models/line.js";
-import { getLines } from "./load.js";
+import { getLines, getTrains } from "./load.js";
 import { LineEditor } from "./editors/lineEditor.js";
 
 const canvas = document.getElementById("editorCanvas");
@@ -18,6 +18,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight - 150;
 
 const dialog = new Dialog();
+const trains = await getTrains();
 
 const ctx = canvas.getContext("2d");
 const world = new World(await Network.load());
@@ -36,6 +37,13 @@ const lineBtn = document.getElementById("lineBtn");
 lineBtn.addEventListener("click", async () => {
   setMode("line");
 });
+const list = document.querySelector("#trainList") as HTMLUListElement;
+for (let i = 0; i < trains.length; i++) {
+  const li = document.createElement("li");
+  const p = document.createTextNode(trains[i].name);
+  li.appendChild(p);
+  list.appendChild(li);
+}
 
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async () => {
