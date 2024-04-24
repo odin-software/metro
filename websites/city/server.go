@@ -24,6 +24,11 @@ type CreateLine struct {
 	} `json:"stations"`
 }
 
+type MoveTrainToLine struct {
+	TrainId int64 `json:"trainId"`
+	LineId  int64 `json:"lineId"`
+}
+
 func NewServer(tick *sematick.Ticker) *Server {
 	return &Server{
 		baso:   baso.NewBaso(),
@@ -214,4 +219,24 @@ func (s *Server) GetTrains(w http.ResponseWriter, req *http.Request) {
 	}
 
 	JsonHandler(w, req, trains)
+}
+
+func (s *Server) UpdateTrainToLine(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	var reqMove MoveTrainToLine
+	err := json.NewDecoder(req.Body).Decode(&reqMove)
+	if err != nil {
+		BadRequestErrorHandler(w, req, "Malformed request body.")
+		return
+	}
+
+	err = s.baso.MoveTrainToLine(reqMove.TrainId, reqMove.LineId)
+	if err != nil {
+		BadRequestErrorHandler(w, req, "an id from the edge does not exists")
+		return
+	}
+
+	w.WriteHeader(http.StatusOK)
 }

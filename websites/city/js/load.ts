@@ -6,6 +6,7 @@ import {
   GET_PLAY_LOOP,
   GET_STATIONS_URL,
   GET_TRAINS_URL,
+  UPDATE_TRAIN_LINE_URL,
 } from "./utils/consts.js";
 
 async function fetchMetro<T>(url: string): Promise<T> {
@@ -101,5 +102,22 @@ export async function createLine(sts: RequestCreateLine) {
 
   if (!response.ok) {
     throw new Error("couldn't create line");
+  }
+}
+
+export async function updateTrainLine(trainId: number, lineId: number) {
+  const response = await fetch(UPDATE_TRAIN_LINE_URL, {
+    method: "PUT",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      trainId,
+      lineId,
+    }),
+  });
+
+  if (!response.ok) {
+    throw new Error("couldn't move train");
   }
 }

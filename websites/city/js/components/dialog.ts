@@ -38,7 +38,6 @@ export class Dialog extends Component<DialogStore> {
       if (DialogStoreValue.state.input.length > 0) {
         input.defaultValue = DialogStoreValue.state.input;
         input.addEventListener("change", (ev) => {
-          //@ts-ignore
           DialogStoreValue.unreactive.input = ev.target.value;
         });
         input.classList.add("open");

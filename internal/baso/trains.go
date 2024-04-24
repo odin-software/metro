@@ -72,3 +72,17 @@ func (bs *Baso) UpdateTrainNoNext(name string, x float64, y float64, z float64, 
 	}
 	return train
 }
+
+func (bs *Baso) MoveTrainToLine(trainId, lineId int64) error {
+	err := bs.queries.ChangeTrainToLine(bs.ctx, dbstore.ChangeTrainToLineParams{
+		ID: trainId,
+		Lineid: sql.NullInt64{
+			Int64: lineId,
+			Valid: true,
+		},
+	})
+	if err != nil {
+		return err
+	}
+	return nil
+}

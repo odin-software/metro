@@ -7,7 +7,7 @@ import Viewport from "./viewport.js";
 import DialogStore from "./store/dialog.js";
 import { saveDraftTemplate } from "./utils/template.js";
 import { Line } from "./models/line.js";
-import { getLines, getTrains } from "./load.js";
+import { getLines, getTrains, updateTrainLine } from "./load.js";
 import { LineEditor } from "./editors/lineEditor.js";
 
 const canvas = document.getElementById("editorCanvas");
@@ -43,13 +43,13 @@ for (let i = 0; i < trains.length; i++) {
   const select = document.createElement("select");
   for (const l of lines) {
     const el = document.createElement("option");
-    el.value = l.name;
+    el.value = l.id.toString();
     el.text = l.name;
     el.selected = l.name === trains[i].line;
     select.append(el);
   }
-  select.addEventListener("change", (ev: InputEvent) => {
-    console.log(trains[i].name, ev.currentTarget.value);
+  select.addEventListener("change", async (ev: InputEvent) => {
+    await updateTrainLine(trains[i].id, parseInt(ev.currentTarget.value, 10));
   });
   const name = document.createTextNode(trains[i].name);
   const make = document.createTextNode(trains[i].make);

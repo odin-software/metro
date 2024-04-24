@@ -10,6 +10,7 @@ import (
 )
 
 type LineWithEdges struct {
+	ID     int64           `json:"id"`
 	Name   string          `json:"name"`
 	Points []models.Vector `json:"points"`
 }
@@ -34,6 +35,7 @@ func (bs *Baso) ListLinesWithStations() []models.Line {
 			})
 		}
 		result = append(result, models.Line{
+			ID:       line.ID,
 			Name:     line.Name,
 			Stations: stations,
 		})
@@ -61,6 +63,7 @@ func (bs *Baso) ListLinesWithPoints() ([]LineWithEdges, error) {
 			vectors = append(vectors, models.NewVector(x, y))
 		}
 		result = append(result, LineWithEdges{
+			ID:     line.ID,
 			Name:   line.Name,
 			Points: vectors,
 		})
