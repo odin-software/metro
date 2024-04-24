@@ -48,8 +48,7 @@ for (let i = 0; i < trains.length; i++) {
     el.selected = l.name === trains[i].line;
     select.append(el);
   }
-  select.addEventListener("change", (ev) => {
-    //@ts-ignore
+  select.addEventListener("change", (ev: InputEvent) => {
     console.log(trains[i].name, ev.currentTarget.value);
   });
   const name = document.createTextNode(trains[i].name);
@@ -71,7 +70,7 @@ saveBtn.addEventListener("click", async () => {
       world.network.draftNodes.length,
       world.network.draftEdges.length
     ),
-    yesBtn: async (_) => {
+    yesBtn: async () => {
       await world.network.saveDrafts();
       DialogStore.dispatch("closeDialog", {});
     },
