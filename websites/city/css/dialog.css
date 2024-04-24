@@ -1,4 +1,4 @@
-.confirm-dialog {
+.dialog {
   display: none;
 
   position: fixed;
@@ -11,38 +11,46 @@
   overflow: auto;
 }
 
-.confirm-dialog.open {
+.dialog.open {
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.confirm-dialog-body {
+.dialog-body {
   padding: 20px;
   background: #fff;
 }
 
-.confirm-dialog-body ul {
+.dialog-body ul {
   text-align: left;
 }
 
-.confirm-dialog-title {
+.dialog-title {
   color: #000;
 }
 
-.confirm-dialog-text {
+.dialog-text {
   color: #000;
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
 }
 
-.confirm-dialog-yes {
+.dialog-yes {
   border: 2px solid #000;
 }
 
-.confirm-dialog-no {
+.dialog-no {
   border: 2px solid #000;
 }
 
-body.confirm-dialog.open {
+body.dialog.open {
   overflow: hidden;
+}
+
+#dialogInput {
+  display: none;
+}
+
+#dialogInput.open {
+  display: block;
 }

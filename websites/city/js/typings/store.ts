@@ -9,6 +9,7 @@ export type DialogStore = {
   open: boolean;
   title: string;
   body: string;
+  input: string;
   yesBtn: () => void;
   noBtn: () => void;
 };

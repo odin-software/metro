@@ -43,3 +43,9 @@ input[type="file"] {
   text-align: left;
   top: 85%;
 }
+
+.trainItem {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}

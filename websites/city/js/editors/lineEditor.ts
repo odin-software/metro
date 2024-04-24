@@ -73,14 +73,20 @@ export class LineEditor {
           open: true,
           title: "Line",
           body: `Line ${this.lineName}`,
+          input: this.lineName,
           yesBtn: async () => {
             const createLineReq = this.#createLineRequest();
+            createLineReq.name = DialogStore.unreactive.input;
             await createLine(createLineReq);
             this.line.length = 0;
             this.selected = null;
             DialogStore.dispatch("closeDialog", {});
           },
-          noBtn: () => DialogStore.dispatch("closeDialog", {}),
+          noBtn: () => {
+            this.line.length = 0;
+            this.selected = null;
+            DialogStore.dispatch("closeDialog", {});
+          },
         });
       } else if (this.selected) {
         // right click

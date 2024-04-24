@@ -17,14 +17,13 @@ export class Dialog extends Component<DialogStore> {
 
   render() {
     if (this.element) {
-      const title = this.element.querySelector(".confirm-dialog-body h1");
-      const body = this.element.querySelector(".confirm-dialog-body p");
-      const yesButton = this.element.querySelector(
-        ".confirm-dialog-body #yesBtn"
-      );
-      const noButton = this.element.querySelector(
-        ".confirm-dialog-body #noBtn"
-      );
+      const title = this.element.querySelector(".dialog-body h1");
+      const body = this.element.querySelector(".dialog-body p");
+      const input = this.element.querySelector(
+        ".dialog-body #dialogInput"
+      ) as HTMLInputElement;
+      const yesButton = this.element.querySelector(".dialog-body #yesBtn");
+      const noButton = this.element.querySelector(".dialog-body #noBtn");
 
       title.innerHTML = DialogStoreValue.state.title;
       body.innerHTML = DialogStoreValue.state.body;
@@ -34,7 +33,18 @@ export class Dialog extends Component<DialogStore> {
       noButton.addEventListener("click", DialogStoreValue.state.noBtn);
 
       this.yesF = DialogStoreValue.state.yesBtn;
-      this.noF = DialogStoreValue.state.yesBtn;
+      this.noF = DialogStoreValue.state.noBtn;
+
+      if (DialogStoreValue.state.input.length > 0) {
+        input.defaultValue = DialogStoreValue.state.input;
+        input.addEventListener("change", (ev) => {
+          //@ts-ignore
+          DialogStoreValue.unreactive.input = ev.target.value;
+        });
+        input.classList.add("open");
+      } else {
+        input.classList.remove("open");
+      }
 
       if (DialogStoreValue.state.open) {
         this.element.classList.add("open");

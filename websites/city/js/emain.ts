@@ -40,8 +40,24 @@ lineBtn.addEventListener("click", async () => {
 const list = document.querySelector("#trainList") as HTMLUListElement;
 for (let i = 0; i < trains.length; i++) {
   const li = document.createElement("li");
-  const p = document.createTextNode(trains[i].name);
-  li.appendChild(p);
+  const select = document.createElement("select");
+  for (const l of lines) {
+    const el = document.createElement("option");
+    el.value = l.name;
+    el.text = l.name;
+    el.selected = l.name === trains[i].line;
+    select.append(el);
+  }
+  select.addEventListener("change", (ev) => {
+    //@ts-ignore
+    console.log(trains[i].name, ev.currentTarget.value);
+  });
+  const name = document.createTextNode(trains[i].name);
+  const make = document.createTextNode(trains[i].make);
+  li.appendChild(name);
+  li.appendChild(make);
+  li.appendChild(select);
+  li.classList.add("trainItem");
   list.appendChild(li);
 }
 
@@ -50,11 +66,12 @@ saveBtn.addEventListener("click", async () => {
   DialogStore.commit("openDialog", {
     open: true,
     title: "Saving Drafts",
+    input: "",
     body: saveDraftTemplate(
       world.network.draftNodes.length,
       world.network.draftEdges.length
     ),
-    yesBtn: async () => {
+    yesBtn: async (_) => {
       await world.network.saveDrafts();
       DialogStore.dispatch("closeDialog", {});
     },

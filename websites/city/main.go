@@ -46,13 +46,13 @@ func Main(ticker *sematick.Ticker) {
 	})
 
 	// Pages
-	mux.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-		ticker.Resume()
-		Index().Render(r.Context(), w)
-	})
 	mux.HandleFunc("/editor", func(w http.ResponseWriter, r *http.Request) {
 		ticker.Pause()
 		Editor().Render(r.Context(), w)
+	})
+	mux.HandleFunc("/city", func(w http.ResponseWriter, r *http.Request) {
+		ticker.Resume()
+		Index().Render(r.Context(), w)
 	})
 
 	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)
