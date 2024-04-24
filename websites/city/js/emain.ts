@@ -98,8 +98,6 @@ function animate() {
     return;
   }
   viewport.reset();
-  const viewPoint = Point.scale(viewport.getOffset(), -1);
-  // world.draw(ctx, true);
   lines.forEach((ln) => {
     const line = new Line(ln.points.map((l) => new Point(l.x, l.y)));
     line.draw(ctx, { color: "yellow" });
@@ -111,10 +109,6 @@ function animate() {
   ctx.globalAlpha = 1;
 
   requestAnimationFrame(animate);
-}
-
-function dispose() {
-  tools["graph"].editor.dispose();
 }
 
 function setMode(mode: string) {
@@ -131,23 +125,3 @@ function disableEditors() {
     tool.editor.disable();
   }
 }
-
-// function openOsmPanel() {
-//   osmPanel.style.display = "block";
-// }
-
-// function closeOsmPanel() {
-//   osmPanel.style.display = "none";
-// }
-
-// function loadOsmData() {
-//   if (osmDataContainer.value == "") {
-//     alert("Please enter valid OSM data");
-//     return;
-//   }
-
-//   const res = Osm.parseRoads(JSON.parse(osmDataContainer.value));
-//   graph.points = res.points;
-//   graph.segments = res.segments;
-//   closeOsmPanel();
-// }
