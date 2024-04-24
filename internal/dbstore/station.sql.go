@@ -11,16 +11,17 @@ import (
 )
 
 const createStation = `-- name: CreateStation :one
-INSERT INTO station (name, x, y, z) 
-VALUES (?, ?, ?, ?)
+INSERT INTO station (name, x, y, z, color) 
+VALUES (?, ?, ?, ?, ?)
 RETURNING id
 `
 
 type CreateStationParams struct {
-	Name string
-	X    sql.NullFloat64
-	Y    sql.NullFloat64
-	Z    sql.NullFloat64
+	Name  string
+	X     sql.NullFloat64
+	Y     sql.NullFloat64
+	Z     sql.NullFloat64
+	Color sql.NullString
 }
 
 func (q *Queries) CreateStation(ctx context.Context, arg CreateStationParams) (int64, error) {
@@ -29,6 +30,7 @@ func (q *Queries) CreateStation(ctx context.Context, arg CreateStationParams) (i
 		arg.X,
 		arg.Y,
 		arg.Z,
+		arg.Color,
 	)
 	var id int64
 	err := row.Scan(&id)
@@ -46,17 +48,18 @@ func (q *Queries) DeleteStation(ctx context.Context, id int64) error {
 }
 
 const getStationById = `-- name: GetStationById :one
-SELECT id, name, x, y, z FROM station 
+SELECT id, name, x, y, z, color FROM station 
 WHERE id = ? 
 LIMIT 1
 `
 
 type GetStationByIdRow struct {
-	ID   int64
-	Name string
-	X    sql.NullFloat64
-	Y    sql.NullFloat64
-	Z    sql.NullFloat64
+	ID    int64
+	Name  string
+	X     sql.NullFloat64
+	Y     sql.NullFloat64
+	Z     sql.NullFloat64
+	Color sql.NullString
 }
 
 func (q *Queries) GetStationById(ctx context.Context, id int64) (GetStationByIdRow, error) {
@@ -68,22 +71,24 @@ func (q *Queries) GetStationById(ctx context.Context, id int64) (GetStationByIdR
 		&i.X,
 		&i.Y,
 		&i.Z,
+		&i.Color,
 	)
 	return i, err
 }
 
 const getStationByName = `-- name: GetStationByName :one
-SELECT id, name, x, y, z FROM station
+SELECT id, name, x, y, z, color FROM station
 WHERE name = ? 
 LIMIT 1
 `
 
 type GetStationByNameRow struct {
-	ID   int64
-	Name string
-	X    sql.NullFloat64
-	Y    sql.NullFloat64
-	Z    sql.NullFloat64
+	ID    int64
+	Name  string
+	X     sql.NullFloat64
+	Y     sql.NullFloat64
+	Z     sql.NullFloat64
+	Color sql.NullString
 }
 
 func (q *Queries) GetStationByName(ctx context.Context, name string) (GetStationByNameRow, error) {
@@ -95,6 +100,7 @@ func (q *Queries) GetStationByName(ctx context.Context, name string) (GetStation
 		&i.X,
 		&i.Y,
 		&i.Z,
+		&i.Color,
 	)
 	return i, err
 }
@@ -129,16 +135,17 @@ func (q *Queries) GetStationLines(ctx context.Context, stationid sql.NullInt64) 
 }
 
 const listStations = `-- name: ListStations :many
-SELECT id, name, x, y, z FROM station 
+SELECT id, name, x, y, z, color FROM station 
 ORDER BY id
 `
 
 type ListStationsRow struct {
-	ID   int64
-	Name string
-	X    sql.NullFloat64
-	Y    sql.NullFloat64
-	Z    sql.NullFloat64
+	ID    int64
+	Name  string
+	X     sql.NullFloat64
+	Y     sql.NullFloat64
+	Z     sql.NullFloat64
+	Color sql.NullString
 }
 
 func (q *Queries) ListStations(ctx context.Context) ([]ListStationsRow, error) {
@@ -156,6 +163,7 @@ func (q *Queries) ListStations(ctx context.Context) ([]ListStationsRow, error) {
 			&i.X,
 			&i.Y,
 			&i.Z,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}

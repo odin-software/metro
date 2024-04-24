@@ -22,6 +22,7 @@ type CreateLine struct {
 		StationId int64 `json:"stationId"`
 		Odr       int64 `json:"odr"`
 	} `json:"stations"`
+	Color string `json:"color"`
 }
 
 type MoveTrainToLine struct {
@@ -128,7 +129,7 @@ func (s *Server) CreateLine(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := s.baso.CreateLine(reqLine.Name)
+	id, err := s.baso.CreateLine(reqLine.Name, reqLine.Color)
 	if err != nil {
 		InternalServerErrorHandler(w, req)
 	}

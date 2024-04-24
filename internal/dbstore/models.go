@@ -27,6 +27,7 @@ type EdgePoint struct {
 type Line struct {
 	ID        int64
 	Name      string
+	Color     sql.NullString
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
@@ -37,6 +38,7 @@ type Make struct {
 	Description  string
 	Acceleration sql.NullFloat64
 	TopSpeed     sql.NullFloat64
+	Color        sql.NullString
 	CreatedAt    time.Time
 	UpdatedAt    time.Time
 }
@@ -47,6 +49,7 @@ type Station struct {
 	X         sql.NullFloat64
 	Y         sql.NullFloat64
 	Z         sql.NullFloat64
+	Color     sql.NullString
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }

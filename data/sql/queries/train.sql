@@ -9,6 +9,7 @@ SELECT
 	tr.x,
 	tr.y,
 	tr.z,
+	mk.color,
 	st.id as stationId,
 	ln.name as lineName,
 	mk.name as makeName

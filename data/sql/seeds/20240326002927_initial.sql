@@ -2,26 +2,26 @@
 -- +goose StatementBegin
 SELECT 'UP initial seed';
 -- Stations data
-INSERT INTO station (id, name, x, y, z) VALUES (1, 'Station 1', 50.0, 350.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (2, 'Station 2', 250.0, 200.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (3, 'Station 3', 150.0, 100.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (4, 'Station 4', 500.0, 50.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (5, 'Station 5', 650.0, 150.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (6, 'Station 6', 200.0, 400.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (7, 'Station 7', 200.0, 500.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (8, 'Station 8', 400.0, 450.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (9, 'Station 9', 500.0, 350.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (10, 'Station 10', 650.0, 300.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (11, 'Station 11', 450.0, 150.0, 0.0);
-INSERT INTO station (id, name, x, y, z) VALUES (12, 'Station 12', 700.0, 50.0, 0.0);
+INSERT INTO station (id, name, x, y, z, color) VALUES (1, 'Station 1', 50.0, 350.0, 0.0, "#FFFFFF");
+INSERT INTO station (id, name, x, y, z, color) VALUES (2, 'Station 2', 250.0, 200.0, 0.0, "#F4F4F4");
+INSERT INTO station (id, name, x, y, z, color) VALUES (3, 'Station 3', 150.0, 100.0, 0.0, "#DFDFDF");
+INSERT INTO station (id, name, x, y, z, color) VALUES (4, 'Station 4', 500.0, 50.0, 0.0, "#D1D1D1");
+INSERT INTO station (id, name, x, y, z, color) VALUES (5, 'Station 5', 650.0, 150.0, 0.0, "#BFBFBF");
+INSERT INTO station (id, name, x, y, z, color) VALUES (6, 'Station 6', 200.0, 400.0, 0.0, "#AFAFAF");
+INSERT INTO station (id, name, x, y, z, color) VALUES (7, 'Station 7', 200.0, 500.0, 0.0, "#FFFFFF");
+INSERT INTO station (id, name, x, y, z, color) VALUES (8, 'Station 8', 400.0, 450.0, 0.0, "#F4F4F4");
+INSERT INTO station (id, name, x, y, z, color) VALUES (9, 'Station 9', 500.0, 350.0, 0.0, "#DFDFDF");
+INSERT INTO station (id, name, x, y, z, color) VALUES (10, 'Station 10', 650.0, 300.0, 0.0, "#D1D1D1");
+INSERT INTO station (id, name, x, y, z, color) VALUES (11, 'Station 11', 450.0, 150.0, 0.0, "#BFBFBF");
+INSERT INTO station (id, name, x, y, z, color) VALUES (12, 'Station 12', 700.0, 50.0, 0.0, "#AFAFAF");
 -- Lines data
-INSERT INTO line (id, name) VALUES (1, 'Line 1');
-INSERT INTO line (id, name) VALUES (2, 'Line 2');
-INSERT INTO line (id, name) VALUES (3, 'Line 3');
-INSERT INTO line (id, name) VALUES (4, 'Line 4');
+INSERT INTO line (id, name, color) VALUES (1, 'Line 1', "#FFFF00");
+INSERT INTO line (id, name, color) VALUES (2, 'Line 2', "#23FF00");
+INSERT INTO line (id, name, color) VALUES (3, 'Line 3', "#D29100");
+INSERT INTO line (id, name, color) VALUES (4, 'Line 4', "#F14900");
 -- Make data
-INSERT INTO make (id, name, description, acceleration, top_speed) VALUES (1, '4-Legged-chu', 'A type of fast train.', 0.003, 1.0);
-INSERT INTO make (id, name, description, acceleration, top_speed) VALUES (2, '1-Legged-chu', 'Another type of fast train.', 0.004, 0.7);
+INSERT INTO make (id, name, description, acceleration, top_speed, color) VALUES (1, '4-Legged-chu', 'A type of fast train.', 0.003, 1.0, "#0000DD");
+INSERT INTO make (id, name, description, acceleration, top_speed, color) VALUES (2, '1-Legged-chu', 'Another type of fast train.', 0.004, 0.7, "#113298");
 -- Trains data
 INSERT INTO train (name, x, y, z, makeId, currentId, lineId) VALUES ('Cha', 50.0, 350.0, 0.0, 1, 1, 1);
 INSERT INTO train (name, x, y, z, makeId, currentId, lineId) VALUES ('Che', 500.0, 50.0, 0.0, 2, 4, 4);
