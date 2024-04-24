@@ -58,3 +58,8 @@ WHERE id = ?;
 UPDATE train
 SET nextId = ?
 WHERE id = ?;
+
+-- name: ChangeTrainToLine :exec
+UPDATE train
+SET lineId = ?, currentId = NULL, nextId = NULL
+WHERE id = ?;

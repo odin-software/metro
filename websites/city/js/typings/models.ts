@@ -54,6 +54,7 @@ type RequestEdgePoint = {
 };
 
 type RequestLine = {
+  id: number;
   name: string;
   points: {
     x: number;

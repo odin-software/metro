@@ -3,6 +3,8 @@ export const CITY_BASE = "http://localhost:2221";
 export const EVENTS_BASE_URL = "ws://localhost:2223";
 
 export const GET_STATIONS_URL = `${CITY_BASE}/stations`;
+export const GET_TRAINS_URL = `${CITY_BASE}/trains`;
+export const UPDATE_TRAIN_LINE_URL = `${CITY_BASE}/trains/line`;
 export const GET_EDGES_URL = `${CITY_BASE}/edges`;
 export const GET_LINES_URL = `${CITY_BASE}/lines`;
 export const GET_EDGE_POINTS_URL = (id: number) => `${CITY_BASE}/edges/${id}`;

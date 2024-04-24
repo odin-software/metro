@@ -114,6 +114,11 @@ func (tr *Train) getNextFromDestinations() *Station {
 		}
 	}
 
+	// This means the train was moved to another line.
+	if next == nil {
+		next = &tr.destinations.Stations[0]
+	}
+
 	return next
 }
 

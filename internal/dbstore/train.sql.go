@@ -10,6 +10,22 @@ import (
 	"database/sql"
 )
 
+const changeTrainToLine = `-- name: ChangeTrainToLine :exec
+UPDATE train
+SET lineId = ?, currentId = NULL, nextId = NULL
+WHERE id = ?
+`
+
+type ChangeTrainToLineParams struct {
+	Lineid sql.NullInt64
+	ID     int64
+}
+
+func (q *Queries) ChangeTrainToLine(ctx context.Context, arg ChangeTrainToLineParams) error {
+	_, err := q.db.ExecContext(ctx, changeTrainToLine, arg.Lineid, arg.ID)
+	return err
+}
+
 const createTrain = `-- name: CreateTrain :one
 INSERT INTO train (name, x, y, z, currentId, makeId, lineId)
 VALUES (?, ?, ?, ?, ?, ?, ?)

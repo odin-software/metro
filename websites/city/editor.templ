@@ -11,17 +11,20 @@ templ Editor() {
 			// Canvas
 			<h1>City Editor</h1>
 			<canvas id="editorCanvas"></canvas>
-			<div id="dialog" class="confirm-dialog">
-				<div class="confirm-dialog-body">
-					<h1 class="confirm-dialog-title">A custom modal popup</h1>
-					<p class="confirm-dialog-text"></p>
-					<button id="yesBtn" type="button" class="confirm-dialog-yes">yes</button>
-					<button id="noBtn" type="button" class="confirm-dialog-no">no</button>
+			<div id="dialog" class="dialog">
+				<div class="dialog-body">
+					<h1 class="dialog-title">A custom modal popup</h1>
+					<p class="dialog-text"></p>
+					<input id="dialogInput" type="text"/>
+					<button id="yesBtn" type="button" class="dialog-yes">yes</button>
+					<button id="noBtn" type="button" class="dialog-no">no</button>
 				</div>
+			</div>
+			<div id="trainDiv">
+				<ul id="trainList"></ul>
 			</div>
 			<div id="controls">
 				<button id="saveBtn">💾</button>
-				<button onclick="openOsmPanel()">🗺️</button>
 				&nbsp;
 				<button id="graphBtn">️🌐</button>
 				<button id="lineBtn">️🖊️</button>

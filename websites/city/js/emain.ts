@@ -7,7 +7,7 @@ import Viewport from "./viewport.js";
 import DialogStore from "./store/dialog.js";
 import { saveDraftTemplate } from "./utils/template.js";
 import { Line } from "./models/line.js";
-import { getLines } from "./load.js";
+import { getLines, getTrains, updateTrainLine } from "./load.js";
 import { LineEditor } from "./editors/lineEditor.js";
 
 const canvas = document.getElementById("editorCanvas");
@@ -18,6 +18,7 @@ canvas.width = window.innerWidth;
 canvas.height = window.innerHeight - 150;
 
 const dialog = new Dialog();
+const trains = await getTrains();
 
 const ctx = canvas.getContext("2d");
 const world = new World(await Network.load());
@@ -36,12 +37,35 @@ const lineBtn = document.getElementById("lineBtn");
 lineBtn.addEventListener("click", async () => {
   setMode("line");
 });
+const list = document.querySelector("#trainList") as HTMLUListElement;
+for (let i = 0; i < trains.length; i++) {
+  const li = document.createElement("li");
+  const select = document.createElement("select");
+  for (const l of lines) {
+    const el = document.createElement("option");
+    el.value = l.id.toString();
+    el.text = l.name;
+    el.selected = l.name === trains[i].line;
+    select.append(el);
+  }
+  select.addEventListener("change", async (ev: InputEvent) => {
+    await updateTrainLine(trains[i].id, parseInt(ev.currentTarget.value, 10));
+  });
+  const name = document.createTextNode(trains[i].name);
+  const make = document.createTextNode(trains[i].make);
+  li.appendChild(name);
+  li.appendChild(make);
+  li.appendChild(select);
+  li.classList.add("trainItem");
+  list.appendChild(li);
+}
 
 const saveBtn = document.getElementById("saveBtn");
 saveBtn.addEventListener("click", async () => {
   DialogStore.commit("openDialog", {
     open: true,
     title: "Saving Drafts",
+    input: "",
     body: saveDraftTemplate(
       world.network.draftNodes.length,
       world.network.draftEdges.length
@@ -74,8 +98,6 @@ function animate() {
     return;
   }
   viewport.reset();
-  const viewPoint = Point.scale(viewport.getOffset(), -1);
-  // world.draw(ctx, true);
   lines.forEach((ln) => {
     const line = new Line(ln.points.map((l) => new Point(l.x, l.y)));
     line.draw(ctx, { color: "yellow" });
@@ -87,10 +109,6 @@ function animate() {
   ctx.globalAlpha = 1;
 
   requestAnimationFrame(animate);
-}
-
-function dispose() {
-  tools["graph"].editor.dispose();
 }
 
 function setMode(mode: string) {
@@ -107,23 +125,3 @@ function disableEditors() {
     tool.editor.disable();
   }
 }
-
-// function openOsmPanel() {
-//   osmPanel.style.display = "block";
-// }
-
-// function closeOsmPanel() {
-//   osmPanel.style.display = "none";
-// }
-
-// function loadOsmData() {
-//   if (osmDataContainer.value == "") {
-//     alert("Please enter valid OSM data");
-//     return;
-//   }
-
-//   const res = Osm.parseRoads(JSON.parse(osmDataContainer.value));
-//   graph.points = res.points;
-//   graph.segments = res.segments;
-//   closeOsmPanel();
-// }

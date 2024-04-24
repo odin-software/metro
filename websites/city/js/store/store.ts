@@ -2,6 +2,7 @@ import PubSub from "../lib/pubsub.js";
 
 export default class Store<T> {
   state: T;
+  unreactive: T;
   actions: Record<string, Function>;
   mutations: Record<string, Function>;
   events: PubSub;
@@ -12,6 +13,7 @@ export default class Store<T> {
     self.actions = {};
     self.mutations = {};
     self.state = params.state;
+    self.unreactive = params.state;
 
     self.events = new PubSub();
 
