@@ -10,6 +10,15 @@ import (
 	"database/sql"
 )
 
+const deleteAllMakes = `-- name: DeleteAllMakes :exec
+DELETE FROM make
+`
+
+func (q *Queries) DeleteAllMakes(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllMakes)
+	return err
+}
+
 const listMakes = `-- name: ListMakes :many
 SELECT name, description, acceleration, top_speed, color
 FROM make

@@ -27,6 +27,24 @@ func (q *Queries) CreateEdge(ctx context.Context, arg CreateEdgeParams) (int64, 
 	return id, err
 }
 
+const deleteAllEdgePoints = `-- name: DeleteAllEdgePoints :exec
+DELETE FROM edge_point
+`
+
+func (q *Queries) DeleteAllEdgePoints(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllEdgePoints)
+	return err
+}
+
+const deleteAllEdges = `-- name: DeleteAllEdges :exec
+DELETE FROM edge
+`
+
+func (q *Queries) DeleteAllEdges(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllEdges)
+	return err
+}
+
 const getEdgePoints = `-- name: GetEdgePoints :many
 SELECT id, edgeId, X, Y, Z, odr
 FROM edge_point

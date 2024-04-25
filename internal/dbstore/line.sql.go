@@ -65,6 +65,24 @@ func (q *Queries) CreateStationLine(ctx context.Context, arg CreateStationLinePa
 	return id, err
 }
 
+const deleteAllLines = `-- name: DeleteAllLines :exec
+DELETE FROM line
+`
+
+func (q *Queries) DeleteAllLines(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllLines)
+	return err
+}
+
+const deleteAllStationLines = `-- name: DeleteAllStationLines :exec
+DELETE FROM station_line
+`
+
+func (q *Queries) DeleteAllStationLines(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllStationLines)
+	return err
+}
+
 const deleteLine = `-- name: DeleteLine :exec
 DELETE FROM line 
 WHERE id = ?

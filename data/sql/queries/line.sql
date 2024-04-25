@@ -97,3 +97,9 @@ RETURNING id;
 -- name: RemoveStationFromLine :exec
 DELETE FROM station_line
 WHERE stationId = ? AND lineId = ?;
+
+-- name: DeleteAllLines :exec
+DELETE FROM line;
+
+-- name: DeleteAllStationLines :exec
+DELETE FROM station_line;

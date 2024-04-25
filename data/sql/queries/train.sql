@@ -64,3 +64,6 @@ WHERE id = ?;
 UPDATE train
 SET lineId = ?, currentId = NULL, nextId = NULL
 WHERE id = ?;
+
+-- name: DeleteAllTrains :exec
+DELETE FROM train;

@@ -41,3 +41,6 @@ ORDER BY id;
 SELECT id FROM station_line 
 WHERE stationId = ? 
 ORDER BY id;
+
+-- name: DeleteAllStations :exec
+DELETE FROM station;

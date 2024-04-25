@@ -57,6 +57,15 @@ func (q *Queries) CreateTrain(ctx context.Context, arg CreateTrainParams) (int64
 	return id, err
 }
 
+const deleteAllTrains = `-- name: DeleteAllTrains :exec
+DELETE FROM train
+`
+
+func (q *Queries) DeleteAllTrains(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllTrains)
+	return err
+}
+
 const deleteTrain = `-- name: DeleteTrain :exec
 DELETE FROM train 
 WHERE id = ?
