@@ -262,5 +262,7 @@ func (s *Server) GenerateNetwork(w http.ResponseWriter, req *http.Request) {
 		InternalServerErrorHandler(w, req)
 	}
 
-	w.WriteHeader(http.StatusOK)
+	sts := generateStations(200, 200, 10)
+
+	JsonHandler(w, req, sts)
 }
