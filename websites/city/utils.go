@@ -4,8 +4,20 @@ import (
 	"math"
 	"math/rand/v2"
 
+	"github.com/odin-software/metro/internal/baso"
 	"github.com/odin-software/metro/internal/models"
 )
+
+func getNearest(position models.Vector, stations []baso.GetStation, radius float64) []baso.GetStation {
+	near := make([]baso.GetStation, 0)
+	for _, st := range stations {
+		if st.Position.Dist(position) < radius {
+			near = append(near, st)
+		}
+	}
+
+	return near
+}
 
 func poissonDiskSampling(radius float64, width, height, k int) []models.Vector {
 	s1 := rand.NewPCG(13, 20)

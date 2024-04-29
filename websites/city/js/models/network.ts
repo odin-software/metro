@@ -53,15 +53,16 @@ export class Network {
       edgesResponse.map(async (e) => {
         const st1 = stations.find((st) => st.id === e.Fromid);
         const st2 = stations.find((st) => st.id === e.Toid);
-        const eps = await getEdgesPoints(e.ID);
+        // const eps = await getEdgesPoints(e.ID);
         return new Edge(
           st1,
           st2,
-          eps ? eps.map((ep) => new Point(ep.X, ep.Y)) : []
+          []
+          // eps ? eps.map((ep) => new Point(ep.X, ep.Y)) : []
         );
       })
     );
-    return new Network(stations, []);
+    return new Network(stations, edges);
   }
 
   async saveDrafts() {
