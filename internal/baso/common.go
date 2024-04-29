@@ -21,3 +21,52 @@ func (bs *Baso) DumpData() []models.Station {
 	}
 	return result
 }
+
+func (bs *Baso) WipeData() error {
+	tx, err := bs.db.Begin()
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+	qtx := bs.queries.WithTx(tx)
+
+	err = qtx.DeleteAllStationLines(bs.ctx)
+	if err != nil {
+		return err
+	}
+	err = qtx.DeleteAllEdgePoints(bs.ctx)
+	if err != nil {
+		return err
+	}
+	err = qtx.DeleteAllEdges(bs.ctx)
+	if err != nil {
+		return err
+	}
+	err = qtx.DeleteAllMakes(bs.ctx)
+	if err != nil {
+		return err
+	}
+	err = qtx.DeleteAllTrains(bs.ctx)
+	if err != nil {
+		return err
+	}
+	err = qtx.DeleteAllStations(bs.ctx)
+	if err != nil {
+		return err
+	}
+	err = qtx.DeleteAllMakes(bs.ctx)
+	if err != nil {
+		return err
+	}
+	err = qtx.DeleteAllLines(bs.ctx)
+	if err != nil {
+		return err
+	}
+
+	err = tx.Commit()
+	if err != nil {
+		return err
+	}
+
+	return nil
+}

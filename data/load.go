@@ -106,7 +106,18 @@ func LoadEdges(cn *models.Network[models.Station]) {
 		for _, ep := range edgePoints {
 			eps = append(eps, models.NewVector(ep.X, ep.Y))
 		}
-		cn.InsertEdge(station1, station2, eps)
+		// Converting the type from the database into the memory model.
+		st1 := models.Station{
+			ID:       station1.ID,
+			Name:     station1.Name,
+			Position: models.NewVector(station1.Position.X, station1.Position.Y),
+		}
+		st2 := models.Station{
+			ID:       station2.ID,
+			Name:     station2.Name,
+			Position: models.NewVector(station2.Position.X, station2.Position.Y),
+		}
+		cn.InsertEdge(st1, st2, eps)
 	}
 }
 

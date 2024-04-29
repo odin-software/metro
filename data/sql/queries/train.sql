@@ -9,6 +9,7 @@ SELECT
 	tr.x,
 	tr.y,
 	tr.z,
+	mk.color,
 	st.id as stationId,
 	ln.name as lineName,
 	mk.name as makeName
@@ -63,3 +64,6 @@ WHERE id = ?;
 UPDATE train
 SET lineId = ?, currentId = NULL, nextId = NULL
 WHERE id = ?;
+
+-- name: DeleteAllTrains :exec
+DELETE FROM train;

@@ -57,6 +57,15 @@ func (q *Queries) CreateTrain(ctx context.Context, arg CreateTrainParams) (int64
 	return id, err
 }
 
+const deleteAllTrains = `-- name: DeleteAllTrains :exec
+DELETE FROM train
+`
+
+func (q *Queries) DeleteAllTrains(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllTrains)
+	return err
+}
+
 const deleteTrain = `-- name: DeleteTrain :exec
 DELETE FROM train 
 WHERE id = ?
@@ -116,6 +125,7 @@ SELECT
 	tr.x,
 	tr.y,
 	tr.z,
+	mk.color,
 	st.id as stationId,
 	ln.name as lineName,
 	mk.name as makeName
@@ -131,6 +141,7 @@ type GetAllTrainsFullRow struct {
 	X         float64
 	Y         float64
 	Z         float64
+	Color     sql.NullString
 	Stationid int64
 	Linename  string
 	Makename  string
@@ -151,6 +162,7 @@ func (q *Queries) GetAllTrainsFull(ctx context.Context) ([]GetAllTrainsFullRow, 
 			&i.X,
 			&i.Y,
 			&i.Z,
+			&i.Color,
 			&i.Stationid,
 			&i.Linename,
 			&i.Makename,

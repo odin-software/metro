@@ -2,6 +2,8 @@ package city
 
 import (
 	"encoding/json"
+	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"sync"
@@ -22,11 +24,18 @@ type CreateLine struct {
 		StationId int64 `json:"stationId"`
 		Odr       int64 `json:"odr"`
 	} `json:"stations"`
+	Color string `json:"color"`
 }
 
 type MoveTrainToLine struct {
 	TrainId int64 `json:"trainId"`
 	LineId  int64 `json:"lineId"`
+}
+
+type GenerateNetworkParams struct {
+	Width  int `json:"width"`
+	Height int `json:"height"`
+	Radius int `json:"radius"`
 }
 
 func NewServer(tick *sematick.Ticker) *Server {
@@ -128,7 +137,7 @@ func (s *Server) CreateLine(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 
-	id, err := s.baso.CreateLine(reqLine.Name)
+	id, err := s.baso.CreateLine(reqLine.Name, reqLine.Color)
 	if err != nil {
 		InternalServerErrorHandler(w, req)
 	}
@@ -239,4 +248,50 @@ func (s *Server) UpdateTrainToLine(w http.ResponseWriter, req *http.Request) {
 	}
 
 	w.WriteHeader(http.StatusOK)
+}
+
+func (s *Server) GenerateNetwork(w http.ResponseWriter, req *http.Request) {
+	s.basoMux.Lock()
+	defer s.basoMux.Unlock()
+
+	var reqNetworkParams GenerateNetworkParams
+	err := json.NewDecoder(req.Body).Decode(&reqNetworkParams)
+	if err != nil {
+		BadRequestErrorHandler(w, req, "Malformed request body.")
+		return
+	}
+
+	err = s.baso.WipeData()
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+	}
+
+	vecs := poissonDiskSampling(float64(reqNetworkParams.Radius), reqNetworkParams.Width, reqNetworkParams.Height, 30)
+	stationsToCreate := make([]baso.CreateStation, 0)
+	for _, v := range vecs {
+		name := strconv.FormatFloat(rand.Float64()*100000.00, 'E', -1, 64)
+		stationsToCreate = append(stationsToCreate, baso.CreateStation{
+			Name:  name,
+			X:     v.X,
+			Y:     v.Y,
+			Z:     0.0,
+			Color: "#48FF23",
+		})
+	}
+	newStations, err := s.baso.CreateStations(stationsToCreate)
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
+	for _, ns := range newStations {
+		sts := getNearest(ns.Position, newStations, float64(reqNetworkParams.Radius*2))
+		pick := rand.Intn(len(sts))
+		err := s.baso.CreateEdge(ns.ID, sts[pick].ID)
+		if err != nil {
+			InternalServerErrorHandler(w, req)
+			return
+		}
+	}
+
+	w.Write([]byte(fmt.Sprintf("%d stations created.", len(newStations))))
 }

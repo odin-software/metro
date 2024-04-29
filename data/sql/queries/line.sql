@@ -8,7 +8,8 @@ SELECT
 	st.name,
 	st.x,
 	st.y,
-	st.z
+	st.z,
+	st.color
 FROM
 	line ln
 	JOIN station_line sl ON ln.id = sl.lineId
@@ -49,18 +50,18 @@ ORDER BY
 	ep.odr;
 
 -- name: GetLineById :one
-SELECT id, name FROM line
+SELECT id, name, color FROM line
 WHERE id = ?
 LIMIT 1;
 
 -- name: GetLineByName :one
-SELECT id, name FROM line
+SELECT id, name, color FROM line
 WHERE name = ?
 LIMIT 1;
 
 -- name: CreateLine :one
-INSERT INTO line (name)
-VALUES (?)
+INSERT INTO line (name, color)
+VALUES (?, ?)
 RETURNING id;
 
 -- name: CreateStationLine :one
@@ -96,3 +97,9 @@ RETURNING id;
 -- name: RemoveStationFromLine :exec
 DELETE FROM station_line
 WHERE stationId = ? AND lineId = ?;
+
+-- name: DeleteAllLines :exec
+DELETE FROM line;
+
+-- name: DeleteAllStationLines :exec
+DELETE FROM station_line;

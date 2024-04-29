@@ -1,2 +1,6 @@
 -- name: ListMakes :many
-SELECT name, description, acceleration, top_speed FROM make;
+SELECT name, description, acceleration, top_speed, color
+FROM make;
+
+-- name: DeleteAllMakes :exec
+DELETE FROM make;

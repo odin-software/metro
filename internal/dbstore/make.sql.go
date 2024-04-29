@@ -10,8 +10,18 @@ import (
 	"database/sql"
 )
 
+const deleteAllMakes = `-- name: DeleteAllMakes :exec
+DELETE FROM make
+`
+
+func (q *Queries) DeleteAllMakes(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllMakes)
+	return err
+}
+
 const listMakes = `-- name: ListMakes :many
-SELECT name, description, acceleration, top_speed FROM make
+SELECT name, description, acceleration, top_speed, color
+FROM make
 `
 
 type ListMakesRow struct {
@@ -19,6 +29,7 @@ type ListMakesRow struct {
 	Description  string
 	Acceleration sql.NullFloat64
 	TopSpeed     sql.NullFloat64
+	Color        sql.NullString
 }
 
 func (q *Queries) ListMakes(ctx context.Context) ([]ListMakesRow, error) {
@@ -35,6 +46,7 @@ func (q *Queries) ListMakes(ctx context.Context) ([]ListMakesRow, error) {
 			&i.Description,
 			&i.Acceleration,
 			&i.TopSpeed,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}

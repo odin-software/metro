@@ -71,8 +71,14 @@ func (bs *Baso) ListLinesWithPoints() ([]LineWithEdges, error) {
 	return result, nil
 }
 
-func (bs *Baso) CreateLine(name string) (int64, error) {
-	line, err := bs.queries.CreateLine(bs.ctx, name)
+func (bs *Baso) CreateLine(name, color string) (int64, error) {
+	line, err := bs.queries.CreateLine(bs.ctx, dbstore.CreateLineParams{
+		Name: name,
+		Color: sql.NullString{
+			String: color,
+			Valid:  true,
+		},
+	})
 	return line, err
 }
 

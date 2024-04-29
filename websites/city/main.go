@@ -56,6 +56,9 @@ func Main(ticker *sematick.Ticker) {
 		Index().Render(r.Context(), w)
 	})
 
+	// Generation
+	mux.HandleFunc("POST /generate", server.GenerateNetwork)
+
 	port := fmt.Sprintf(":%d", control.DefaultConfig.PortCity)
 	log.Printf("server is listening at %s", port)
 	log.Fatal(http.ListenAndServe(port, mux))

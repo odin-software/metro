@@ -1,20 +1,20 @@
 -- name: ListStations :many
-SELECT id, name, x, y, z FROM station 
+SELECT id, name, x, y, z, color FROM station 
 ORDER BY id;
 
 -- name: GetStationById :one
-SELECT id, name, x, y, z FROM station 
+SELECT id, name, x, y, z, color FROM station 
 WHERE id = ? 
 LIMIT 1;
 
 -- name: GetStationByName :one
-SELECT id, name, x, y, z FROM station
+SELECT id, name, x, y, z, color FROM station
 WHERE name = ? 
 LIMIT 1;
 
 -- name: CreateStation :one
-INSERT INTO station (name, x, y, z) 
-VALUES (?, ?, ?, ?)
+INSERT INTO station (name, x, y, z, color) 
+VALUES (?, ?, ?, ?, ?)
 RETURNING id;
 
 -- name: UpdateStation :one
@@ -41,3 +41,6 @@ ORDER BY id;
 SELECT id FROM station_line 
 WHERE stationId = ? 
 ORDER BY id;
+
+-- name: DeleteAllStations :exec
+DELETE FROM station;

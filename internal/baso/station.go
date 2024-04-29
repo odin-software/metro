@@ -7,42 +7,52 @@ import (
 	"github.com/odin-software/metro/internal/models"
 )
 
-type CreateStation struct {
-	Name string  `json:"name"`
-	X    float64 `json:"x"`
-	Y    float64 `json:"y"`
-	Z    float64 `json:"z"`
+type GetStation struct {
+	ID       int64         `json:"id"`
+	Name     string        `json:"name"`
+	Color    string        `json:"color"`
+	Position models.Vector `json:"position"`
 }
 
-func (bs *Baso) ListStations() ([]models.Station, error) {
+type CreateStation struct {
+	Name  string  `json:"name"`
+	X     float64 `json:"x"`
+	Y     float64 `json:"y"`
+	Z     float64 `json:"z"`
+	Color string  `json:"color"`
+}
+
+func (bs *Baso) ListStations() ([]GetStation, error) {
 	stations, err := bs.queries.ListStations(bs.ctx)
 	if err != nil {
 		return nil, err
 	}
-	result := make([]models.Station, 0)
+	result := make([]GetStation, 0)
 	for _, station := range stations {
-		result = append(result, models.Station{
+		result = append(result, GetStation{
 			ID:       station.ID,
 			Name:     station.Name,
+			Color:    station.Color.String,
 			Position: models.NewVector(station.X.Float64, station.Y.Float64),
 		})
 	}
 	return result, nil
 }
 
-func (bs *Baso) GetStationById(id int64) (models.Station, error) {
+func (bs *Baso) GetStationById(id int64) (GetStation, error) {
 	station, err := bs.queries.GetStationById(bs.ctx, id)
 	if err != nil {
-		return models.Station{}, err
+		return GetStation{}, err
 	}
-	return models.Station{
+	return GetStation{
 		ID:       station.ID,
 		Name:     station.Name,
+		Color:    station.Color.String,
 		Position: models.NewVector(station.X.Float64, station.Y.Float64),
 	}, err
 }
 
-func (bs *Baso) CreateStation(name string, x, y, z float64) error {
+func (bs *Baso) CreateStation(name, color string, x, y, z float64) error {
 	_, err := bs.queries.CreateStation(bs.ctx, dbstore.CreateStationParams{
 		Name: name,
 		X: sql.NullFloat64{
@@ -57,12 +67,16 @@ func (bs *Baso) CreateStation(name string, x, y, z float64) error {
 			Float64: 0,
 			Valid:   true,
 		},
+		Color: sql.NullString{
+			String: color,
+			Valid:  true,
+		},
 	})
 
 	return err
 }
 
-func (bs *Baso) CreateStations(sts []CreateStation) ([]models.Station, error) {
+func (bs *Baso) CreateStations(sts []CreateStation) ([]GetStation, error) {
 	tx, err := bs.db.Begin()
 	if err != nil {
 		return nil, err
@@ -84,6 +98,10 @@ func (bs *Baso) CreateStations(sts []CreateStation) ([]models.Station, error) {
 			Z: sql.NullFloat64{
 				Float64: 0,
 				Valid:   true,
+			},
+			Color: sql.NullString{
+				String: st.Color,
+				Valid:  true,
 			},
 		})
 		if err != nil {

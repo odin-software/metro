@@ -29,13 +29,18 @@ func (q *Queries) AddStationToLine(ctx context.Context, arg AddStationToLinePara
 }
 
 const createLine = `-- name: CreateLine :one
-INSERT INTO line (name)
-VALUES (?)
+INSERT INTO line (name, color)
+VALUES (?, ?)
 RETURNING id
 `
 
-func (q *Queries) CreateLine(ctx context.Context, name string) (int64, error) {
-	row := q.db.QueryRowContext(ctx, createLine, name)
+type CreateLineParams struct {
+	Name  string
+	Color sql.NullString
+}
+
+func (q *Queries) CreateLine(ctx context.Context, arg CreateLineParams) (int64, error) {
+	row := q.db.QueryRowContext(ctx, createLine, arg.Name, arg.Color)
 	var id int64
 	err := row.Scan(&id)
 	return id, err
@@ -60,6 +65,24 @@ func (q *Queries) CreateStationLine(ctx context.Context, arg CreateStationLinePa
 	return id, err
 }
 
+const deleteAllLines = `-- name: DeleteAllLines :exec
+DELETE FROM line
+`
+
+func (q *Queries) DeleteAllLines(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllLines)
+	return err
+}
+
+const deleteAllStationLines = `-- name: DeleteAllStationLines :exec
+DELETE FROM station_line
+`
+
+func (q *Queries) DeleteAllStationLines(ctx context.Context) error {
+	_, err := q.db.ExecContext(ctx, deleteAllStationLines)
+	return err
+}
+
 const deleteLine = `-- name: DeleteLine :exec
 DELETE FROM line 
 WHERE id = ?
@@ -71,38 +94,40 @@ func (q *Queries) DeleteLine(ctx context.Context, id int64) error {
 }
 
 const getLineById = `-- name: GetLineById :one
-SELECT id, name FROM line
+SELECT id, name, color FROM line
 WHERE id = ?
 LIMIT 1
 `
 
 type GetLineByIdRow struct {
-	ID   int64
-	Name string
+	ID    int64
+	Name  string
+	Color sql.NullString
 }
 
 func (q *Queries) GetLineById(ctx context.Context, id int64) (GetLineByIdRow, error) {
 	row := q.db.QueryRowContext(ctx, getLineById, id)
 	var i GetLineByIdRow
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Name, &i.Color)
 	return i, err
 }
 
 const getLineByName = `-- name: GetLineByName :one
-SELECT id, name FROM line
+SELECT id, name, color FROM line
 WHERE name = ?
 LIMIT 1
 `
 
 type GetLineByNameRow struct {
-	ID   int64
-	Name string
+	ID    int64
+	Name  string
+	Color sql.NullString
 }
 
 func (q *Queries) GetLineByName(ctx context.Context, name string) (GetLineByNameRow, error) {
 	row := q.db.QueryRowContext(ctx, getLineByName, name)
 	var i GetLineByNameRow
-	err := row.Scan(&i.ID, &i.Name)
+	err := row.Scan(&i.ID, &i.Name, &i.Color)
 	return i, err
 }
 
@@ -243,7 +268,8 @@ SELECT
 	st.name,
 	st.x,
 	st.y,
-	st.z
+	st.z,
+	st.color
 FROM
 	line ln
 	JOIN station_line sl ON ln.id = sl.lineId
@@ -253,11 +279,12 @@ WHERE
 `
 
 type GetStationsFromLineRow struct {
-	ID   int64
-	Name string
-	X    sql.NullFloat64
-	Y    sql.NullFloat64
-	Z    sql.NullFloat64
+	ID    int64
+	Name  string
+	X     sql.NullFloat64
+	Y     sql.NullFloat64
+	Z     sql.NullFloat64
+	Color sql.NullString
 }
 
 func (q *Queries) GetStationsFromLine(ctx context.Context, lineid sql.NullInt64) ([]GetStationsFromLineRow, error) {
@@ -275,6 +302,7 @@ func (q *Queries) GetStationsFromLine(ctx context.Context, lineid sql.NullInt64)
 			&i.X,
 			&i.Y,
 			&i.Z,
+			&i.Color,
 		); err != nil {
 			return nil, err
 		}

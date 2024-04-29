@@ -12,3 +12,9 @@ ORDER BY odr;
 INSERT INTO edge (fromId, toId) 
 VALUES (?, ?)
 RETURNING id;
+
+-- name: DeleteAllEdges :exec
+DELETE FROM edge;
+
+-- name: DeleteAllEdgePoints :exec
+DELETE FROM edge_point;
