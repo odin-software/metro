@@ -28,7 +28,6 @@ const viewport = new Viewport(
   world.network.getCenterPoint().invertSign()
 );
 const lines = await getLines();
-console.log(lines);
 
 let logs = [];
 const mouse = new Point(0, 0);

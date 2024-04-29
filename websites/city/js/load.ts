@@ -59,8 +59,11 @@ export async function getLines() {
 
 export async function getTrains() {
   const response = await fetchMetro<RequestTrain[]>(GET_TRAINS_URL);
+  if (!response.ok) {
+    return [];
+  }
 
-  return response;
+  return await response.json();
 }
 
 export function playLoop() {
