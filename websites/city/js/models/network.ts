@@ -61,7 +61,7 @@ export class Network {
         );
       })
     );
-    return new Network(stations, edges);
+    return new Network(stations, []);
   }
 
   async saveDrafts() {

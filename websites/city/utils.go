@@ -1,24 +1,11 @@
 package city
 
 import (
-	"fmt"
 	"math"
 	"math/rand/v2"
 
 	"github.com/odin-software/metro/internal/models"
 )
-
-func generateStations(width, height int, radius float64) []models.Station {
-	s1 := rand.NewPCG(13, 20)
-	_ = rand.New(s1)
-
-	vecs := poissonDiskSampling(radius, width, height, 30)
-	fmt.Print(vecs)
-
-	result := make([]models.Station, 0)
-
-	return result
-}
 
 func poissonDiskSampling(radius float64, width, height, k int) []models.Vector {
 	s1 := rand.NewPCG(13, 20)
@@ -28,7 +15,7 @@ func poissonDiskSampling(radius float64, width, height, k int) []models.Vector {
 	points := make([]models.Vector, 0)
 	active := make([]models.Vector, 0)
 
-	p0 := models.NewVector(float64(r1.IntN(width)), float64(r1.IntN(height)))
+	p0 := models.NewVector(float64(r1.IntN(width)), float64(rand.IntN(height)))
 
 	cellSize := math.Floor(radius / math.Sqrt(N))
 
@@ -110,7 +97,7 @@ func isValidPoint(
 	for i := i0; i <= i1; i++ {
 		for j := j0; j <= j1; j++ {
 			gp := grid[int(i)][int(j)]
-			if gp.X == -1 && gp.Y == -1 {
+			if gp.X != -1 && gp.Y != -1 {
 				if gp.Dist(p) < radius {
 					return false
 				}

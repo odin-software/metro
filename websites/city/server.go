@@ -2,6 +2,8 @@ package city
 
 import (
 	"encoding/json"
+	"fmt"
+	"math/rand"
 	"net/http"
 	"strconv"
 	"sync"
@@ -31,7 +33,9 @@ type MoveTrainToLine struct {
 }
 
 type GenerateNetworkParams struct {
-	Stations int `json:"stations"`
+	Width  int `json:"width"`
+	Height int `json:"height"`
+	Radius int `json:"radius"`
 }
 
 func NewServer(tick *sematick.Ticker) *Server {
@@ -262,7 +266,23 @@ func (s *Server) GenerateNetwork(w http.ResponseWriter, req *http.Request) {
 		InternalServerErrorHandler(w, req)
 	}
 
-	sts := generateStations(200, 200, 10)
+	vecs := poissonDiskSampling(float64(reqNetworkParams.Radius), reqNetworkParams.Width, reqNetworkParams.Height, 30)
+	stationsToCreate := make([]baso.CreateStation, 0)
+	for _, v := range vecs {
+		name := strconv.FormatFloat(rand.Float64()*100000.00, 'E', -1, 64)
+		stationsToCreate = append(stationsToCreate, baso.CreateStation{
+			Name:  name,
+			X:     v.X,
+			Y:     v.Y,
+			Z:     0.0,
+			Color: "#48FF23",
+		})
+	}
+	newStations, err := s.baso.CreateStations(stationsToCreate)
+	if err != nil {
+		InternalServerErrorHandler(w, req)
+		return
+	}
 
-	JsonHandler(w, req, sts)
+	w.Write([]byte(fmt.Sprintf("%d stations created.", len(newStations))))
 }

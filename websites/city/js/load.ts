@@ -9,24 +9,31 @@ import {
   UPDATE_TRAIN_LINE_URL,
 } from "./utils/consts.js";
 
-async function fetchMetro<T>(url: string): Promise<T> {
+async function fetchMetro<T>(url: string): Promise<Response> {
   const response = await fetch(url);
   if (!response.ok && !(response.status === 404)) {
     throw new Error(response.statusText);
   }
-  return await (response.json() as Promise<T>);
+
+  return response;
 }
 
 export async function getStations() {
   const response = await fetchMetro<RequestStation[]>(GET_STATIONS_URL);
+  if (!response.ok) {
+    return [];
+  }
 
-  return response;
+  return await response.json();
 }
 
 export async function getEdges() {
   const response = await fetchMetro<RequestEdge[]>(GET_EDGES_URL);
+  if (!response.ok) {
+    return [];
+  }
 
-  return response;
+  return await response.json();
 }
 
 export async function getEdgesPoints(
@@ -43,8 +50,11 @@ export async function getEdgesPoints(
 
 export async function getLines() {
   const response = await fetchMetro<RequestLine[]>(GET_LINES_URL);
+  if (!response.ok) {
+    return [];
+  }
 
-  return response;
+  return await response.json();
 }
 
 export async function getTrains() {
