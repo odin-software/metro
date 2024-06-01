@@ -6,7 +6,6 @@ Tasks to do:
 - [x] City Server needs to remove `echo` and start using routers.
 - [x] Fix editor.
 - [] Remove templ.
-- [] Check what to do with the sqlite driver and having it downloaded.
 - [] Research and implement a small LLM for the reporter.
 - [] Generate random big maps.
 - [] A notification on top right when requests are successful.

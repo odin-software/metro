@@ -283,15 +283,15 @@ func (s *Server) GenerateNetwork(w http.ResponseWriter, req *http.Request) {
 		InternalServerErrorHandler(w, req)
 		return
 	}
-	for _, ns := range newStations {
-		sts := getNearest(ns.Position, newStations, float64(reqNetworkParams.Radius*2))
-		pick := rand.Intn(len(sts))
-		err := s.baso.CreateEdge(ns.ID, sts[pick].ID)
-		if err != nil {
-			InternalServerErrorHandler(w, req)
-			return
-		}
-	}
+	// for _, ns := range newStations {
+	// 	sts := getNearest(ns.Position, newStations, float64(reqNetworkParams.Radius*2))
+	// 	pick := rand.Intn(len(sts))
+	// 	err := s.baso.CreateEdge(ns.ID, sts[pick].ID)
+	// 	if err != nil {
+	// 		InternalServerErrorHandler(w, req)
+	// 		return
+	// 	}
+	// }
 
 	w.Write([]byte(fmt.Sprintf("%d stations created.", len(newStations))))
 }
