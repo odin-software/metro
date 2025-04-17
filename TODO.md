@@ -10,6 +10,7 @@ Tasks to do:
 - [] Generate random big maps.
 - [] A notification on top right when requests are successful.
 - [] Retake random city generation, outline of the city approach.
+- [] Ebiten to show the simulation.
 
 Things to check:
 

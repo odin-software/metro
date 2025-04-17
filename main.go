@@ -22,7 +22,7 @@ var StationHashFunction = func(station models.Station) string {
 }
 
 func main() {
-	// Setup
+	// Setup.
 	loopTick := sematick.NewTicker(
 		control.DefaultConfig.LoopDuration,
 		control.DefaultConfig.LoopStartingState,
@@ -45,7 +45,10 @@ func main() {
 	// Loading stations, lines, edges from the database.
 	stations := data.LoadStations(bcArr, bcDep)
 	lines := data.LoadLines()
-	cityNetwork.InsertVertices(stations)
+	err := cityNetwork.InsertVertices(stations)
+	if err != nil {
+		return
+	}
 	data.LoadEdges(&cityNetwork)
 
 	// Creating the train with lines and channels to communicate.

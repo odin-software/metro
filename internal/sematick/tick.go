@@ -20,7 +20,7 @@ type Ticker struct {
 	stopChannel chan struct{}
 }
 
-// Creates a new sematick, pushes time.Time messages at the
+// NewTicker creates a new sematick, pushes time.Time messages at the
 // desired interval and can start either as 0 which equals stopped
 // or 1 which equals running.
 func NewTicker(interval time.Duration, initialState int) *Ticker {
@@ -42,7 +42,7 @@ func NewTicker(interval time.Duration, initialState int) *Ticker {
 	return t
 }
 
-// Creates and returns a new channel that recieves time messages
+// Subscribe creates and returns a new channel that receives time messages
 // at the specified interval.
 func (t *Ticker) Subscribe() <-chan time.Time {
 	t.mux.Lock()
@@ -55,24 +55,24 @@ func (t *Ticker) Subscribe() <-chan time.Time {
 	return new_channel
 }
 
-// Gets the amount of times the main ticker has sent a message.
+// Count gets the amount of times the main ticker has sent a message.
 func (t *Ticker) Count() int {
 	return t.count
 }
 
-// Changes the state to pause, ticks still happen but are not
+// Pause changes the state to pause, ticks still happen but are not
 // sent to the subscribed channels.
 func (t *Ticker) Pause() {
 	atomic.StoreUint32(&t.state, 2)
 }
 
-// Changes state to resume, this works as a play button when
+// Resume changes state to resume, this works as a play button when
 // the ticker was initialized in the stopped state.
 func (t *Ticker) Resume() {
 	atomic.StoreUint32(&t.state, 1)
 }
 
-// Stops ticking and quits the main goroutine.
+// Stop stops ticking and quits the main goroutine.
 func (t *Ticker) Stop() {
 	t.tickerMux.Lock()
 	defer t.tickerMux.Unlock()

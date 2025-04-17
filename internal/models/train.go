@@ -164,7 +164,10 @@ func (tr *Train) Tick() {
 	distance := tr.Position.Dist(reach)
 
 	if distance <= 1 {
-		tr.q.DQ()
+		_, err := tr.q.DQ()
+		if err != nil {
+			return
+		}
 		tr.velocity.Scale(0)
 		if tr.q.Size() == 0 {
 			tr.Current = *tr.Next
