@@ -2,19 +2,18 @@ package main
 
 import (
 	"context"
+	"log"
 	"strconv"
+	"sync"
 	"time"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/data"
+	"github.com/odin-software/metro/display"
 	"github.com/odin-software/metro/internal/broadcast"
 	"github.com/odin-software/metro/internal/models"
 	"github.com/odin-software/metro/internal/sematick"
-
-	"github.com/odin-software/metro/websites/city"
-	"github.com/odin-software/metro/websites/events"
-	"github.com/odin-software/metro/websites/reporter"
-	"github.com/odin-software/metro/websites/virtual-world"
 )
 
 var StationHashFunction = func(station models.Station) string {
@@ -23,6 +22,7 @@ var StationHashFunction = func(station models.Station) string {
 
 func main() {
 	// Setup.
+	var wg sync.WaitGroup
 	loopTick := sematick.NewTicker(
 		control.DefaultConfig.LoopDuration,
 		control.DefaultConfig.LoopStartingState,
@@ -55,8 +55,10 @@ func main() {
 	trains := data.LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
 
 	// Starting the goroutines for the trains.
-	for i := 0; i < len(trains); i++ {
+	for i := range len(trains) {
+		wg.Add(1)
 		go func(idx int) {
+			defer wg.Done()
 			sub := loopTick.Subscribe()
 			for range sub {
 				trains[idx].Tick()
@@ -70,15 +72,23 @@ func main() {
 	}
 
 	// Reflect what's on memory on the DB.
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for range reflexTick.C {
 			data.DumpTrainsData(trains)
 		}
 	}()
 
-	// Starting the server for The New Metro Times, Virtual World and CityServer.
-	go reporter.Server()
-	go virtual.Server()
-	go events.Main()
-	city.Main(loopTick)
+	game := display.NewGame(trains)
+	ebiten.SetWindowSize(
+		control.DefaultConfig.DisplayScreenWidth*2,
+		control.DefaultConfig.DisplayScreenHeight*2,
+	)
+	ebiten.SetWindowTitle("Metro")
+	if err := ebiten.RunGame(game); err != nil {
+		log.Fatal(err)
+	}
+
+	wg.Wait()
 }

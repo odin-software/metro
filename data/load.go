@@ -77,6 +77,9 @@ func LoadTrains(
 				central,
 				a,
 				d,
+				13,
+				13,
+				"files/t2.png",
 			),
 		)
 	}
