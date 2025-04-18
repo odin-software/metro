@@ -7,18 +7,21 @@ import (
 )
 
 type Game struct {
-	trains []models.Train
+	trains   []models.Train
+	stations []models.Station
 }
 
-func NewGame(trains []models.Train) *Game {
+func NewGame(trains []models.Train, stations []models.Station) *Game {
+	Init()
 	return &Game{
-		trains: trains,
+		trains:   trains,
+		stations: stations,
 	}
 }
 
 func (g *Game) Update() error {
-	for _, tr := range g.trains {
-		tr.Update()
+	for i := range g.trains {
+		g.trains[i].Update()
 	}
 	return nil
 }
@@ -26,6 +29,7 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	for _, tr := range g.trains {
 		tr.Draw(screen)
+		DrawText(screen, tr.Name, tr.Position, S_FONT_SIZE)
 	}
 }
 

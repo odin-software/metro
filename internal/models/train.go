@@ -1,11 +1,9 @@
 package models
 
 import (
-	"bytes"
 	"fmt"
 	"image"
 	_ "image/png"
-	"log"
 	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
@@ -36,7 +34,7 @@ type Train struct {
 	arrivals     chan<- broadcast.ADMessage[Train]
 	departures   chan<- broadcast.ADMessage[Train]
 	img          *ebiten.Image
-	Fr           int
+	counter      int
 	frameWidth   int
 	frameHeight  int
 	frameCount   int
@@ -51,18 +49,8 @@ func NewTrain(
 	central *Network[Station],
 	a chan broadcast.ADMessage[Train],
 	d chan broadcast.ADMessage[Train],
-	frameWidth int,
-	frameHeight int,
-	spritePath string,
 ) Train {
-	t, err := assets.Assets.ReadFile(spritePath)
-	if err != nil {
-		log.Fatal(err)
-	}
-	img, _, err := image.Decode(bytes.NewReader(t))
-	if err != nil {
-		log.Fatal(err)
-	}
+	img, frameWidth, frameHeight, frameCount := assets.GetTrainSprite()
 	return Train{
 		Name:         name,
 		make:         make,
@@ -78,11 +66,11 @@ func NewTrain(
 		arrivals:     a,
 		departures:   d,
 		// TODO: take framecount from somewhere significance
-		Fr:          0,
-		img:         ebiten.NewImageFromImage(img),
+		counter:     0,
+		img:         img,
 		frameWidth:  frameWidth,
 		frameHeight: frameHeight,
-		frameCount:  13,
+		frameCount:  frameCount,
 	}
 }
 
@@ -96,14 +84,14 @@ func NewMake(name string, description string, accMag float64, topSpeed float64) 
 }
 
 func (tr *Train) Update() {
-	tr.Fr += 1
+	tr.counter++
 }
 
 func (tr *Train) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
 	op.GeoM.Translate(-float64(tr.frameWidth)/2, -float64(tr.frameHeight)/2)
 	op.GeoM.Translate(tr.Position.X, tr.Position.Y)
-	i := tr.Fr % tr.frameCount
+	i := (tr.counter / tr.frameCount) % tr.frameCount
 	sx, sy := 0+i*tr.frameWidth, 0
 	screen.DrawImage(tr.img.SubImage(image.Rect(sx, sy, sx+tr.frameWidth, sy+tr.frameHeight)).(*ebiten.Image), op)
 }

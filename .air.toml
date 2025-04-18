@@ -19,6 +19,8 @@ include_dir = [
   "pkg",
   "internal",
   "control",
+  "display",
+  "logs",
 ]
 include_ext = ["go", "html", "css", "js"]
 include_file = ["main.go"]
