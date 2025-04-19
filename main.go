@@ -80,10 +80,10 @@ func main() {
 		}
 	}()
 
-	game := display.NewGame(trains)
+	game := display.NewGame(trains, stations)
 	ebiten.SetWindowSize(
-		control.DefaultConfig.DisplayScreenWidth*2,
-		control.DefaultConfig.DisplayScreenHeight*2,
+		control.DefaultConfig.DisplayScreenWidth,
+		control.DefaultConfig.DisplayScreenHeight,
 	)
 	ebiten.SetWindowTitle("Metro")
 	if err := ebiten.RunGame(game); err != nil {

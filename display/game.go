@@ -8,10 +8,10 @@ import (
 
 type Game struct {
 	trains   []models.Train
-	stations []models.Station
+	stations []*models.Station
 }
 
-func NewGame(trains []models.Train, stations []models.Station) *Game {
+func NewGame(trains []models.Train, stations []*models.Station) *Game {
 	Init()
 	return &Game{
 		trains:   trains,
@@ -30,6 +30,10 @@ func (g *Game) Draw(screen *ebiten.Image) {
 	for _, tr := range g.trains {
 		tr.Draw(screen)
 		DrawText(screen, tr.Name, tr.Position, S_FONT_SIZE)
+	}
+	for _, st := range g.stations {
+		st.Draw(screen)
+		DrawText(screen, st.Name, st.Position, S_FONT_SIZE)
 	}
 }
 

@@ -23,3 +23,15 @@ func GetTrainSprite() (ebitenImage *ebiten.Image, frameWidth int, frameHeight in
 	}
 	return ebiten.NewImageFromImage(img), 13, 13, 13
 }
+
+func GetStationSprite() (ebitenImage *ebiten.Image, frameWidth int, frameHeight int, frameCount int) {
+	t, err := Assets.ReadFile("files/st1.png")
+	if err != nil {
+		log.Fatal(err)
+	}
+	img, _, err := image.Decode(bytes.NewReader(t))
+	if err != nil {
+		log.Fatal(err)
+	}
+	return ebiten.NewImageFromImage(img), 27, 27, 1
+}

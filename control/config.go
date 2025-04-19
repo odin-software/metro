@@ -19,8 +19,8 @@ type Config struct {
 }
 
 var DefaultConfig = Config{
-	DisplayScreenWidth:  500,
-	DisplayScreenHeight: 500,
+	DisplayScreenWidth:  800,
+	DisplayScreenHeight: 600,
 	LogsDirectory:       "logs/",
 	LoopDuration:        20 * time.Millisecond,
 	LoopDurationOffset:  -1 * time.Millisecond,

@@ -33,11 +33,7 @@ type Train struct {
 	central      *Network[Station]
 	arrivals     chan<- broadcast.ADMessage[Train]
 	departures   chan<- broadcast.ADMessage[Train]
-	img          *ebiten.Image
-	counter      int
-	frameWidth   int
-	frameHeight  int
-	frameCount   int
+	Drawing
 }
 
 func NewTrain(
@@ -65,12 +61,13 @@ func NewTrain(
 		central:      central,
 		arrivals:     a,
 		departures:   d,
-		// TODO: take framecount from somewhere significance
-		counter:     0,
-		img:         img,
-		frameWidth:  frameWidth,
-		frameHeight: frameHeight,
-		frameCount:  frameCount,
+		Drawing: Drawing{
+			Counter:     0,
+			FrameWidth:  frameWidth,
+			FrameHeight: frameHeight,
+			FrameCount:  frameCount,
+			Sprite:      img,
+		},
 	}
 }
 
@@ -84,16 +81,16 @@ func NewMake(name string, description string, accMag float64, topSpeed float64) 
 }
 
 func (tr *Train) Update() {
-	tr.counter++
+	tr.Drawing.Counter++
 }
 
 func (tr *Train) Draw(screen *ebiten.Image) {
 	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-float64(tr.frameWidth)/2, -float64(tr.frameHeight)/2)
+	op.GeoM.Translate(-float64(tr.FrameWidth)/2, -float64(tr.FrameHeight)/2)
 	op.GeoM.Translate(tr.Position.X, tr.Position.Y)
-	i := (tr.counter / tr.frameCount) % tr.frameCount
-	sx, sy := 0+i*tr.frameWidth, 0
-	screen.DrawImage(tr.img.SubImage(image.Rect(sx, sy, sx+tr.frameWidth, sy+tr.frameHeight)).(*ebiten.Image), op)
+	i := (tr.Counter / tr.FrameCount) % tr.FrameCount
+	sx, sy := 0+i*tr.FrameWidth, 0
+	screen.DrawImage(tr.Sprite.SubImage(image.Rect(sx, sy, sx+tr.FrameWidth, sy+tr.FrameHeight)).(*ebiten.Image), op)
 }
 
 func (tr *Train) addToQueue(sts []Vector) {
