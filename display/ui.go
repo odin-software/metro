@@ -37,7 +37,7 @@ func Init() {
 func DrawText(screen *ebiten.Image, info string, position models.Vector, size FontSize) {
 	// TODO: Make color configurable.
 	op := &text.DrawOptions{}
-	op.GeoM.Translate(position.X, position.Y)
+	op.GeoM.Translate(position.X-14, position.Y-15)
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, info, &text.GoTextFace{
 		Source: textFontSource,
