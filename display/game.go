@@ -29,11 +29,11 @@ func (g *Game) Update() error {
 func (g *Game) Draw(screen *ebiten.Image) {
 	for _, tr := range g.trains {
 		tr.Draw(screen)
-		DrawText(screen, tr.Name, tr.Position, S_FONT_SIZE)
+		DrawTitle(screen, tr.Name, tr.Position, S_FONT_SIZE, tr.FrameWidth, tr.FrameHeight, TITLE_TOP_SIDE)
 	}
 	for _, st := range g.stations {
 		st.Draw(screen)
-		DrawText(screen, st.Name, st.Position, S_FONT_SIZE)
+		DrawTitle(screen, st.Name, st.Position, XS_FONT_SIZE, st.FrameWidth, st.FrameHeight, TITLE_BOT_SIDE)
 	}
 }
 

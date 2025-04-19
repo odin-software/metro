@@ -80,19 +80,6 @@ func NewMake(name string, description string, accMag float64, topSpeed float64) 
 	}
 }
 
-func (tr *Train) Update() {
-	tr.Drawing.Counter++
-}
-
-func (tr *Train) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-float64(tr.FrameWidth)/2, -float64(tr.FrameHeight)/2)
-	op.GeoM.Translate(tr.Position.X, tr.Position.Y)
-	i := (tr.Counter / tr.FrameCount) % tr.FrameCount
-	sx, sy := 0+i*tr.FrameWidth, 0
-	screen.DrawImage(tr.Sprite.SubImage(image.Rect(sx, sy, sx+tr.FrameWidth, sy+tr.FrameHeight)).(*ebiten.Image), op)
-}
-
 func (tr *Train) addToQueue(sts []Vector) {
 	tr.q.QList(sts)
 }
@@ -207,4 +194,19 @@ func (tr *Train) Tick() {
 			return
 		}
 	}
+}
+
+// Display methods
+
+func (tr *Train) Update() {
+	tr.Drawing.Counter++
+}
+
+func (tr *Train) Draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-float64(tr.FrameWidth)/2, -float64(tr.FrameHeight)/2)
+	op.GeoM.Translate(tr.Position.X, tr.Position.Y)
+	i := (tr.Counter / tr.FrameCount) % tr.FrameCount
+	sx, sy := 0+i*tr.FrameWidth, 0
+	screen.DrawImage(tr.Sprite.SubImage(image.Rect(sx, sy, sx+tr.FrameWidth, sy+tr.FrameHeight)).(*ebiten.Image), op)
 }

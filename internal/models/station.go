@@ -42,19 +42,6 @@ func NewStation(id int64, name string, location Vector, arr <-chan broadcast.ADM
 	return st
 }
 
-func (st *Station) Update() {
-	st.Drawing.Counter++
-}
-
-func (st *Station) Draw(screen *ebiten.Image) {
-	op := &ebiten.DrawImageOptions{}
-	op.GeoM.Translate(-float64(st.FrameWidth)/2, -float64(st.FrameHeight)/2)
-	op.GeoM.Translate(st.Position.X, st.Position.Y)
-	i := (st.Counter / st.FrameCount) % st.FrameCount
-	sx, sy := 0+i*st.FrameWidth, 0
-	screen.DrawImage(st.Sprite.SubImage(image.Rect(sx, sy, sx+st.FrameWidth, sy+st.FrameHeight)).(*ebiten.Image), op)
-}
-
 func (st *Station) AddTrain(train Train) {
 	st.Trains = append(st.Trains, train)
 }
@@ -86,4 +73,19 @@ func (st *Station) ListenForDepartures() {
 		}
 		st.RemoveTrain(msg.Train)
 	}
+}
+
+// Drawing methods
+
+func (st *Station) Update() {
+	st.Drawing.Counter++
+}
+
+func (st *Station) Draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-float64(st.FrameWidth)/2, -float64(st.FrameHeight)/2)
+	op.GeoM.Translate(st.Position.X, st.Position.Y)
+	i := (st.Counter / st.FrameCount) % st.FrameCount
+	sx, sy := 0+i*st.FrameWidth, 0
+	screen.DrawImage(st.Sprite.SubImage(image.Rect(sx, sy, sx+st.FrameWidth, sy+st.FrameHeight)).(*ebiten.Image), op)
 }
