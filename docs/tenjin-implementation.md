@@ -645,7 +645,7 @@ Added passenger simulation with sentiment tracking, boarding/disembarking, and T
 ✅ Boarding, disembarking all functional
 ✅ Tenjin tracking passenger metrics
 ✅ Passengers now arrive at destinations correctly
-⏳ Database persistence (optional next step)
+✅ Database persistence (completed)
 
 ### Bug Fixes
 
@@ -654,6 +654,210 @@ Added passenger simulation with sentiment tracking, boarding/disembarking, and T
 3. **Sentiment calculation**: Arrived passengers excluded from average (only waiting/riding counted)
 4. **Journey timing**: JourneyStartTime now set when boarding (not spawning) for accurate journey duration
 5. **Station updates**: Added station.Update() to game loop so passengers emit events
+
+## Phase 3: Visualization & UI (IN PROGRESS)
+
+### Overview
+
+Added interactive visualization and click-based data panels for trains and stations.
+
+### Files Created/Modified
+
+- **MOD**: `/display/game.go` - Added passenger visualization, click detection, data panels
+- **MOD**: `/display/ui.go` - Added `DrawDataText()` helper function
+- **MOD**: `/internal/models/train.go` - Added `GetSpeed()` method
+
+### Features Implemented
+
+#### 1. Passenger Visualization
+
+- Waiting passengers shown as colored dots around stations (max 10 visible)
+- Dots arranged in circle around each station
+- Color-coded by sentiment:
+  - 🟢 Green (70-100): Happy
+  - 🟡 Yellow (40-69): Neutral
+  - 🔴 Red (0-39): Frustrated/Angry
+
+#### 2. Passenger Count Displays
+
+- Stations: Shows count of waiting passengers
+- Trains: Shows count of passengers on board
+- Displayed in light blue text next to objects
+
+#### 3. Click Interactions
+
+- **Click Train**: Shows data panel overlay with:
+
+  - Train name
+  - Current speed
+  - Passenger count (X/50)
+  - Next destination or current station
+  - Capacity bar (green/yellow/red based on load)
+
+- **Click Station**: Switches to dedicated station interior scene:
+  - Station name (centered at top)
+  - Platform background with floor
+  - Individual passengers displayed as colored circles (sentiment-based)
+  - Passenger names below each circle
+  - Waiting passenger count
+  - Back button (top-left) to return to map
+
+### Technical Details
+
+- Scene management system (SceneMap vs SceneStation)
+- Mouse click detection using `ebiten.IsMouseButtonPressed()`
+- Click handled only on frame button is pressed (not held)
+- Back button bounds checking for scene switching
+- Visual bounds checking for train/station hitboxes
+- Passengers arranged in rows (10 per row) on platform
+
+### Status
+
+✅ Passenger visualization complete (map view)
+✅ Train click → data panel overlay
+✅ Station click → dedicated interior scene
+✅ Scene management system (map ↔ station)
+✅ Back button navigation
+✅ Sentiment timing adjustments
+⏳ Scoring system (next)
+⏳ Newspaper summary (next)
+
+---
+
+## Phase 4: Sentiment Tuning
+
+### Sentiment Drop Rate Fix (2025-09-30)
+
+**Problem**: Sentiment was dropping too rapidly (every frame, 60x/sec)
+
+**Solution**: Implemented time-based sentiment decay with `lastSentimentDrop` tracking
+
+#### Timing Parameters (Adjusted)
+
+- **Waiting**: -2 points every 5 seconds
+- **Riding**: -0.5 points every 15 seconds
+- **Crowded Train**: Additional -1.0 penalty per interval
+- **Frustration Events**: Only emit when sentiment < 50
+
+#### Implementation
+
+Added `lastSentimentDrop time.Time` field to `Passenger` struct
+
+- Initialized in `NewPassenger()`
+- Reset on `StartWaiting()`, `BoardTrain()`, and transfer in `DisembarkTrain()`
+- Checked in `UpdateSentiment()` to throttle drops to 5-second intervals
+
+#### Result
+
+Passengers can wait ~4 minutes before reaching 0 sentiment (100 points ÷ 2 points per 5 sec = 250 sec). This creates urgency while giving the system reasonable time to process them through the network.
+
+---
+
+## Phase 2b: Database Persistence (2025-09-30)
+
+### Overview
+
+Added SQLite persistence for passengers and their journey events, synced every 2 seconds via reflexTick.
+
+### Database Schema
+
+#### `passenger` Table
+
+Stores active passengers (non-arrived):
+
+- `id` (TEXT PRIMARY KEY) - Unique passenger identifier
+- `name` (TEXT) - Passenger name
+- `current_station_id` (INTEGER) - Current station, FK to station
+- `destination_station_id` (INTEGER) - Destination station, FK to station
+- `current_train_id` (INTEGER NULL) - Train passenger is riding (NULL if waiting)
+- `state` (TEXT) - waiting/boarding/riding/disembarking/arrived
+- `sentiment` (REAL) - Satisfaction score (0-100)
+- `spawn_time` (TIMESTAMP) - When passenger entered system
+- `created_at`, `updated_at` (TIMESTAMP)
+
+**Indexes**: current_station_id, destination_station_id, current_train_id, state
+
+#### `passenger_event` Table
+
+Historical log of all passenger events:
+
+- `id` (INTEGER PRIMARY KEY AUTOINCREMENT)
+- `passenger_id` (TEXT) - FK to passenger
+- `event_type` (TEXT) - spawn/wait/board/disembark/arrive/frustration
+- `station_id` (INTEGER NULL) - Related station
+- `train_id` (INTEGER NULL) - Related train
+- `sentiment` (REAL) - Sentiment at time of event
+- `metadata` (TEXT) - Additional event data
+- `created_at` (TIMESTAMP)
+
+**Indexes**: passenger_id, event_type, created_at
+
+### Files Created/Modified
+
+- **NEW**: `/data/sql/migrations/20250930210333_add_passenger_tables.sql` - Migration
+- **NEW**: `/data/sql/queries/passenger.sql` - CRUD queries
+- **NEW**: `/internal/dbstore/passenger.sql.go` - Generated sqlc code
+- **NEW**: `/internal/baso/passenger.go` - Database wrapper functions
+- **MOD**: `/data/sql/schema.sql` - Updated with passenger tables
+- **MOD**: `/data/dump.go` - Added `DumpPassengersData()` function
+- **MOD**: `/main.go` - Added passenger DB sync to reflexTick goroutine
+
+### Key Functions
+
+#### `/internal/baso/passenger.go`
+
+- `SavePassenger(passenger)` - Insert new passenger
+- `UpdatePassengerState(id, state, sentiment)` - Update state/sentiment
+- `UpdatePassengerBoarding(id)` - Mark passenger as boarding
+- `UpdatePassengerDisembarking(id, stationID, state)` - Mark passenger as disembarking
+- `DeletePassenger(id)` - Remove passenger (on arrival)
+- `SyncPassengers(passengers)` - Batch sync all active passengers
+- `CreatePassengerEvent(...)` - Log passenger event
+- `GetPassengerEvents(id)` - Retrieve passenger's event history
+
+#### `/data/dump.go`
+
+- `DumpPassengersData(stations, trains)` - Collects all active passengers from stations/trains and syncs to DB
+
+### Sync Strategy
+
+**Timing**: Every 2 seconds (reflexTick)
+
+**Method**: Batch sync
+
+1. Delete all existing passenger records
+2. Collect active passengers from stations (waiting) and trains (riding)
+3. Insert all active passengers
+4. Arrived passengers are excluded (deleted on arrival)
+
+**Rationale**: Simple "snapshot" approach - DB always reflects current in-memory state
+
+### Event Logging
+
+Passenger events are logged separately to `passenger_event` table for historical analysis:
+
+- Spawn events when passengers enter system
+- Wait events during station waiting
+- Board events when entering trains
+- Disembark events when leaving trains
+- Arrive events when reaching destination
+- Frustration events when sentiment drops
+
+### Limitations & Future Enhancements
+
+1. **Train ID**: Currently set to NULL - `Train` struct doesn't expose database ID (only `Name`)
+   - **Fix**: Add `ID int64` field to `Train` struct in future refactor
+2. **Delete on Arrival**: Arrived passengers are removed from DB
+   - **Enhancement**: Could keep for X hours with TTL cleanup
+3. **Event Logging**: Events logged in separate table but not yet integrated with Tenjin event flow
+   - **Enhancement**: Wire up passenger events to `baso.CreatePassengerEvent()` calls
+
+### Technical Notes
+
+- Used `sql.NullInt64` for nullable foreign keys (current_train_id)
+- Transactions ensure atomic batch updates
+- Indexes on frequently queried columns for performance
+- Schema matches Go `models.Passenger` struct closely
 
 ## References
 

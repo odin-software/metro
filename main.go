@@ -99,6 +99,7 @@ func main() {
 		defer wg.Done()
 		for range reflexTick.C {
 			data.DumpTrainsData(trains)
+			data.DumpPassengersData(stations, trains)
 		}
 	}()
 

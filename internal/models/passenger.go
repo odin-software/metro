@@ -30,6 +30,7 @@ type Passenger struct {
 	State              PassengerState
 	WaitStartTime      time.Time          // When they started waiting
 	JourneyStartTime   time.Time          // When they spawned/started journey
+	lastSentimentDrop  time.Time          // Last time sentiment was decreased
 	eventChannel       chan<- interface{} // Channel to send events to Tenjin
 	Drawing                               // For future visualization
 }
@@ -53,6 +54,7 @@ func NewPassenger(
 		State:              PassengerStateWaiting,
 		WaitStartTime:      time.Now(),
 		JourneyStartTime:   time.Time{}, // Will be set when boarding
+		lastSentimentDrop:  time.Now(),
 		eventChannel:       eventChannel,
 	}
 
@@ -64,27 +66,41 @@ func NewPassenger(
 
 // UpdateSentiment adjusts passenger sentiment based on waiting/riding conditions
 func (p *Passenger) UpdateSentiment(deltaTime time.Duration) {
+	// Only update sentiment every 5 seconds to avoid rapid drops
+	if time.Since(p.lastSentimentDrop) < 5*time.Second {
+		return
+	}
+
 	switch p.State {
 	case PassengerStateWaiting:
-		// Lose 1 point per 5 seconds of waiting
+		// Lose 2 points every 5 seconds of waiting
 		waitTime := time.Since(p.WaitStartTime)
 		if waitTime >= 5*time.Second {
-			decrement := float64(waitTime/(5*time.Second)) * 0.2 // Gradual decrease
-			p.Sentiment -= decrement
+			p.Sentiment -= 2.0
 			if p.Sentiment < 0 {
 				p.Sentiment = 0
 			}
-			p.emitFrustrationEvent()
+			p.lastSentimentDrop = time.Now()
+
+			// Emit frustration event when sentiment drops below 50
+			if p.Sentiment < 50 {
+				p.emitFrustrationEvent()
+			}
 		}
 
 	case PassengerStateRiding:
-		// Check if train is crowded (will implement when train has capacity tracking)
-		// For now, just minor decrease for journey time
+		// Minor sentiment decrease for long journeys
 		journeyTime := time.Since(p.JourneyStartTime)
-		if journeyTime > 2*time.Minute {
-			p.Sentiment -= 0.1
+		if journeyTime > 15*time.Second {
+			p.Sentiment -= 0.5
 			if p.Sentiment < 0 {
 				p.Sentiment = 0
+			}
+			p.lastSentimentDrop = time.Now()
+
+			// Extra penalty if train is crowded
+			if p.CurrentTrain != nil && p.CurrentTrain.IsCrowded() {
+				p.Sentiment -= 1.0
 			}
 		}
 	}
@@ -94,6 +110,7 @@ func (p *Passenger) UpdateSentiment(deltaTime time.Duration) {
 func (p *Passenger) StartWaiting() {
 	p.State = PassengerStateWaiting
 	p.WaitStartTime = time.Now()
+	p.lastSentimentDrop = time.Now()
 	p.emitWaitEvent()
 }
 
@@ -103,8 +120,9 @@ func (p *Passenger) BoardTrain(train *Train) {
 	p.CurrentTrain = train
 	p.Position = train.Position
 	p.State = PassengerStateRiding
-	p.JourneyStartTime = time.Now() // Start tracking journey time
-	p.WaitStartTime = time.Time{}   // Clear wait timer
+	p.JourneyStartTime = time.Now()  // Start tracking journey time
+	p.WaitStartTime = time.Time{}    // Clear wait timer
+	p.lastSentimentDrop = time.Now() // Reset sentiment drop timer
 	p.emitBoardEvent()
 }
 
@@ -128,6 +146,7 @@ func (p *Passenger) DisembarkTrain(station *Station) {
 		p.State = PassengerStateWaiting
 		p.WaitStartTime = time.Now()
 		p.JourneyStartTime = time.Time{} // Reset for next leg
+		p.lastSentimentDrop = time.Now() // Reset sentiment drop timer
 		p.emitWaitEvent()
 	}
 }

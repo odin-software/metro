@@ -415,6 +415,11 @@ func (tr *Train) GetCapacityPercentage() float64 {
 	return (float64(len(tr.Passengers)) / float64(tr.Capacity)) * 100
 }
 
+// GetSpeed returns the current speed (magnitude of velocity)
+func (tr *Train) GetSpeed() float64 {
+	return tr.velocity.Magnitude()
+}
+
 // GetPassengers returns a copy of the passengers slice (thread-safe)
 func (tr *Train) GetPassengers() []*Passenger {
 	tr.passengerMutex.RLock()

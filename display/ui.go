@@ -76,3 +76,28 @@ func DrawTitle(screen *ebiten.Image, info string, position models.Vector, size F
 	op.ColorScale.ScaleWithColor(color.White)
 	text.Draw(screen, info, f, op)
 }
+
+func DrawInfo(screen *ebiten.Image, info string, position models.Vector, size FontSize, fw int, fh int) {
+	// Draw info text to the right of the object
+	f := &text.GoTextFace{
+		Source: TextFontSource,
+		Size:   float64(size),
+	}
+	op := &text.DrawOptions{}
+	// Position to the right and slightly down
+	op.GeoM.Translate(position.X+float64(fw)/2+5, position.Y+float64(fh)/2)
+	op.ColorScale.ScaleWithColor(color.RGBA{150, 200, 255, 255}) // Light blue
+	text.Draw(screen, info, f, op)
+}
+
+func DrawDataText(screen *ebiten.Image, info string, x, y float32, size FontSize) {
+	// Draw text at absolute position for data panels
+	f := &text.GoTextFace{
+		Source: TextFontSource,
+		Size:   float64(size),
+	}
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, info, f, op)
+}

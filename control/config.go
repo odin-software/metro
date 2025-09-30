@@ -29,7 +29,7 @@ var DefaultConfig = Config{
 	LoopDuration:         time.Second / 60,
 	LoopDurationOffset:   -1 * time.Millisecond,
 	LoopStartingState:    1,
-	ReflexDuration:       200 * time.Millisecond,
+	ReflexDuration:       2 * time.Second,
 	StdLogs:              true,
 	TrainWaitInStation:   5 * time.Second,
 	TenjinEnabled:        true,
