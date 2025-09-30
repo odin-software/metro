@@ -25,9 +25,7 @@ func (q *Queue[T]) DQ() (T, error) {
 		return *new(T), errors.New("there are no more items in the queue")
 	}
 	val := q.items[0]
-	q.items[0] = *new(T)
 	q.items = q.items[1:]
-
 	return val, nil
 }
 

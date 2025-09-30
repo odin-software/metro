@@ -134,9 +134,3 @@ func LoadEdges(cn *models.Network[models.Station]) {
 		cn.InsertEdge(st1, st2, eps)
 	}
 }
-
-func LoadEverything(cn *models.Network[models.Station]) {
-	// lines := LoadLines()
-	// stations := LoadStations()
-	LoadEdges(cn)
-}
