@@ -51,6 +51,17 @@ func (v *Vector) SetMag(mag float64) {
 	v.Scale(mag)
 }
 
+// SetMagFrom sets the magnitude using a pre-calculated current magnitude.
+// This avoids recalculating sqrt when you already know the current magnitude.
+// Mathematically equivalent to SetMag but more efficient.
+func (v *Vector) SetMagFrom(currentMag, newMag float64) {
+	if currentMag > 0 {
+		scale := newMag / currentMag
+		v.X *= scale
+		v.Y *= scale
+	}
+}
+
 // non-modifier methods.
 func (v *Vector) SoftAdd(v2 Vector) Vector {
 	return NewVector(v.X+v2.X, v.Y+v2.Y)

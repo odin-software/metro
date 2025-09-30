@@ -22,7 +22,6 @@ type Train struct {
 	make         Make
 	Position     Vector
 	velocity     Vector
-	acceleration Vector
 	Current      Station
 	Next         *Station
 	forward      bool
@@ -30,6 +29,7 @@ type Train struct {
 	q            Queue[Vector]
 	central      *Network[Station]
 	waitCounter  int // Ticks to wait at station (non-blocking)
+	waitTicks    int // Precomputed wait duration in ticks
 	Drawing
 }
 
@@ -42,18 +42,20 @@ func NewTrain(
 	central *Network[Station],
 ) Train {
 	img, frameWidth, frameHeight, frameCount := assets.GetTrainSprite()
+	// Precompute wait duration in ticks
+	waitTicks := int(control.DefaultConfig.TrainWaitInStation / control.DefaultConfig.LoopDuration)
 	return Train{
 		Name:         name,
 		make:         make,
 		Position:     pos,
 		velocity:     NewVector(0.0, 0.0),
-		acceleration: NewVector(0.0, 0.0),
 		Current:      initialStation,
 		Next:         nil,
 		forward:      true,
 		destinations: line,
 		q:            Queue[Vector]{},
 		central:      central,
+		waitTicks:    waitTicks,
 		Drawing: Drawing{
 			Counter:     0,
 			FrameWidth:  frameWidth,
@@ -149,14 +151,14 @@ func (tr *Train) Tick() {
 
 	direction := reach.SoftSub(tr.Position)
 	mag := direction.Magnitude()
-	where := tr.Current.Position.Dist(reach) / 8
+	where := tr.Current.Position.Dist(reach) / 4 // Larger slowing zone for faster trains
 
-	// Slow down if we are close.
+	// Slow down if we are close - scale velocity directly for visible deceleration.
 	if mag < where {
 		m := Map(mag, 0, where, 0, tr.make.AccMag)
-		direction.SetMag(m)
+		direction.SetMagFrom(mag, m) // Reuse calculated magnitude
 	} else {
-		direction.SetMag(tr.make.AccMag)
+		direction.SetMagFrom(mag, tr.make.AccMag) // Reuse calculated magnitude
 	}
 
 	// Update position based on velocity
@@ -178,9 +180,8 @@ func (tr *Train) Tick() {
 			// Log arrival
 			tr.logArrival(tr.Current.Name)
 
-			// Calculate wait ticks: waitDuration / tickDuration
-			waitTicks := int(control.DefaultConfig.TrainWaitInStation / control.DefaultConfig.LoopDuration)
-			tr.waitCounter = waitTicks
+			// Use precomputed wait ticks
+			tr.waitCounter = tr.waitTicks
 			return
 		}
 	}
