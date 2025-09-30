@@ -20,10 +20,10 @@ var DefaultConfig = Config{
 	DisplayScreenWidth:  800,
 	DisplayScreenHeight: 600,
 	LogsDirectory:       "logs/",
-	LoopDuration:        20 * time.Millisecond,
+	LoopDuration:        time.Second / 60,
 	LoopDurationOffset:  -1 * time.Millisecond,
 	LoopStartingState:   1,
 	ReflexDuration:      200 * time.Millisecond,
 	StdLogs:             false,
-	TrainWaitInStation:  3000 * time.Millisecond,
+	TrainWaitInStation:  3 * time.Second,
 }

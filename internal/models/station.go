@@ -5,28 +5,21 @@ import (
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/odin-software/metro/internal/assets"
-	"github.com/odin-software/metro/internal/broadcast"
 )
 
 type Station struct {
-	ID         int64   `json:"id"`
-	Name       string  `json:"name"`
-	Position   Vector  `json:"position"`
-	Trains     []Train `json:"trains"`
-	arrivals   <-chan broadcast.ADMessage[Train]
-	departures <-chan broadcast.ADMessage[Train]
+	ID       int64  `json:"id"`
+	Name     string `json:"name"`
+	Position Vector `json:"position"`
 	Drawing
 }
 
-func NewStation(id int64, name string, location Vector, arr <-chan broadcast.ADMessage[Train], dep <-chan broadcast.ADMessage[Train]) *Station {
+func NewStation(id int64, name string, location Vector) *Station {
 	img, frameWidth, frameHeight, frameCount := assets.GetStationSprite()
-	st := &Station{
-		ID:         id,
-		Name:       name,
-		Position:   location,
-		Trains:     []Train{},
-		arrivals:   arr,
-		departures: dep,
+	return &Station{
+		ID:       id,
+		Name:     name,
+		Position: location,
 		Drawing: Drawing{
 			Counter:     0,
 			FrameWidth:  frameWidth,
@@ -34,44 +27,6 @@ func NewStation(id int64, name string, location Vector, arr <-chan broadcast.ADM
 			FrameCount:  frameCount,
 			Sprite:      img,
 		},
-	}
-
-	go st.ListenForArrivals()
-	go st.ListenForDepartures()
-
-	return st
-}
-
-func (st *Station) AddTrain(train Train) {
-	st.Trains = append(st.Trains, train)
-}
-
-func (st *Station) RemoveTrain(train Train) {
-	for i, t := range st.Trains {
-		if t.Name == train.Name {
-			st.Trains = append(st.Trains[:i], st.Trains[i+1:]...)
-			break
-		}
-	}
-}
-
-func (st *Station) ListenForArrivals() {
-	// This should be a goroutine that listens for trains and adds them to the station.
-	for msg := range st.arrivals {
-		if msg.StationID != st.ID {
-			continue
-		}
-		st.AddTrain(msg.Train)
-	}
-}
-
-func (st *Station) ListenForDepartures() {
-	// This should be a goroutine that listens for trains and removes them to the station.
-	for msg := range st.departures {
-		if msg.StationID != st.ID {
-			continue
-		}
-		st.RemoveTrain(msg.Train)
 	}
 }
 

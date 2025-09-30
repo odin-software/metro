@@ -1,7 +1,6 @@
 package main
 
 import (
-	"context"
 	"log"
 	"strconv"
 	"sync"
@@ -11,7 +10,6 @@ import (
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/data"
 	"github.com/odin-software/metro/display"
-	"github.com/odin-software/metro/internal/broadcast"
 	"github.com/odin-software/metro/internal/models"
 	"github.com/odin-software/metro/internal/sematick"
 )
@@ -28,15 +26,7 @@ func main() {
 		control.DefaultConfig.LoopStartingState,
 	)
 	reflexTick := time.NewTicker(control.DefaultConfig.ReflexDuration)
-	ctx, cancel := context.WithCancel(context.Background())
 	control.InitLogger()
-	defer cancel()
-
-	// Creating the broadcast channels for the trains.
-	arrivals := make(chan broadcast.ADMessage[models.Train])
-	departures := make(chan broadcast.ADMessage[models.Train])
-	bcArr := broadcast.NewBroadcastServer(ctx, arrivals)
-	bcDep := broadcast.NewBroadcastServer(ctx, departures)
 
 	// Initialize database (create and run migrations if needed).
 	if err := data.InitDatabase(); err != nil {
@@ -47,7 +37,7 @@ func main() {
 	cityNetwork := models.NewNetwork(StationHashFunction)
 
 	// Loading stations, lines, edges from the database.
-	stations := data.LoadStations(bcArr, bcDep)
+	stations := data.LoadStations()
 	lines := data.LoadLines()
 	err := cityNetwork.InsertVertices(stations)
 	if err != nil {
@@ -55,8 +45,8 @@ func main() {
 	}
 	data.LoadEdges(&cityNetwork)
 
-	// Creating the train with lines and channels to communicate.
-	trains := data.LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
+	// Creating the train with lines.
+	trains := data.LoadTrains(stations, lines, &cityNetwork)
 
 	// Starting the goroutines for the trains.
 	for i := range len(trains) {

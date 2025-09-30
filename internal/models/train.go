@@ -4,12 +4,10 @@ import (
 	"fmt"
 	"image"
 	_ "image/png"
-	"time"
 
 	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/assets"
-	"github.com/odin-software/metro/internal/broadcast"
 )
 
 type Make struct {
@@ -31,8 +29,7 @@ type Train struct {
 	destinations Line
 	q            Queue[Vector]
 	central      *Network[Station]
-	arrivals     chan<- broadcast.ADMessage[Train]
-	departures   chan<- broadcast.ADMessage[Train]
+	waitCounter  int // Ticks to wait at station (non-blocking)
 	Drawing
 }
 
@@ -43,8 +40,6 @@ func NewTrain(
 	initialStation Station,
 	line Line,
 	central *Network[Station],
-	a chan broadcast.ADMessage[Train],
-	d chan broadcast.ADMessage[Train],
 ) Train {
 	img, frameWidth, frameHeight, frameCount := assets.GetTrainSprite()
 	return Train{
@@ -59,8 +54,6 @@ func NewTrain(
 		destinations: line,
 		q:            Queue[Vector]{},
 		central:      central,
-		arrivals:     a,
-		departures:   d,
 		Drawing: Drawing{
 			Counter:     0,
 			FrameWidth:  frameWidth,
@@ -84,24 +77,14 @@ func (tr *Train) addToQueue(sts []Vector) {
 	tr.q.QList(sts)
 }
 
-func (tr *Train) broadcastArrival(stationId int64, stationName string) {
-	msg := broadcast.ADMessage[Train]{
-		StationID: stationId,
-		Train:     *tr,
-	}
+func (tr *Train) logArrival(stationName string) {
 	logMsg := fmt.Sprintf("%s arrived at station: %s", tr.Name, stationName)
 	control.Log(logMsg)
-	tr.arrivals <- msg
 }
 
-func (tr *Train) broadcastDeparture(stationId int64, stationName string) {
-	msg := broadcast.ADMessage[Train]{
-		StationID: stationId,
-		Train:     *tr,
-	}
+func (tr *Train) logDeparture(stationName string) {
 	logMsg := fmt.Sprintf("%s departed from station: %s", tr.Name, stationName)
 	control.Log(logMsg)
-	tr.departures <- msg
 }
 
 func (tr *Train) getNextFromDestinations() *Station {
@@ -136,6 +119,12 @@ func (tr *Train) getNextFromDestinations() *Station {
 }
 
 func (tr *Train) Tick() {
+	// If waiting at station, decrement counter and skip this tick
+	if tr.waitCounter > 0 {
+		tr.waitCounter--
+		return
+	}
+
 	// If there is no next station, assign one from the destinations queue
 	if tr.Next == nil {
 		tr.Next = tr.getNextFromDestinations()
@@ -144,17 +133,17 @@ func (tr *Train) Tick() {
 		path, err := tr.central.AreConnected(tr.Current, *tr.Next)
 		path = append(path, tr.Next.Position)
 		if err != nil {
-			fmt.Println("Something went wrong")
+			control.Log(fmt.Sprintf("Error connecting stations %s to %s: %v", tr.Current.Name, tr.Next.Name, err))
 		}
 		tr.addToQueue(path)
 
-		tr.broadcastDeparture(tr.Current.ID, tr.Current.Name)
+		tr.logDeparture(tr.Current.Name)
 	}
 
 	// Update velocity based of direction of next location
 	reach, err := tr.q.Peek()
 	if err != nil {
-		fmt.Println("No items in queue (?)")
+		control.Log(fmt.Sprintf("Train %s: No items in queue", tr.Name))
 		return
 	}
 
@@ -186,10 +175,12 @@ func (tr *Train) Tick() {
 			tr.Current = *tr.Next
 			tr.Next = nil
 
-			// Broadcast arrival
-			tr.broadcastArrival(tr.Current.ID, tr.Current.Name)
+			// Log arrival
+			tr.logArrival(tr.Current.Name)
 
-			time.Sleep(3 * time.Second)
+			// Calculate wait ticks: waitDuration / tickDuration
+			waitTicks := int(control.DefaultConfig.TrainWaitInStation / control.DefaultConfig.LoopDuration)
+			tr.waitCounter = waitTicks
 			return
 		}
 	}
