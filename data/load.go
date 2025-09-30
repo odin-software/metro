@@ -23,16 +23,32 @@ func LoadStations() []*models.Station {
 	return result
 }
 
-func LoadLines() []models.Line {
+func LoadLines(stations []*models.Station) []models.Line {
 	db := baso.NewBaso()
 	lines := db.ListLinesWithStations()
+
+	// Build station lookup map by ID for O(1) access
+	stationsByID := make(map[int64]*models.Station)
+	for _, st := range stations {
+		stationsByID[st.ID] = st
+	}
+
 	result := make([]models.Line, 0)
 	for _, line := range lines {
+		// Match line's stations to the loaded station pointers
+		stationPtrs := make([]*models.Station, 0, len(line.Stations))
+		for _, st := range line.Stations {
+			if stPtr, ok := stationsByID[st.ID]; ok {
+				stationPtrs = append(stationPtrs, stPtr)
+			}
+		}
+
 		result = append(
 			result,
 			models.Line{
+				ID:       line.ID,
 				Name:     line.Name,
-				Stations: line.Stations,
+				Stations: stationPtrs,
 			},
 		)
 	}
@@ -44,6 +60,7 @@ func LoadTrains(
 	stations []*models.Station,
 	lines []models.Line,
 	central *models.Network[models.Station],
+	eventChannel chan<- interface{},
 ) []models.Train {
 	db := baso.NewBaso()
 	trainsData := db.ListTrainsFull()
@@ -88,9 +105,10 @@ func LoadTrains(
 				train.Name,
 				mk,
 				models.NewVector(train.X, train.Y),
-				*st,
+				st,
 				line,
 				central,
+				eventChannel,
 			),
 		)
 	}

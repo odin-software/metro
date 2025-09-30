@@ -26,6 +26,9 @@ func (g *Game) Update() error {
 	for i := range g.trains {
 		g.trains[i].Update()
 	}
+	for i := range g.stations {
+		g.stations[i].Update()
+	}
 	return nil
 }
 

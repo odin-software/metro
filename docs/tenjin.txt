@@ -1,0 +1,33 @@
+┌─────────────────────────────────────────────────────┐
+│                     TENJIN                          │
+├─────────────────────────────────────────────────────┤
+│  Observation Layer (Eyes & Ears)                    │
+│  ├─ Listens to all train events                     │
+│  ├─ Monitors station states                         │
+│  └─ Tracks passenger activities (future)            │
+├─────────────────────────────────────────────────────┤
+│  Analysis Layer (Understanding)                     │
+│  ├─ Calculates metrics (avg wait, satisfaction)     │
+│  ├─ Aggregates data over time                       │
+│  └─ Scores the system health                        │
+├─────────────────────────────────────────────────────┤
+│  Intelligence Layer (Thinking)                      │
+│  ├─ Evaluates current state                         │
+│  ├─ Applies decision strategies                     │
+│  └─ Plans interventions                             │
+├─────────────────────────────────────────────────────┤
+│  Action Layer (Hands)                               │
+│  ├─ Executes commands on trains                     │
+│  ├─ Modifies station states                         │
+│  └─ Spawns/removes actors                           │
+├─────────────────────────────────────────────────────┤
+│  Memory Layer (Memory)                              │
+│  ├─ Current simulation state                        │
+│  ├─ Historical time-series data                     │
+│  └─ Snapshots for replay/debugging                  │
+├─────────────────────────────────────────────────────┤
+│  Reporting Layer (Communication)                    │
+│  ├─ Daily summaries                                 │
+│  ├─ Event logs                                      │
+│  └─ Newspaper generation                            │
+└─────────────────────────────────────────────────────┘

@@ -15,12 +15,19 @@ type LineWithEdges struct {
 	Points []models.Vector `json:"points"`
 }
 
-func (bs *Baso) ListLinesWithStations() []models.Line {
+// LineWithStationData is used for loading from database before linking station pointers
+type LineWithStationData struct {
+	ID       int64
+	Name     string
+	Stations []models.Station // Values from DB, will be matched to pointers later
+}
+
+func (bs *Baso) ListLinesWithStations() []LineWithStationData {
 	lines, err := bs.queries.ListLines(bs.ctx)
 	if err != nil {
 		log.Fatal(err)
 	}
-	result := make([]models.Line, 0)
+	result := make([]LineWithStationData, 0)
 	for _, line := range lines {
 		stationsInLine, err := bs.queries.GetStationsFromLine(bs.ctx, sql.NullInt64{Int64: line.ID, Valid: true})
 		if err != nil {
@@ -34,7 +41,7 @@ func (bs *Baso) ListLinesWithStations() []models.Line {
 				Position: models.NewVector(station.X.Float64, station.Y.Float64),
 			})
 		}
-		result = append(result, models.Line{
+		result = append(result, LineWithStationData{
 			ID:       line.ID,
 			Name:     line.Name,
 			Stations: stations,
