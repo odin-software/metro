@@ -1,0 +1,109 @@
+# Metro Project - Go Transit Simulation
+
+## Overview
+
+Go-based metro simulation using Ebiten (graphics), SQLite (persistence), and custom network graphs. Trains move between stations with real-time visualization.
+
+## Code Standards
+
+- Follow standard Go conventions (gofmt, golint)
+- Use `models.NewVector(x, y)` for positions
+- Broadcast channels use `ADMessage[T]` types
+- Database access via `baso` package (wraps sqlc-generated code)
+- Configuration in `control.DefaultConfig`
+- Logging via `control.Log()`
+
+## Project Structure
+
+```
+/control/     - Config, logging, constants
+/data/        - DB operations, loading/dumping
+/display/     - Ebiten game engine & UI
+/internal/
+  /baso/      - Database abstraction layer
+  /broadcast/ - Message broadcasting
+  /dbstore/   - Generated sqlc code
+  /models/    - Domain models (Station, Train, Line, Network)
+  /assets/    - Embedded fonts/images
+```
+
+## Database
+
+- **Migrations**: `make create_migration name="..."` → `make run_migrations`
+- **Seeds**: `make create_seed name="..."` → `make run_seeds`
+- **Queries**: Add to `data/sql/queries/`, then `make generate_sqlc`
+- **Schema**: Use INTEGER PRIMARY KEY, REAL for coordinates, timestamps for all tables
+- **Transactions**: Always use `tx.Begin()`, `defer tx.Rollback()`, `qtx := queries.WithTx(tx)`, `tx.Commit()`
+
+## Key Patterns
+
+### Game Objects
+
+```go
+// Implement for renderable entities
+type MyEntity struct {
+    Drawing  // Embed for sprite animation
+}
+func (e *MyEntity) Update() { /* increment counters */ }
+func (e *MyEntity) Draw(screen *ebiten.Image) { /* render */ }
+```
+
+### Concurrency
+
+```go
+// Train movement via goroutines + tickers
+wg.Add(1)
+go func() {
+    defer wg.Done()
+    sub := loopTick.Subscribe()
+    for range sub { /* tick logic */ }
+}()
+```
+
+### Channels
+
+```go
+// Broadcast arrivals/departures
+msg := broadcast.ADMessage[Train]{StationID: id, Train: *tr}
+tr.arrivals <- msg
+```
+
+### Vectors
+
+```go
+pos := models.NewVector(x, y)
+direction := target.SoftSub(current)
+direction.SetMag(speed)
+position.Add(velocity)
+```
+
+## Development
+
+```bash
+go build && ./metro          # Build & run
+make run_data               # Setup DB (migrations + seeds)
+```
+
+**Config**: Set `TerminalMapEnabled: true` for console map, `StdLogs: true` for console output
+
+**Architecture**:
+
+- 3 tickers: `loopTick` (train updates), `reflexTick` (DB sync), `mapTick` (terminal map)
+- Context cancellation for shutdown
+- WaitGroups for goroutine coordination
+
+## Checklist
+
+- Proper error handling (`log.Fatal` for critical, `control.Log` for others)
+- Close channels, no goroutine leaks
+- Use transactions for multi-step DB operations
+- Test files end with `_test.go`
+
+## AI Assistant Preferences
+
+- When summarizing the changes made, please make the summary small and to the point.
+- Do not make any changes in the code without planning first.
+- Don't be sycophantic.
+- Changes should be made incrementally.
+- Do not test the changes without asking me first.
+- Make comments when neccessary and only to clarify changes that can be confusing.

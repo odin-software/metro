@@ -28,7 +28,6 @@ func main() {
 		control.DefaultConfig.LoopStartingState,
 	)
 	reflexTick := time.NewTicker(control.DefaultConfig.ReflexDuration)
-	mapTick := time.NewTicker(control.DefaultConfig.TerminalMapDuration)
 	ctx, cancel := context.WithCancel(context.Background())
 	control.InitLogger()
 	defer cancel()
@@ -38,6 +37,11 @@ func main() {
 	departures := make(chan broadcast.ADMessage[models.Train])
 	bcArr := broadcast.NewBroadcastServer(ctx, arrivals)
 	bcDep := broadcast.NewBroadcastServer(ctx, departures)
+
+	// Initialize database (create and run migrations if needed).
+	if err := data.InitDatabase(); err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
 
 	// Creating the city graph.
 	cityNetwork := models.NewNetwork(StationHashFunction)
@@ -64,11 +68,6 @@ func main() {
 				trains[idx].Tick()
 			}
 		}(i)
-	}
-
-	// Drawing a map in the console of the trains and stations.
-	if control.DefaultConfig.TerminalMapEnabled {
-		go StartMap(mapTick.C, stations, trains)
 	}
 
 	// Reflect what's on memory on the DB.

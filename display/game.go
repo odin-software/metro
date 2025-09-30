@@ -30,9 +30,6 @@ func (g *Game) Update() error {
 }
 
 func (g *Game) Draw(screen *ebiten.Image) {
-	for _, ln := range g.lines {
-		ln.Draw(screen)
-	}
 	for _, tr := range g.trains {
 		tr.Draw(screen)
 		DrawTitle(screen, tr.Name, tr.Position, S_FONT_SIZE, tr.FrameWidth, tr.FrameHeight, TITLE_TOP_SIDE)

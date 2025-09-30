@@ -13,8 +13,6 @@ type Config struct {
 	LoopStartingState   int
 	ReflexDuration      time.Duration
 	StdLogs             bool
-	TerminalMapDuration time.Duration
-	TerminalMapEnabled  bool
 	TrainWaitInStation  time.Duration
 }
 
@@ -27,7 +25,5 @@ var DefaultConfig = Config{
 	LoopStartingState:   1,
 	ReflexDuration:      200 * time.Millisecond,
 	StdLogs:             false,
-	TerminalMapDuration: 800 * time.Millisecond,
-	TerminalMapEnabled:  false,
 	TrainWaitInStation:  3000 * time.Millisecond,
 }
