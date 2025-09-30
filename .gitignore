@@ -5,6 +5,7 @@ logs/
 metro.db
 data/metro.db
 __debug__*
+.DS_Store
 
 .env
 

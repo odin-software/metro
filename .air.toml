@@ -19,13 +19,11 @@ include_dir = [
   "pkg",
   "internal",
   "control",
-  "websites/city",
-  "websites/events",
-  "websites/reporter",
-  "websites/virtual-world",
+  "display",
+  "logs",
 ]
 include_ext = ["go", "html", "css", "js"]
-include_file = ["reporter.go", "main.go"]
+include_file = ["main.go"]
 kill_delay = "0s"
 log = "build-errors.log"
 poll = false

@@ -2,10 +2,12 @@ package models
 
 import (
 	"fmt"
-	"time"
+	"image"
+	_ "image/png"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/odin-software/metro/control"
-	"github.com/odin-software/metro/internal/broadcast"
+	"github.com/odin-software/metro/internal/assets"
 )
 
 type Make struct {
@@ -20,15 +22,15 @@ type Train struct {
 	make         Make
 	Position     Vector
 	velocity     Vector
-	acceleration Vector
 	Current      Station
 	Next         *Station
 	forward      bool
 	destinations Line
 	q            Queue[Vector]
 	central      *Network[Station]
-	arrivals     chan<- broadcast.ADMessage[Train]
-	departures   chan<- broadcast.ADMessage[Train]
+	waitCounter  int // Ticks to wait at station (non-blocking)
+	waitTicks    int // Precomputed wait duration in ticks
+	Drawing
 }
 
 func NewTrain(
@@ -38,23 +40,29 @@ func NewTrain(
 	initialStation Station,
 	line Line,
 	central *Network[Station],
-	a chan broadcast.ADMessage[Train],
-	d chan broadcast.ADMessage[Train],
 ) Train {
+	img, frameWidth, frameHeight, frameCount := assets.GetTrainSprite()
+	// Precompute wait duration in ticks
+	waitTicks := int(control.DefaultConfig.TrainWaitInStation / control.DefaultConfig.LoopDuration)
 	return Train{
 		Name:         name,
 		make:         make,
 		Position:     pos,
 		velocity:     NewVector(0.0, 0.0),
-		acceleration: NewVector(0.0, 0.0),
 		Current:      initialStation,
 		Next:         nil,
 		forward:      true,
 		destinations: line,
 		q:            Queue[Vector]{},
 		central:      central,
-		arrivals:     a,
-		departures:   d,
+		waitTicks:    waitTicks,
+		Drawing: Drawing{
+			Counter:     0,
+			FrameWidth:  frameWidth,
+			FrameHeight: frameHeight,
+			FrameCount:  frameCount,
+			Sprite:      img,
+		},
 	}
 }
 
@@ -71,24 +79,14 @@ func (tr *Train) addToQueue(sts []Vector) {
 	tr.q.QList(sts)
 }
 
-func (tr *Train) broadcastArrival(stationId int64, stationName string) {
-	msg := broadcast.ADMessage[Train]{
-		StationID: stationId,
-		Train:     *tr,
-	}
+func (tr *Train) logArrival(stationName string) {
 	logMsg := fmt.Sprintf("%s arrived at station: %s", tr.Name, stationName)
 	control.Log(logMsg)
-	tr.arrivals <- msg
 }
 
-func (tr *Train) broadcastDeparture(stationId int64, stationName string) {
-	msg := broadcast.ADMessage[Train]{
-		StationID: stationId,
-		Train:     *tr,
-	}
+func (tr *Train) logDeparture(stationName string) {
 	logMsg := fmt.Sprintf("%s departed from station: %s", tr.Name, stationName)
 	control.Log(logMsg)
-	tr.departures <- msg
 }
 
 func (tr *Train) getNextFromDestinations() *Station {
@@ -123,6 +121,12 @@ func (tr *Train) getNextFromDestinations() *Station {
 }
 
 func (tr *Train) Tick() {
+	// If waiting at station, decrement counter and skip this tick
+	if tr.waitCounter > 0 {
+		tr.waitCounter--
+		return
+	}
+
 	// If there is no next station, assign one from the destinations queue
 	if tr.Next == nil {
 		tr.Next = tr.getNextFromDestinations()
@@ -131,30 +135,30 @@ func (tr *Train) Tick() {
 		path, err := tr.central.AreConnected(tr.Current, *tr.Next)
 		path = append(path, tr.Next.Position)
 		if err != nil {
-			fmt.Println("Something went wrong")
+			control.Log(fmt.Sprintf("Error connecting stations %s to %s: %v", tr.Current.Name, tr.Next.Name, err))
 		}
 		tr.addToQueue(path)
 
-		tr.broadcastDeparture(tr.Current.ID, tr.Current.Name)
+		tr.logDeparture(tr.Current.Name)
 	}
 
 	// Update velocity based of direction of next location
 	reach, err := tr.q.Peek()
 	if err != nil {
-		fmt.Println("No items in queue (?)")
+		control.Log(fmt.Sprintf("Train %s: No items in queue", tr.Name))
 		return
 	}
 
 	direction := reach.SoftSub(tr.Position)
 	mag := direction.Magnitude()
-	where := tr.Current.Position.Dist(reach) / 8
+	where := tr.Current.Position.Dist(reach) / 4 // Larger slowing zone for faster trains
 
-	// Slow down if we are close.
+	// Slow down if we are close - scale velocity directly for visible deceleration.
 	if mag < where {
 		m := Map(mag, 0, where, 0, tr.make.AccMag)
-		direction.SetMag(m)
+		direction.SetMagFrom(mag, m) // Reuse calculated magnitude
 	} else {
-		direction.SetMag(tr.make.AccMag)
+		direction.SetMagFrom(mag, tr.make.AccMag) // Reuse calculated magnitude
 	}
 
 	// Update position based on velocity
@@ -173,11 +177,27 @@ func (tr *Train) Tick() {
 			tr.Current = *tr.Next
 			tr.Next = nil
 
-			// Broadcast arrival
-			tr.broadcastArrival(tr.Current.ID, tr.Current.Name)
+			// Log arrival
+			tr.logArrival(tr.Current.Name)
 
-			time.Sleep(3 * time.Second)
+			// Use precomputed wait ticks
+			tr.waitCounter = tr.waitTicks
 			return
 		}
 	}
+}
+
+// Display methods
+
+func (tr *Train) Update() {
+	tr.Drawing.Counter++
+}
+
+func (tr *Train) Draw(screen *ebiten.Image) {
+	op := &ebiten.DrawImageOptions{}
+	op.GeoM.Translate(-float64(tr.FrameWidth)/2, -float64(tr.FrameHeight)/2)
+	op.GeoM.Translate(tr.Position.X, tr.Position.Y)
+	i := (tr.Counter / tr.FrameCount) % tr.FrameCount
+	sx, sy := 0+i*tr.FrameWidth, 0
+	screen.DrawImage(tr.Sprite.SubImage(image.Rect(sx, sy, sx+tr.FrameWidth, sy+tr.FrameHeight)).(*ebiten.Image), op)
 }

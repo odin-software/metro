@@ -33,17 +33,7 @@ func (gr *Network[T]) InsertVertex(vertex T) error {
 	return nil
 }
 
-// Works like InsertVertex, but for a slice of vertices.
-func (gr *Network[T]) InsertVertices2(vertices []T) error {
-	for _, v := range vertices {
-		err := gr.InsertVertex(v)
-		if err != nil {
-			return err
-		}
-	}
-	return nil
-}
-
+// InsertVertices works like InsertVertex, but for a slice of vertices.
 func (gr *Network[T]) InsertVertices(vertices []*T) error {
 	for _, v := range vertices {
 		err := gr.InsertVertex(*v)

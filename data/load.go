@@ -1,15 +1,13 @@
 package data
 
 import (
-	"errors"
 	"log"
 
 	"github.com/odin-software/metro/internal/baso"
-	"github.com/odin-software/metro/internal/broadcast"
 	"github.com/odin-software/metro/internal/models"
 )
 
-func LoadStations(arrs broadcast.BroadcastServer[broadcast.ADMessage[models.Train]], deps broadcast.BroadcastServer[broadcast.ADMessage[models.Train]]) []*models.Station {
+func LoadStations() []*models.Station {
 	db := baso.NewBaso()
 	stations, err := db.ListStations()
 	if err != nil {
@@ -19,7 +17,7 @@ func LoadStations(arrs broadcast.BroadcastServer[broadcast.ADMessage[models.Trai
 	for _, station := range stations {
 		result = append(
 			result,
-			models.NewStation(station.ID, station.Name, station.Position, arrs.Subscribe(), deps.Subscribe()),
+			models.NewStation(station.ID, station.Name, station.Position),
 		)
 	}
 	return result
@@ -46,37 +44,53 @@ func LoadTrains(
 	stations []*models.Station,
 	lines []models.Line,
 	central *models.Network[models.Station],
-	a chan broadcast.ADMessage[models.Train],
-	d chan broadcast.ADMessage[models.Train],
 ) []models.Train {
 	db := baso.NewBaso()
 	trainsData := db.ListTrainsFull()
 	makes := db.ListMakes()
+
+	// Build lookup maps for O(1) access
+	makesByName := make(map[string]models.Make)
+	for _, make := range makes {
+		makesByName[make.Name] = make
+	}
+
+	linesByName := make(map[string]models.Line)
+	for _, line := range lines {
+		linesByName[line.Name] = line
+	}
+
+	stationsById := make(map[int64]*models.Station)
+	for _, station := range stations {
+		stationsById[station.ID] = station
+	}
+
 	result := make([]models.Train, 0)
 	for _, train := range trainsData {
-		mk, err := getMakeByName(train.MakeName, makes)
-		if err != nil {
-			log.Fatal(err)
+		mk, ok := makesByName[train.MakeName]
+		if !ok {
+			log.Fatalf("Make not found: %s", train.MakeName)
 		}
-		line, err := getLineByName(train.LineName, lines)
-		if err != nil {
-			log.Fatal(err)
+
+		line, ok := linesByName[train.LineName]
+		if !ok {
+			log.Fatalf("Line not found: %s", train.LineName)
 		}
-		st, err := getStationById(train.CurrentStationId, stations)
-		if err != nil {
-			log.Fatal(err)
+
+		st, ok := stationsById[train.CurrentStationId]
+		if !ok {
+			log.Fatalf("Station not found with ID: %d", train.CurrentStationId)
 		}
+
 		result = append(
 			result,
 			models.NewTrain(
 				train.Name,
 				mk,
 				models.NewVector(train.X, train.Y),
-				st,
+				*st,
 				line,
 				central,
-				a,
-				d,
 			),
 		)
 	}
@@ -119,44 +133,4 @@ func LoadEdges(cn *models.Network[models.Station]) {
 		}
 		cn.InsertEdge(st1, st2, eps)
 	}
-}
-
-func LoadEverything(
-	arrs broadcast.BroadcastServer[broadcast.ADMessage[models.Train]],
-	deps broadcast.BroadcastServer[broadcast.ADMessage[models.Train]],
-	cn *models.Network[models.Station],
-) {
-	// lines := LoadLines()
-	// stations := LoadStations(arrs, deps)
-	LoadEdges(cn)
-}
-
-func getMakeByName(name string, makes []models.Make) (models.Make, error) {
-	for _, make := range makes {
-		if make.Name == name {
-			return make, nil
-		}
-	}
-	err := errors.New("make not found")
-	return models.Make{}, err
-}
-
-func getLineByName(name string, lines []models.Line) (models.Line, error) {
-	for _, line := range lines {
-		if line.Name == name {
-			return line, nil
-		}
-	}
-	err := errors.New("line not found")
-	return models.Line{}, err
-}
-
-func getStationById(id int64, stations []*models.Station) (models.Station, error) {
-	for _, station := range stations {
-		if station.ID == id {
-			return *station, nil
-		}
-	}
-	err := errors.New("station not found")
-	return models.Station{}, err
 }

@@ -1,20 +1,17 @@
 package main
 
 import (
-	"context"
+	"log"
 	"strconv"
+	"sync"
 	"time"
 
+	"github.com/hajimehoshi/ebiten/v2"
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/data"
-	"github.com/odin-software/metro/internal/broadcast"
+	"github.com/odin-software/metro/display"
 	"github.com/odin-software/metro/internal/models"
 	"github.com/odin-software/metro/internal/sematick"
-
-	"github.com/odin-software/metro/websites/city"
-	"github.com/odin-software/metro/websites/events"
-	"github.com/odin-software/metro/websites/reporter"
-	"github.com/odin-software/metro/websites/virtual-world"
 )
 
 var StationHashFunction = func(station models.Station) string {
@@ -23,27 +20,24 @@ var StationHashFunction = func(station models.Station) string {
 
 func main() {
 	// Setup.
+	var wg sync.WaitGroup
 	loopTick := sematick.NewTicker(
 		control.DefaultConfig.LoopDuration,
 		control.DefaultConfig.LoopStartingState,
 	)
 	reflexTick := time.NewTicker(control.DefaultConfig.ReflexDuration)
-	mapTick := time.NewTicker(control.DefaultConfig.TerminalMapDuration)
-	ctx, cancel := context.WithCancel(context.Background())
 	control.InitLogger()
-	defer cancel()
 
-	// Creating the broadcast channels for the trains.
-	arrivals := make(chan broadcast.ADMessage[models.Train])
-	departures := make(chan broadcast.ADMessage[models.Train])
-	bcArr := broadcast.NewBroadcastServer(ctx, arrivals)
-	bcDep := broadcast.NewBroadcastServer(ctx, departures)
+	// Initialize database (create and run migrations if needed).
+	if err := data.InitDatabase(); err != nil {
+		log.Fatal("Failed to initialize database:", err)
+	}
 
 	// Creating the city graph.
 	cityNetwork := models.NewNetwork(StationHashFunction)
 
 	// Loading stations, lines, edges from the database.
-	stations := data.LoadStations(bcArr, bcDep)
+	stations := data.LoadStations()
 	lines := data.LoadLines()
 	err := cityNetwork.InsertVertices(stations)
 	if err != nil {
@@ -51,12 +45,14 @@ func main() {
 	}
 	data.LoadEdges(&cityNetwork)
 
-	// Creating the train with lines and channels to communicate.
-	trains := data.LoadTrains(stations, lines, &cityNetwork, arrivals, departures)
+	// Creating the train with lines.
+	trains := data.LoadTrains(stations, lines, &cityNetwork)
 
 	// Starting the goroutines for the trains.
-	for i := 0; i < len(trains); i++ {
+	for i := range len(trains) {
+		wg.Add(1)
 		go func(idx int) {
+			defer wg.Done()
 			sub := loopTick.Subscribe()
 			for range sub {
 				trains[idx].Tick()
@@ -64,21 +60,24 @@ func main() {
 		}(i)
 	}
 
-	// Drawing a map in the console of the trains and stations.
-	if control.DefaultConfig.TerminalMapEnabled {
-		go StartMap(mapTick.C, stations, trains)
-	}
-
 	// Reflect what's on memory on the DB.
+	wg.Add(1)
 	go func() {
+		defer wg.Done()
 		for range reflexTick.C {
 			data.DumpTrainsData(trains)
 		}
 	}()
 
-	// Starting the server for The New Metro Times, Virtual World and CityServer.
-	go reporter.Server()
-	go virtual.Server()
-	go events.Main()
-	city.Main(loopTick)
+	game := display.NewGame(trains, stations, lines)
+	ebiten.SetWindowSize(
+		control.DefaultConfig.DisplayScreenWidth*2,
+		control.DefaultConfig.DisplayScreenHeight*2,
+	)
+	ebiten.SetWindowTitle("Metro")
+	if err := ebiten.RunGame(game); err != nil {
+		log.Fatal(err)
+	}
+
+	wg.Wait()
 }

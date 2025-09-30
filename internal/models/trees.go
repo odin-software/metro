@@ -221,7 +221,7 @@ func (rbn *RBNode[V]) preorder(visited *[]NodeValue[V]) *[]NodeValue[V] {
 }
 
 func (rbt *RBTree[V]) Count() int {
-	return countNodes[V](rbt.root)
+	return countNodes(rbt.root)
 }
 
 func countNodes[V any](root *RBNode[V]) int {
