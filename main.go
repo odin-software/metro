@@ -80,7 +80,6 @@ func main() {
 		}
 	}()
 
-	display.Init()
 	game := display.NewGame(trains, stations, lines)
 	ebiten.SetWindowSize(
 		control.DefaultConfig.DisplayScreenWidth*2,

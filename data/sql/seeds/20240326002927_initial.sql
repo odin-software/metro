@@ -20,8 +20,8 @@ INSERT INTO line (id, name, color) VALUES (2, 'Line 2', "#23FF00");
 INSERT INTO line (id, name, color) VALUES (3, 'Line 3', "#D29100");
 INSERT INTO line (id, name, color) VALUES (4, 'Line 4', "#F14900");
 -- Make data
-INSERT INTO make (id, name, description, acceleration, top_speed, color) VALUES (1, '4-Legged-chu', 'A type of fast train.', 0.003, 1.0, "#0000DD");
-INSERT INTO make (id, name, description, acceleration, top_speed, color) VALUES (2, '1-Legged-chu', 'Another type of fast train.', 0.004, 0.7, "#113298");
+INSERT INTO make (id, name, description, acceleration, top_speed, color) VALUES (1, '4-Legged-chu', 'A type of fast train.', 0.003, 0.01, "#0000DD");
+INSERT INTO make (id, name, description, acceleration, top_speed, color) VALUES (2, '1-Legged-chu', 'Another type of fast train.', 0.004, 0.06, "#113298");
 -- Trains data
 INSERT INTO train (name, x, y, z, makeId, currentId, lineId) VALUES ('Cha', 50.0, 350.0, 0.0, 1, 1, 1);
 INSERT INTO train (name, x, y, z, makeId, currentId, lineId) VALUES ('Che', 500.0, 50.0, 0.0, 2, 4, 4);
@@ -48,9 +48,9 @@ INSERT INTO station_line (stationId, lineId, odr) VALUES (5, 4, 3);
 -- +goose Down
 -- +goose StatementBegin
 SELECT 'DOWN initial seed';
-DELETE FROM station; 
-DELETE FROM line; 
-DELETE FROM make; 
-DELETE FROM trains; 
-DELETE FROM station_line; 
+DELETE FROM station;
+DELETE FROM line;
+DELETE FROM make;
+DELETE FROM trains;
+DELETE FROM station_line;
 -- +goose StatementEnd

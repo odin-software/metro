@@ -136,7 +136,6 @@ func (tr *Train) getNextFromDestinations() *Station {
 }
 
 func (tr *Train) Tick() {
-	// tr.Update()
 	// If there is no next station, assign one from the destinations queue
 	if tr.Next == nil {
 		tr.Next = tr.getNextFromDestinations()
