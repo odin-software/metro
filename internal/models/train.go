@@ -13,10 +13,12 @@ import (
 )
 
 type Make struct {
-	Name        string
-	Description string
-	AccMag      float64
-	TopSpeed    float64
+	Name         string
+	Description  string
+	AccMag       float64 // Acceleration in pixels/tick²
+	TopSpeed     float64 // Top speed in pixels/tick
+	TopSpeedKmH  float64 // Top speed in km/h (real-world)
+	AccelerationMPS2 float64 // Acceleration in m/s² (real-world)
 }
 
 // EventEmitter is an interface for emitting train events to Tenjin
@@ -84,11 +86,22 @@ func NewTrain(
 }
 
 func NewMake(name string, description string, accMag float64, topSpeed float64) Make {
+	// Calculate real-world speeds
+	topSpeedKmH := PixelSpeedToKmPerHour(topSpeed)
+
+	// Calculate acceleration in m/s²
+	// accMag is in pixels/tick², convert to m/s²
+	ticksPerSecond := 1.0 / control.DefaultConfig.LoopDuration.Seconds()
+	pixelsPerSecondSquared := accMag * ticksPerSecond * ticksPerSecond
+	metersPerSecondSquared := PixelsToMeters(pixelsPerSecondSquared)
+
 	return Make{
-		Name:        name,
-		Description: description,
-		AccMag:      accMag,
-		TopSpeed:    topSpeed,
+		Name:              name,
+		Description:       description,
+		AccMag:            accMag,
+		TopSpeed:          topSpeed,
+		TopSpeedKmH:       topSpeedKmH,
+		AccelerationMPS2:  metersPerSecondSquared,
 	}
 }
 
@@ -415,9 +428,24 @@ func (tr *Train) GetCapacityPercentage() float64 {
 	return (float64(len(tr.Passengers)) / float64(tr.Capacity)) * 100
 }
 
-// GetSpeed returns the current speed (magnitude of velocity)
+// GetSpeed returns the current speed (magnitude of velocity in pixels/tick)
 func (tr *Train) GetSpeed() float64 {
 	return tr.velocity.Magnitude()
+}
+
+// GetSpeedKmH returns the current speed in km/h
+func (tr *Train) GetSpeedKmH() float64 {
+	return PixelSpeedToKmPerHour(tr.velocity.Magnitude())
+}
+
+// GetDistanceToNext returns the distance to the next waypoint in meters
+func (tr *Train) GetDistanceToNext() float64 {
+	reach, err := tr.q.Peek()
+	if err != nil {
+		return 0
+	}
+	pixelDistance := tr.Position.Dist(reach)
+	return PixelsToMeters(pixelDistance)
 }
 
 // GetPassengers returns a copy of the passengers slice (thread-safe)

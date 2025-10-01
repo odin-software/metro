@@ -19,6 +19,10 @@ type Config struct {
 	TenjinTickRate       time.Duration
 	PassengerSpawnRate   time.Duration
 	PassengersPerStation int
+
+	// Real-world metrics scaling
+	PixelsPerMeter      float64 // Scale factor: 1 pixel = X meters
+	SimulationSpeed     float64 // Multiplier for time (1.0 = real-time, 2.0 = 2x speed)
 }
 
 var DefaultConfig = Config{
@@ -30,10 +34,14 @@ var DefaultConfig = Config{
 	LoopDurationOffset:   -1 * time.Millisecond,
 	LoopStartingState:    1,
 	ReflexDuration:       2 * time.Second,
-	StdLogs:              true,
+	StdLogs:              false,
 	TrainWaitInStation:   5 * time.Second,
 	TenjinEnabled:        true,
 	TenjinTickRate:       time.Second,
 	PassengerSpawnRate:   5 * time.Second,
 	PassengersPerStation: 3,
+
+	// Real-world scaling: 1 pixel = 100 meters (map is ~70km x 50km)
+	PixelsPerMeter:      0.01,  // 1 pixel = 100 meters
+	SimulationSpeed:     1.0,   // 1.0 = real-time
 }

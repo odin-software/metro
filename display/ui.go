@@ -17,10 +17,11 @@ type FontSize int
 type TitleSide int
 
 const (
-	XS_FONT_SIZE FontSize = 6
-	S_FONT_SIZE  FontSize = 10
-	M_FONT_SIZE  FontSize = 24
-	L_FONT_SIZE  FontSize = 48
+	XS_FONT_SIZE  FontSize = 6
+	S_FONT_SIZE   FontSize = 10
+	M_FONT_SIZE   FontSize = 24
+	L_FONT_SIZE   FontSize = 48
+	XXL_FONT_SIZE FontSize = 64
 
 	TITLE_TOP_SIDE   TitleSide = 0
 	TITLE_BOT_SIDE   TitleSide = 1
@@ -99,5 +100,17 @@ func DrawDataText(screen *ebiten.Image, info string, x, y float32, size FontSize
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(float64(x), float64(y))
 	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, info, f, op)
+}
+
+func DrawColoredText(screen *ebiten.Image, info string, x, y float32, size FontSize, textColor color.Color) {
+	// Draw text at absolute position with custom color
+	f := &text.GoTextFace{
+		Source: TextFontSource,
+		Size:   float64(size),
+	}
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	op.ColorScale.ScaleWithColor(textColor)
 	text.Draw(screen, info, f, op)
 }

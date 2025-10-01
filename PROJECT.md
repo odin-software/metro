@@ -21,3 +21,4 @@ The possible interactions are:
 - User can click on a train and check the trains current data (where its heading, the amount of passengers inside, current velocity)
 - User can click on a station and check the station data (people waiting inline for train, next train incoming, how many people has served)
 - User can check the newspaper to figure out a summary of that day's simulation, including the people's sentiments for example.
+- The simulation will be run in a Raspberry Zero or something like that very light so that it can be attached to the touch screen and sold as a whole product.

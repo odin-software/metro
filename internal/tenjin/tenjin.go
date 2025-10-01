@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"github.com/odin-software/metro/control"
+	"github.com/odin-software/metro/internal/newspaper"
 	"github.com/odin-software/metro/internal/tenjin/analysis"
 	"github.com/odin-software/metro/internal/tenjin/observation"
 )
@@ -17,6 +18,7 @@ type Tenjin struct {
 	observation  *observation.Collector
 	analysis     *analysis.MetricsEngine
 	logger       *analysis.MetricsLogger
+	newspaper    *newspaper.Newspaper
 	ticker       *time.Ticker
 	ctx          context.Context
 	cancel       context.CancelFunc
@@ -41,6 +43,12 @@ func NewTenjin(totalTrains int) (*Tenjin, error) {
 		return nil, fmt.Errorf("failed to create metrics logger: %w", err)
 	}
 
+	// Create newspaper
+	news, err := newspaper.NewNewspaper()
+	if err != nil {
+		return nil, fmt.Errorf("failed to create newspaper: %w", err)
+	}
+
 	// Create context for lifecycle management
 	ctx, cancel := context.WithCancel(context.Background())
 
@@ -49,6 +57,7 @@ func NewTenjin(totalTrains int) (*Tenjin, error) {
 		observation:  collector,
 		analysis:     metricsEngine,
 		logger:       logger,
+		newspaper:    news,
 		ticker:       time.NewTicker(control.DefaultConfig.TenjinTickRate),
 		ctx:          ctx,
 		cancel:       cancel,
@@ -113,6 +122,22 @@ func (t *Tenjin) run() {
 			if control.DefaultConfig.StdLogs {
 				fmt.Print(output)
 			}
+
+			// Check if newspaper needs new edition (daily + on-demand)
+			if t.newspaper.NeedsNewEdition() && !t.newspaper.IsGenerating() {
+				control.Log("Tenjin: Triggering newspaper generation...")
+
+				// Generate in background goroutine (non-blocking)
+				go func() {
+					ctx, cancel := context.WithTimeout(t.ctx, 2*time.Minute)
+					defer cancel()
+
+					metrics := t.analysis.GetMetrics()
+					if err := t.newspaper.GenerateEdition(ctx, &metrics); err != nil {
+						control.Log(fmt.Sprintf("Tenjin: Newspaper generation error: %v", err))
+					}
+				}()
+			}
 		}
 	}
 }
@@ -144,4 +169,9 @@ func (t *Tenjin) Stop() {
 // GetMetrics returns current metrics (useful for UI or external queries)
 func (t *Tenjin) GetMetrics() analysis.Metrics {
 	return t.analysis.GetMetrics()
+}
+
+// GetNewspaper returns the newspaper instance (for UI access)
+func (t *Tenjin) GetNewspaper() *newspaper.Newspaper {
+	return t.newspaper
 }

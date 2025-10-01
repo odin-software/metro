@@ -169,11 +169,19 @@ Station Arrivals (9 stations):
 - Dynamic scheduling adjustments
 - Actor spawning/removal
 
-### Reporting Layer
+### Real City Data Integration
 
-- LLM-generated daily newspaper summaries
-- Key event highlighting
-- Narrative storytelling from metrics
+- Santo Domingo metro system data
+- Additional cities (NYC, Tokyo, etc.)
+- City selector at startup
+- Coordinate scaling for different city sizes
+
+### Time Schedules & Punctuality
+
+- Scheduled arrival times per station
+- Actual vs. scheduled tracking
+- Punctuality metrics in Tenjin
+- Intelligence to optimize for on-time performance
 
 ### Enhancements
 
@@ -181,6 +189,45 @@ Station Arrivals (9 stations):
 - Real-time alerts for score drops
 - Database persistence for daily stats
 - Score trend indicators (↑↓)
+
+---
+
+## Phase 5: Newspaper System ✅
+
+### Backend
+
+**Ollama Integration**: Local LLM (llama3.2:1b) for story generation
+**Story Types**: Performance, Sentiment, Records, Incidents
+**Generation**: Automatic daily at midnight + on-demand
+**Caching**: Edition persists until next day
+**Tone**: Playful journalism style
+
+### UI
+
+**Newspaper Scene**: Full-screen view with cream/beige background
+**Access**: "NEWS" button in top-right corner of map view
+**Layout**:
+
+- Dark title bar with "METRO DAILY NEWS"
+- Date display
+- Story headlines (larger, highlighted background)
+- Article text (wrapped at ~90 characters)
+- Dividers between stories
+- Back button to return to map
+
+**States**:
+
+- Generating: Shows "Generating today's edition..."
+- Not Available: Shows "No edition available yet."
+- Ready: Displays all stories with formatting
+
+### Performance
+
+- **First Generation**: ~20 seconds (model loads into RAM)
+- **Subsequent**: <1 second (model cached for 5 minutes)
+- **Model Size**: 1.2GB on disk
+- **RAM Usage**: ~1-2GB during generation
+- **Raspberry Pi 5**: Compatible (ARM64 support, 8GB RAM sufficient)
 
 ---
 

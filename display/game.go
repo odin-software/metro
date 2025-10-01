@@ -17,6 +17,7 @@ type SceneType int
 const (
 	SceneMap SceneType = iota
 	SceneStation
+	SceneNewspaper
 )
 
 type Game struct {
@@ -72,11 +73,22 @@ func (g *Game) handleMouseClick() {
 				g.currentScene = SceneMap
 				g.selectedStation = nil
 			}
+		} else if g.currentScene == SceneNewspaper {
+			// In newspaper scene, check for back button
+			if g.isPointInBackButton(mousePos) {
+				g.currentScene = SceneMap
+			}
 		} else {
 			// In map scene
 			// Check if clicked on score panel to toggle breakdown
 			if g.isPointInScorePanel(mousePos) {
 				g.scoreBreakdownOpen = !g.scoreBreakdownOpen
+				return
+			}
+
+			// Check if clicked on newspaper button
+			if g.isPointInNewspaperButton(mousePos) {
+				g.currentScene = SceneNewspaper
 				return
 			}
 
@@ -121,6 +133,12 @@ func (g *Game) isPointInScorePanel(point models.Vector) bool {
 	return point.X >= 10 && point.X <= 190 && point.Y >= 10 && point.Y <= 10+panelHeight
 }
 
+func (g *Game) isPointInNewspaperButton(point models.Vector) bool {
+	// Newspaper button in top-right corner: screenWidth-70, 10, 60x60
+	buttonX := float64(control.DefaultConfig.DisplayScreenWidth - 70)
+	return point.X >= buttonX && point.X <= buttonX+60 && point.Y >= 10 && point.Y <= 70
+}
+
 func (g *Game) isPointInBounds(point, objPos models.Vector, width, height int) bool {
 	halfW := float64(width) / 2
 	halfH := float64(height) / 2
@@ -131,6 +149,8 @@ func (g *Game) isPointInBounds(point, objPos models.Vector, width, height int) b
 func (g *Game) Draw(screen *ebiten.Image) {
 	if g.currentScene == SceneStation {
 		g.drawStationScene(screen)
+	} else if g.currentScene == SceneNewspaper {
+		g.drawNewspaperScene(screen)
 	} else {
 		g.drawMapScene(screen)
 	}
@@ -173,6 +193,9 @@ func (g *Game) drawMapScene(screen *ebiten.Image) {
 
 	// Draw score overlay (always visible)
 	g.drawScoreOverlay(screen)
+
+	// Draw newspaper button (top-right corner)
+	g.drawNewspaperButton(screen)
 }
 
 func (g *Game) drawWaitingPassengers(screen *ebiten.Image, st *models.Station) {
@@ -228,7 +251,7 @@ func (g *Game) drawTrainDataPanel(screen *ebiten.Image) {
 	yPos := float32(25.0)
 	DrawDataText(screen, fmt.Sprintf("TRAIN: %s", tr.Name), panelX+10, yPos, M_FONT_SIZE)
 	yPos += 20
-	DrawDataText(screen, fmt.Sprintf("Speed: %.2f", tr.GetSpeed()), panelX+10, yPos, S_FONT_SIZE)
+	DrawDataText(screen, fmt.Sprintf("Speed: %.1f km/h", tr.GetSpeedKmH()), panelX+10, yPos, S_FONT_SIZE)
 	yPos += 15
 	DrawDataText(screen, fmt.Sprintf("Passengers: %d/%d", tr.GetPassengerCount(), tr.Capacity), panelX+10, yPos, S_FONT_SIZE)
 	yPos += 15
@@ -420,6 +443,152 @@ func (g *Game) getGradeColorRGBA(grade string) color.RGBA {
 	default:
 		return color.RGBA{255, 255, 255, 255} // White
 	}
+}
+
+// drawNewspaperButton draws the newspaper button in the top-right corner
+func (g *Game) drawNewspaperButton(screen *ebiten.Image) {
+	buttonX := float32(control.DefaultConfig.DisplayScreenWidth - 70)
+	buttonY := float32(10)
+	buttonW := float32(60)
+	buttonH := float32(60)
+
+	// Draw button background
+	vector.DrawFilledRect(screen, buttonX, buttonY, buttonW, buttonH, color.RGBA{100, 100, 120, 255}, false)
+	vector.StrokeRect(screen, buttonX, buttonY, buttonW, buttonH, 2, color.RGBA{200, 200, 220, 255}, false)
+
+	// Draw newspaper icon (📰)
+	DrawDataText(screen, "NEWS", buttonX+5, buttonY+35, S_FONT_SIZE)
+}
+
+// drawNewspaperScene draws the full newspaper view
+func (g *Game) drawNewspaperScene(screen *ebiten.Image) {
+	// Draw background (newspaper-like)
+	bgColor := color.RGBA{240, 235, 220, 255} // Cream/beige newspaper color
+	screen.Fill(bgColor)
+
+	// Draw back button (top-left)
+	g.drawBackButton(screen)
+
+	// Get current newspaper edition
+	newspaper := g.brain.GetNewspaper()
+	edition := newspaper.GetCurrentEdition()
+
+	// Title bar (darker background)
+	titleBarHeight := float32(100)
+	vector.DrawFilledRect(screen, 0, 0, float32(control.DefaultConfig.DisplayScreenWidth), titleBarHeight, color.RGBA{30, 30, 40, 255}, false)
+
+	// Newspaper title (white on dark background)
+	titleX := float32(control.DefaultConfig.DisplayScreenWidth/2 - 180)
+	DrawDataText(screen, "METRO DAILY NEWS", titleX, 55, XXL_FONT_SIZE)
+
+	// Check if newspaper is available
+	if edition == nil {
+		// Show "generating" message (black text on cream background)
+		blackColor := color.RGBA{0, 0, 0, 255}
+		if newspaper.IsGenerating() {
+			message := "Generating today's edition..."
+			messageX := float32(control.DefaultConfig.DisplayScreenWidth/2 - 150)
+			DrawColoredText(screen, message, messageX, 200, L_FONT_SIZE, blackColor)
+		} else {
+			message := "No edition available yet."
+			messageX := float32(control.DefaultConfig.DisplayScreenWidth/2 - 120)
+			DrawColoredText(screen, message, messageX, 200, L_FONT_SIZE, blackColor)
+		}
+		return
+	}
+
+	// Display date (white on dark title bar)
+	dateText := edition.Date.Format("Monday, January 2, 2006")
+	dateX := float32(control.DefaultConfig.DisplayScreenWidth/2 - 120)
+	DrawDataText(screen, dateText, dateX, 85, M_FONT_SIZE)
+
+	// Draw stories in columns
+	startY := float32(120)
+	currentY := startY
+	margin := float32(40)
+	storySpacing := float32(50)
+	blackColor := color.RGBA{0, 0, 0, 255}
+	grayColor := color.RGBA{50, 50, 50, 255}
+
+	for i, story := range edition.Stories {
+		// Story divider
+		if i > 0 {
+			dividerY := currentY - 20
+			vector.DrawFilledRect(screen, margin, dividerY, float32(control.DefaultConfig.DisplayScreenWidth)-margin*2, 2, color.RGBA{100, 100, 100, 255}, false)
+			currentY += 10
+		}
+
+		// Story headline (bold, larger, black text)
+		vector.DrawFilledRect(screen, margin-10, currentY-10, float32(control.DefaultConfig.DisplayScreenWidth)-margin*2+20, 50, color.RGBA{255, 250, 230, 255}, false)
+		DrawColoredText(screen, fmt.Sprintf("📰 %s", story.Headline), margin, currentY+20, M_FONT_SIZE, blackColor)
+		currentY += 60
+
+		// Story article text (wrapped, gray text for body)
+		articleLines := g.wrapText(story.Article, 80) // Wrap at ~80 characters for better readability
+		for _, line := range articleLines {
+			DrawColoredText(screen, line, margin+10, currentY, S_FONT_SIZE, grayColor)
+			currentY += 20
+		}
+
+		currentY += storySpacing
+
+		// Don't draw too many stories if they don't fit
+		if currentY > float32(control.DefaultConfig.DisplayScreenHeight-80) {
+			break
+		}
+	}
+}
+
+// wrapText wraps text to fit within a certain character width
+func (g *Game) wrapText(text string, width int) []string {
+	words := []string{}
+	words = append(words, splitBySpaces(text)...)
+
+	lines := []string{}
+	currentLine := ""
+
+	for _, word := range words {
+		testLine := currentLine
+		if testLine != "" {
+			testLine += " "
+		}
+		testLine += word
+
+		if len(testLine) > width {
+			if currentLine != "" {
+				lines = append(lines, currentLine)
+			}
+			currentLine = word
+		} else {
+			currentLine = testLine
+		}
+	}
+
+	if currentLine != "" {
+		lines = append(lines, currentLine)
+	}
+
+	return lines
+}
+
+// splitBySpaces splits a string by spaces
+func splitBySpaces(s string) []string {
+	result := []string{}
+	current := ""
+	for _, ch := range s {
+		if ch == ' ' {
+			if current != "" {
+				result = append(result, current)
+				current = ""
+			}
+		} else {
+			current += string(ch)
+		}
+	}
+	if current != "" {
+		result = append(result, current)
+	}
+	return result
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {
