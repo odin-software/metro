@@ -30,9 +30,26 @@ type Game struct {
 	lastMouseClick     bool
 	brain              *tenjin.Tenjin
 	scoreBreakdownOpen bool
+	clock              interface{ GetCurrentTime() string; GetCurrentTimeOfDay() int } // Simulation clock interface
+	scheduleDB         ScheduleDB                                                       // Schedule database access
 }
 
-func NewGame(trains []models.Train, stations []*models.Station, lines []models.Line, brain *tenjin.Tenjin) *Game {
+// ScheduleDB interface for accessing schedule data
+type ScheduleDB interface {
+	GetScheduleByTrainAndStation(trainID, stationID int64) (Schedule, error)
+	GetScheduleForTrain(trainID int64) ([]Schedule, error)
+	GetScheduleForStation(stationID int64) ([]Schedule, error)
+}
+
+// Schedule represents a scheduled stop
+type Schedule struct {
+	TrainID       int64
+	StationID     int64
+	ScheduledTime int
+	SequenceOrder int64
+}
+
+func NewGame(trains []models.Train, stations []*models.Station, lines []models.Line, brain *tenjin.Tenjin, clock interface{ GetCurrentTime() string; GetCurrentTimeOfDay() int }, scheduleDB ScheduleDB) *Game {
 	Init()
 	models.LineInit()
 	return &Game{
@@ -40,7 +57,9 @@ func NewGame(trains []models.Train, stations []*models.Station, lines []models.L
 		stations:     stations,
 		lines:        lines,
 		currentScene: SceneMap,
+		scheduleDB:   scheduleDB,
 		brain:        brain,
+		clock:        clock,
 	}
 }
 
@@ -56,6 +75,13 @@ func (g *Game) Update() error {
 	g.handleMouseClick()
 
 	return nil
+}
+
+// formatTime converts seconds since midnight to HH:MM format
+func (g *Game) formatTime(secondsSinceMidnight int) string {
+	hours := secondsSinceMidnight / 3600
+	minutes := (secondsSinceMidnight % 3600) / 60
+	return fmt.Sprintf("%02d:%02d", hours, minutes)
 }
 
 func (g *Game) handleMouseClick() {
@@ -196,6 +222,9 @@ func (g *Game) drawMapScene(screen *ebiten.Image) {
 
 	// Draw newspaper button (top-right corner)
 	g.drawNewspaperButton(screen)
+
+	// Draw simulation clock (top-center)
+	g.drawSimulationClock(screen)
 }
 
 func (g *Game) drawWaitingPassengers(screen *ebiten.Image, st *models.Station) {
@@ -241,7 +270,7 @@ func (g *Game) drawTrainDataPanel(screen *ebiten.Image) {
 	panelX := float32(control.DefaultConfig.DisplayScreenWidth - 200)
 	panelY := float32(10)
 	panelW := float32(190)
-	panelH := float32(120)
+	panelH := float32(160) // Increased height for schedule info
 
 	// Draw panel background
 	vector.DrawFilledRect(screen, panelX, panelY, panelW, panelH, color.RGBA{30, 30, 40, 230}, false)
@@ -259,10 +288,48 @@ func (g *Game) drawTrainDataPanel(screen *ebiten.Image) {
 	// Show destination info
 	if tr.Next != nil {
 		DrawDataText(screen, fmt.Sprintf("Next: %s", tr.Next.Name), panelX+10, yPos, S_FONT_SIZE)
+		yPos += 15
+
+		// Show scheduled arrival time if available
+		if g.scheduleDB != nil && g.clock != nil {
+			schedule, err := g.scheduleDB.GetScheduleByTrainAndStation(tr.ID, tr.Next.ID)
+			if err == nil {
+				scheduledTime := g.formatTime(schedule.ScheduledTime)
+				currentTime := g.clock.GetCurrentTimeOfDay()
+
+				// Calculate ETA
+				timeDiff := schedule.ScheduledTime - currentTime
+				etaText := ""
+				if timeDiff > 0 {
+					mins := timeDiff / 60
+					etaText = fmt.Sprintf(" (ETA: %dm)", mins)
+				}
+
+				DrawDataText(screen, fmt.Sprintf("Sched: %s%s", scheduledTime, etaText), panelX+10, yPos, XS_FONT_SIZE)
+			}
+		}
 	} else if tr.Current != nil {
 		DrawDataText(screen, fmt.Sprintf("At: %s", tr.Current.Name), panelX+10, yPos, S_FONT_SIZE)
 	}
 	yPos += 15
+
+	// Show punctuality status if brain is available
+	if g.brain != nil {
+		metrics := g.brain.GetMetrics()
+		if metrics.TotalArrivalsChecked > 0 {
+			statusText := fmt.Sprintf("On-Time: %.0f%%", metrics.OnTimePercentage)
+			statusColor := color.RGBA{0, 200, 0, 255} // Green
+
+			if metrics.OnTimePercentage < 70 {
+				statusColor = color.RGBA{200, 0, 0, 255} // Red
+			} else if metrics.OnTimePercentage < 85 {
+				statusColor = color.RGBA{200, 200, 0, 255} // Yellow
+			}
+
+			DrawColoredText(screen, statusText, panelX+10, yPos, XS_FONT_SIZE, statusColor)
+			yPos += 15
+		}
+	}
 
 	// Capacity bar
 	capacityPct := tr.GetCapacityPercentage() / 100.0
@@ -589,6 +656,27 @@ func splitBySpaces(s string) []string {
 		result = append(result, current)
 	}
 	return result
+}
+
+// drawSimulationClock draws the current simulation time in the top-center
+func (g *Game) drawSimulationClock(screen *ebiten.Image) {
+	if g.clock == nil {
+		return
+	}
+
+	// Clock panel in top-center
+	panelW := float32(120)
+	panelH := float32(40)
+	panelX := float32(control.DefaultConfig.DisplayScreenWidth/2) - panelW/2
+	panelY := float32(10)
+
+	// Draw panel background
+	vector.DrawFilledRect(screen, panelX, panelY, panelW, panelH, color.RGBA{30, 30, 40, 230}, false)
+	vector.StrokeRect(screen, panelX, panelY, panelW, panelH, 2, color.RGBA{100, 150, 200, 255}, false)
+
+	// Draw time
+	currentTime := g.clock.GetCurrentTime()
+	DrawDataText(screen, currentTime, panelX+15, panelY+25, L_FONT_SIZE)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

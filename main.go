@@ -12,6 +12,7 @@ import (
 	"github.com/odin-software/metro/data"
 	"github.com/odin-software/metro/display"
 	"github.com/odin-software/metro/internal/baso"
+	"github.com/odin-software/metro/internal/clock"
 	"github.com/odin-software/metro/internal/models"
 	"github.com/odin-software/metro/internal/sematick"
 	"github.com/odin-software/metro/internal/tenjin"
@@ -69,20 +70,40 @@ func main() {
 		control.Log("Tenjin initialized successfully")
 	}
 
+	// Initialize simulation clock (needed for trains)
+	simulationClock := clock.NewSimulationClock()
+
 	// Creating the train with lines.
-	trains := data.LoadTrains(stations, lines, &cityNetwork, eventChannel)
+	trains := data.LoadTrains(stations, lines, &cityNetwork, eventChannel, simulationClock)
+	control.Log("Simulation clock initialized - Starting time: " + simulationClock.GetCurrentTime())
 
 	// Starting the goroutines for the trains.
 	for i := range len(trains) {
 		wg.Add(1)
 		go func(idx int) {
 			defer wg.Done()
+			defer func() {
+				// Recover from panic if channel is closed during shutdown
+				if r := recover(); r != nil {
+					control.Log("Train goroutine recovered from panic during shutdown")
+				}
+			}()
 			sub := loopTick.Subscribe()
 			for range sub {
 				trains[idx].Tick()
 			}
 		}(i)
 	}
+
+	// Start simulation clock updater
+	wg.Add(1)
+	go func() {
+		defer wg.Done()
+		sub := loopTick.Subscribe()
+		for range sub {
+			simulationClock.Update()
+		}
+	}()
 
 	// Start Tenjin if enabled
 	if control.DefaultConfig.TenjinEnabled && brain != nil {
@@ -103,7 +124,9 @@ func main() {
 		}
 	}()
 
-	game := display.NewGame(trains, stations, lines, brain)
+	// Initialize schedule adapter for UI
+	scheduleAdapter := display.NewBasoScheduleAdapter()
+	game := display.NewGame(trains, stations, lines, brain, simulationClock, scheduleAdapter)
 	ebiten.SetWindowSize(
 		control.DefaultConfig.DisplayScreenWidth*2,
 		control.DefaultConfig.DisplayScreenHeight*2,

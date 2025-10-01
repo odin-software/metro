@@ -27,6 +27,13 @@ type Metrics struct {
 	PassengerDisembarkments int
 	LastUpdated             time.Time
 	Score                   scoring.ScoreComponents // System score
+	// Punctuality metrics
+	TotalArrivalsChecked int
+	OnTimeArrivals       int     // Within ±2 minutes of schedule
+	EarlyArrivals        int     // More than 2 minutes early
+	LateArrivals         int     // More than 2 minutes late
+	AverageDelay         float64 // Average delay in seconds (negative = early)
+	OnTimePercentage     float64 // Percentage of on-time arrivals
 }
 
 // MetricsEngine calculates and maintains metrics from events
@@ -41,10 +48,24 @@ type MetricsEngine struct {
 	totalStations          int                   // Total stations in system
 	stationsWithPassengers map[int64]bool        // Stations that have served passengers
 	currentDay             time.Time             // Track current day for daily resets
+	delays                 []float64             // Track all delays for averaging
+	scheduleDB             ScheduleDB            // Interface for schedule lookups
+}
+
+// ScheduleDB provides schedule lookup functionality
+type ScheduleDB interface {
+	GetScheduleByTrainAndStation(trainID, stationID int64) (Schedule, error)
+}
+
+// Schedule represents a scheduled stop
+type Schedule struct {
+	TrainID       int64
+	StationID     int64
+	ScheduledTime int // Seconds since midnight
 }
 
 // NewMetricsEngine creates a new metrics engine
-func NewMetricsEngine(totalTrains int) *MetricsEngine {
+func NewMetricsEngine(totalTrains int, scheduleDB ScheduleDB) *MetricsEngine {
 	now := time.Now()
 	dayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
 
@@ -65,6 +86,8 @@ func NewMetricsEngine(totalTrains int) *MetricsEngine {
 		stationsWithPassengers: make(map[int64]bool),
 		totalStations:          0, // Will be set based on events
 		currentDay:             dayStart,
+		delays:                 make([]float64, 0),
+		scheduleDB:             scheduleDB,
 	}
 }
 
@@ -78,13 +101,17 @@ func (m *MetricsEngine) ProcessEvents(events []interface{}) {
 		// Use type assertion on the struct itself
 		if e, ok := event.(struct {
 			Type        string
+			TrainID     int64
 			Train       string
 			StationID   int64
 			StationName string
 			Time        time.Time
+			SimTime     int
 			Position    models.Vector
 		}); ok && e.Type == "train_arrival" {
 			m.current.ArrivalsPerStation[e.StationID]++
+			// Track punctuality
+			m.trackPunctuality(e.TrainID, e.StationID, e.SimTime)
 		} else if e, ok := event.(struct {
 			Type        string
 			Train       string
@@ -190,6 +217,51 @@ func (m *MetricsEngine) ProcessEvents(events []interface{}) {
 }
 
 // calculateAverages recomputes average speed and total distance
+// trackPunctuality compares actual arrival time with scheduled time
+func (m *MetricsEngine) trackPunctuality(trainID, stationID int64, actualTime int) {
+	// Skip if no schedule DB available
+	if m.scheduleDB == nil {
+		return
+	}
+
+	// Look up scheduled time
+	schedule, err := m.scheduleDB.GetScheduleByTrainAndStation(trainID, stationID)
+	if err != nil {
+		// No schedule found for this train/station combo (not an error, just skip)
+		return
+	}
+
+	// Calculate delay (negative = early, positive = late)
+	delay := float64(actualTime - schedule.ScheduledTime)
+	m.delays = append(m.delays, delay)
+
+	// Increment counters
+	m.current.TotalArrivalsChecked++
+
+	// Categorize: on-time = within ±2 minutes (±120 seconds)
+	if delay <= -120 {
+		m.current.EarlyArrivals++
+	} else if delay >= 120 {
+		m.current.LateArrivals++
+	} else {
+		m.current.OnTimeArrivals++
+	}
+
+	// Update average delay
+	if len(m.delays) > 0 {
+		totalDelay := 0.0
+		for _, d := range m.delays {
+			totalDelay += d
+		}
+		m.current.AverageDelay = totalDelay / float64(len(m.delays))
+	}
+
+	// Update on-time percentage
+	if m.current.TotalArrivalsChecked > 0 {
+		m.current.OnTimePercentage = (float64(m.current.OnTimeArrivals) / float64(m.current.TotalArrivalsChecked)) * 100.0
+	}
+}
+
 func (m *MetricsEngine) calculateAverages() {
 	// Average speed across all trains
 	if len(m.trainSpeeds) > 0 {
@@ -257,6 +329,14 @@ func (m *MetricsEngine) calculateScore() {
 		m.trainSpeeds = make(map[string]float64)
 		m.trainDistances = make(map[string]float64)
 		m.stationsWithPassengers = make(map[int64]bool)
+		// Reset punctuality metrics
+		m.current.TotalArrivalsChecked = 0
+		m.current.OnTimeArrivals = 0
+		m.current.EarlyArrivals = 0
+		m.current.LateArrivals = 0
+		m.current.AverageDelay = 0
+		m.current.OnTimePercentage = 0
+		m.delays = make([]float64, 0)
 		// Note: Don't reset passengerStates/passengerSentiment - those track active passengers
 	}
 
@@ -376,6 +456,21 @@ func (m *MetricsEngine) GetFormattedOutput() string {
 	output += fmt.Sprintf("Total Boardings: %d | Disembarkments: %d\n",
 		m.current.PassengerBoardings, m.current.PassengerDisembarkments)
 	output += fmt.Sprintf("Average Sentiment: %.1f/100\n", m.current.AverageSentiment)
+
+	// Punctuality metrics
+	if m.current.TotalArrivalsChecked > 0 {
+		output += "\n--- PUNCTUALITY ---\n"
+		output += fmt.Sprintf("Total Arrivals Checked: %d\n", m.current.TotalArrivalsChecked)
+		output += fmt.Sprintf("On-Time: %d (%.1f%%) | Early: %d | Late: %d\n",
+			m.current.OnTimeArrivals, m.current.OnTimePercentage,
+			m.current.EarlyArrivals, m.current.LateArrivals)
+		// Format average delay nicely
+		if m.current.AverageDelay < 0 {
+			output += fmt.Sprintf("Average Delay: %.0f seconds (early)\n", -m.current.AverageDelay)
+		} else {
+			output += fmt.Sprintf("Average Delay: %.0f seconds (late)\n", m.current.AverageDelay)
+		}
+	}
 
 	output += fmt.Sprintf("\nStation Arrivals (%d stations):\n", len(m.current.ArrivalsPerStation))
 	for stationID, count := range m.current.ArrivalsPerStation {

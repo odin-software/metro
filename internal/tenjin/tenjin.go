@@ -33,8 +33,11 @@ func NewTenjin(totalTrains int) (*Tenjin, error) {
 	// Create observation layer
 	collector := observation.NewCollector(eventChannel)
 
+	// Create schedule adapter for punctuality tracking
+	scheduleAdapter := analysis.NewBasoScheduleAdapter()
+
 	// Create analysis layer
-	metricsEngine := analysis.NewMetricsEngine(totalTrains)
+	metricsEngine := analysis.NewMetricsEngine(totalTrains, scheduleAdapter)
 
 	// Create metrics logger
 	metricsDir := control.DefaultConfig.LogsDirectory + "tenjin/"

@@ -67,6 +67,15 @@ type PassengerEvent struct {
 	CreatedAt   time.Time
 }
 
+type Schedule struct {
+	ID            int64
+	TrainID       int64
+	StationID     int64
+	ScheduledTime int64
+	SequenceOrder int64
+	CreatedAt     time.Time
+}
+
 type Station struct {
 	ID        int64
 	Name      string

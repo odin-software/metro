@@ -1,7 +1,7 @@
 # Tenjin Implementation - Executive Summary
 
-**Last Updated**: September 30, 2025
-**Status**: Core Features Complete ✅
+**Last Updated**: October 1, 2025
+**Status**: Core Features Complete ✅ | Time Schedules Added ⏰
 
 ---
 
@@ -228,6 +228,193 @@ Station Arrivals (9 stations):
 - **Model Size**: 1.2GB on disk
 - **RAM Usage**: ~1-2GB during generation
 - **Raspberry Pi 5**: Compatible (ARM64 support, 8GB RAM sufficient)
+
+---
+
+## Phase 6: Real-World Metrics & Time Schedules ✅
+
+### Real-World Scaling
+
+**Scale Configuration**: 1 pixel = 100 meters (0.01 pixels/meter)
+**Map Coverage**: ~70km × 50km (realistic city size)
+**Train Speeds**: Fixed from 3000+ km/h to realistic 60-70 km/h
+**Conversion Utilities**: `internal/models/metrics.go`
+
+**Functions**:
+
+- `PixelsToMeters`, `MetersToPixels`
+- `PixelSpeedToKmPerHour`, `KmPerHourToPixelSpeed`
+- `FormatDistance` (e.g., "1.2 km", "500 m")
+- `FormatSpeed` (e.g., "60 km/h")
+- `CalculateJourneyTime` (distance + speed → time)
+
+**UI Updates**:
+
+- Train data panels now show speed in km/h
+- Distance calculations use real-world units
+
+### Simulation Clock
+
+**Time Tracking**: Seconds since midnight (e.g., 28800 = 8:00 AM)
+**Start Time**: Configurable (default: 8:00 AM)
+**Display**: Top-center of screen (HH:MM:SS format)
+**Updates**: Every game tick (~60 Hz)
+**Speed Multiplier**: `SimulationSpeed` config (default: 1.0 = real-time)
+
+**Package**: `internal/clock/clock.go`
+
+- `SimulationClock` struct (thread-safe)
+- `GetCurrentTime()` - formatted string
+- `GetCurrentTimeOfDay()` - seconds since midnight
+- Wraps at midnight (24-hour cycle)
+
+### Time Schedules
+
+**Database Schema**: `schedule` table
+
+- `train_id` - which train
+- `station_id` - which station
+- `scheduled_time` - seconds since midnight (e.g., 28800 = 8:00 AM)
+- `sequence_order` - stop number (1, 2, 3...)
+- Indexes for fast lookups by train, station, and time
+
+**Schedule Generation**: `data/generate_schedules.go`
+
+- Loads train routes from database
+- Calculates realistic travel times:
+  - Distance between stations (using coordinates)
+  - Train speed and acceleration (physics-based)
+  - Dwell time at each station (45 seconds)
+- Generates full-day schedules (8:00 AM - 10:00 PM)
+- Multiple loops per train (continuous service)
+
+**Current Data**: 191 schedule entries across 5 trains
+
+- Train Cha (Line 1): 28 stops
+- Train Che (Line 4): 51 stops
+- Train Chi (Line 1): 24 stops
+- Train Cho (Line 3): 48 stops
+- Train Chu (Line 2): 40 stops
+
+**Example Schedule** (Train Cha):
+
+```
+08:00:00  Station 1
+08:22:28  Station 2
+08:48:32  Station 4
+09:06:39  Station 12
+10:09:33  Station 1 (loop complete)
+...
+22:03:57  Station 2 (last stop)
+```
+
+**Database Helpers**: `internal/baso/schedule.go`
+
+- `GetScheduleForTrain()` - all stops for a train
+- `GetScheduleForStation()` - all arrivals at a station
+- `GetNextScheduledStop()` - next stop in sequence
+- `GetScheduleByTrainAndStation()` - specific entry
+
+### Punctuality Tracking ✅ (Steps 4 & 5)
+
+**Arrival Tracking**:
+
+- Trains emit `SimTime` (seconds since midnight) with each arrival event
+- Train struct includes `ID` and `ClockInterface` for timing
+- Events include `TrainID`, `StationID`, and `SimTime`
+
+**Punctuality Calculation**:
+
+- Tenjin looks up scheduled time from database for each arrival
+- Calculates delay: `actual_time - scheduled_time`
+- Categorizes: **Early** (>2min early), **On-Time** (±2min), **Late** (>2min late)
+- Tracks average delay across all arrivals
+
+**Metrics**:
+
+- `TotalArrivalsChecked` - Total arrivals compared against schedule
+- `OnTimeCount` & `OnTimePercentage` - Punctuality rate
+- `EarlyArrivals` / `LateArrivals` - Breakdown by category
+- `AverageDelay` - Mean delay in seconds (negative = early)
+
+**Implementation**:
+
+- `ScheduleDB` interface for database abstraction
+- `BasoScheduleAdapter` connects analysis layer to schedule queries
+- `trackPunctuality()` method processes each arrival
+- Daily reset included in midnight rollover
+- Non-blocking: if schedule not found, skip gracefully
+
+**Output Example**:
+
+```
+--- PUNCTUALITY ---
+Total Arrivals Checked: 42
+On-Time: 35 (83.3%) | Early: 5 | Late: 2
+Average Delay: 12 seconds (late)
+```
+
+**Files Modified**:
+
+- `internal/models/train.go` - Added ID, ClockInterface, updated arrival event
+- `data/load.go` - Pass train ID and clock to NewTrain
+- `main.go` - Initialize clock before trains, pass to LoadTrains
+- `internal/tenjin/analysis/metrics.go` - Added punctuality tracking
+- `internal/tenjin/analysis/schedule_adapter.go` - New adapter for DB access
+- `internal/tenjin/tenjin.go` - Initialize schedule adapter
+- `tools/generate_schedules.go` - Moved from data/ (package conflict)
+
+### UI & Newspaper Integration ✅ (Step 6)
+
+**Train Data Panel Enhancements**:
+
+- Shows scheduled arrival time for next stop
+- Displays ETA in minutes (e.g., "Sched: 08:45 (ETA: 5m)")
+- System-wide on-time percentage with color coding:
+  - Green: ≥85% on-time
+  - Yellow: 70-84% on-time
+  - Red: <70% on-time
+- Increased panel height to accommodate new info
+
+**Newspaper Integration**:
+
+- New story type: `StoryTypePunctuality`
+- Automatically generated when ≥10 arrivals tracked
+- Includes:
+  - On-time percentage
+  - Breakdown (on-time/early/late counts)
+  - Average delay (formatted as "X seconds early/late")
+  - Status assessment (excellent/good/fair/needs improvement)
+- Playful, informative tone matching other stories
+
+**Implementation Details**:
+
+- `ScheduleDB` interface for UI layer
+- `BasoScheduleAdapter` connects display to database
+- `formatTime()` helper converts seconds-since-midnight to HH:MM
+- Real-time schedule lookups on train selection
+- Clock interface extended for `GetCurrentTimeOfDay()`
+
+**Files Modified**:
+
+- `display/game.go` - Enhanced train panel, added formatTime()
+- `display/schedule_adapter.go` - **New**: Database adapter for UI
+- `main.go` - Pass schedule adapter to NewGame
+- `internal/newspaper/stories.go` - Added punctuality data collection and story type
+- `internal/newspaper/generator.go` - Added punctuality story prompt
+
+---
+
+### Time Schedules & Punctuality: Complete! 🎉
+
+All 6 steps completed:
+
+1. ✅ Real-world metrics & clock
+2. ✅ Schedule database & generation
+3. ✅ Schedule seed data (191 entries)
+4. ✅ Actual arrival tracking
+5. ✅ Punctuality metrics in Tenjin
+6. ✅ UI display & newspaper stories
 
 ---
 

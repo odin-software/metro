@@ -12,6 +12,8 @@ Tasks to do:
 - [] Retake random city generation, outline of the city approach.
 - [] Ebiten to show the simulation.
 
+- [] A way to run the simmulation for a lot of time and check results. No need for graphics.
+
 Things to check:
 
 - Constrains en rieles.

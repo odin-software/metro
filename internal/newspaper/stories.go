@@ -15,6 +15,7 @@ const (
 	StoryTypeRecord      StoryType = "record"
 	StoryTypeIncident    StoryType = "incident"
 	StoryTypeSentiment   StoryType = "sentiment"
+	StoryTypePunctuality StoryType = "punctuality"
 )
 
 // Story represents a generated newspaper article
@@ -31,6 +32,7 @@ type StoryData struct {
 	Records     []map[string]interface{}
 	Incidents   []map[string]interface{}
 	Sentiment   map[string]interface{}
+	Punctuality map[string]interface{}
 }
 
 // CollectStoryData gathers interesting data from Tenjin metrics
@@ -40,6 +42,7 @@ func CollectStoryData(metrics *analysis.Metrics) StoryData {
 		Records:     []map[string]interface{}{},
 		Incidents:   []map[string]interface{}{},
 		Sentiment:   make(map[string]interface{}),
+		Punctuality: make(map[string]interface{}),
 	}
 
 	// Performance story data (always generated)
@@ -83,6 +86,35 @@ func CollectStoryData(metrics *analysis.Metrics) StoryData {
 			data.Sentiment["trend"] = "holding steady"
 		} else {
 			data.Sentiment["trend"] = "declining"
+		}
+	}
+
+	// Punctuality story data (if arrivals have been tracked)
+	if metrics.TotalArrivalsChecked > 0 {
+		data.Punctuality["total_checked"] = metrics.TotalArrivalsChecked
+		data.Punctuality["on_time_pct"] = fmt.Sprintf("%.1f", metrics.OnTimePercentage)
+		data.Punctuality["on_time"] = metrics.OnTimeArrivals
+		data.Punctuality["early"] = metrics.EarlyArrivals
+		data.Punctuality["late"] = metrics.LateArrivals
+
+		// Average delay (formatted nicely)
+		if metrics.AverageDelay < 0 {
+			data.Punctuality["avg_delay"] = fmt.Sprintf("%.0f seconds early", -metrics.AverageDelay)
+		} else if metrics.AverageDelay > 0 {
+			data.Punctuality["avg_delay"] = fmt.Sprintf("%.0f seconds late", metrics.AverageDelay)
+		} else {
+			data.Punctuality["avg_delay"] = "exactly on time"
+		}
+
+		// Status assessment
+		if metrics.OnTimePercentage >= 90 {
+			data.Punctuality["status"] = "excellent"
+		} else if metrics.OnTimePercentage >= 80 {
+			data.Punctuality["status"] = "good"
+		} else if metrics.OnTimePercentage >= 70 {
+			data.Punctuality["status"] = "fair"
+		} else {
+			data.Punctuality["status"] = "needs improvement"
 		}
 	}
 
@@ -143,6 +175,11 @@ func SelectStoriesToGenerate(data StoryData) []StoryType {
 	// Add sentiment story if passengers exist
 	if val, ok := data.Sentiment["total"]; ok && val.(int) > 0 {
 		stories = append(stories, StoryTypeSentiment)
+	}
+
+	// Add punctuality story if data exists
+	if val, ok := data.Punctuality["total_checked"]; ok && val.(int) > 10 {
+		stories = append(stories, StoryTypePunctuality)
 	}
 
 	// Add one record story if any exist

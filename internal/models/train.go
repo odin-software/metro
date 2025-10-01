@@ -27,6 +27,7 @@ type EventEmitter interface {
 }
 
 type Train struct {
+	ID             int64              // Database ID for schedule lookups
 	Name           string
 	model          Make // Renamed from 'make' to avoid conflict with built-in
 	Position       Vector
@@ -44,10 +45,17 @@ type Train struct {
 	Capacity       int                // Maximum number of passengers
 	Passengers     []*Passenger       // Current passengers on board
 	passengerMutex sync.RWMutex       // Thread safety for passenger operations
+	clock          ClockInterface     // Simulation clock for timing
 	Drawing
 }
 
+// ClockInterface provides access to simulation time
+type ClockInterface interface {
+	GetCurrentTimeOfDay() int // Returns seconds since midnight
+}
+
 func NewTrain(
+	id int64,
 	name string,
 	trainMake Make,
 	pos Vector,
@@ -55,11 +63,13 @@ func NewTrain(
 	line Line,
 	central *Network[Station],
 	eventChannel chan<- interface{},
+	clock ClockInterface,
 ) Train {
 	img, frameWidth, frameHeight, frameCount := assets.GetTrainSprite()
 	// Precompute wait duration in ticks
 	waitTicks := int(control.DefaultConfig.TrainWaitInStation / control.DefaultConfig.LoopDuration)
 	return Train{
+		ID:           id,
 		Name:         name,
 		model:        trainMake,
 		Position:     pos,
@@ -75,6 +85,7 @@ func NewTrain(
 		tickCounter:  0,
 		Capacity:     50, // Default capacity: 50 passengers
 		Passengers:   make([]*Passenger, 0),
+		clock:        clock,
 		Drawing: Drawing{
 			Counter:     0,
 			FrameWidth:  frameWidth,
@@ -112,19 +123,29 @@ func (tr *Train) addToQueue(sts []Vector) {
 func (tr *Train) logArrival(stationName string) {
 	// Emit arrival event to Tenjin
 	if tr.eventChannel != nil && control.DefaultConfig.TenjinEnabled {
+		// Get simulation time (seconds since midnight)
+		simTime := 0
+		if tr.clock != nil {
+			simTime = tr.clock.GetCurrentTimeOfDay()
+		}
+
 		event := struct {
 			Type        string
+			TrainID     int64
 			Train       string
 			StationID   int64
 			StationName string
 			Time        time.Time
+			SimTime     int // Seconds since midnight in simulation
 			Position    Vector
 		}{
 			Type:        "train_arrival",
+			TrainID:     tr.ID,
 			Train:       tr.Name,
 			StationID:   tr.Current.ID,
 			StationName: stationName,
 			Time:        time.Now(),
+			SimTime:     simTime,
 			Position:    tr.Position,
 		}
 		select {

@@ -114,6 +114,23 @@ ARTICLE: (2-3 sentences, empathetic tone)`,
 			data["sentiment"], data["trend"], data["station"], data["waiting"],
 		)
 
+	case StoryTypePunctuality:
+		return fmt.Sprintf(
+			`Write a playful newspaper article about train punctuality in a metro system.
+
+On-Time Rate: %s%%
+Status: %s
+Total Trains Checked: %v
+Breakdown: %v on-time, %v early, %v late
+Average Delay: %s
+
+Format:
+HEADLINE: (catchy, one line)
+ARTICLE: (2-3 sentences, informative and playful tone)`,
+			data["on_time_pct"], data["status"], data["total_checked"],
+			data["on_time"], data["early"], data["late"], data["avg_delay"],
+		)
+
 	default:
 		return "Write a short playful newspaper article about a metro system."
 	}

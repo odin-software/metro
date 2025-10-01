@@ -61,6 +61,7 @@ func LoadTrains(
 	lines []models.Line,
 	central *models.Network[models.Station],
 	eventChannel chan<- interface{},
+	clock models.ClockInterface,
 ) []models.Train {
 	db := baso.NewBaso()
 	trainsData := db.ListTrainsFull()
@@ -102,6 +103,7 @@ func LoadTrains(
 		result = append(
 			result,
 			models.NewTrain(
+				train.ID,
 				train.Name,
 				mk,
 				models.NewVector(train.X, train.Y),
@@ -109,6 +111,7 @@ func LoadTrains(
 				line,
 				central,
 				eventChannel,
+				clock,
 			),
 		)
 	}
