@@ -9,6 +9,7 @@ import (
 	"github.com/hajimehoshi/ebiten/v2/vector"
 	"github.com/odin-software/metro/control"
 	"github.com/odin-software/metro/internal/models"
+	"github.com/odin-software/metro/internal/tenjin"
 )
 
 type SceneType int
@@ -19,16 +20,18 @@ const (
 )
 
 type Game struct {
-	trains          []models.Train
-	stations        []*models.Station
-	lines           []models.Line
-	selectedTrain   *models.Train
-	selectedStation *models.Station
-	currentScene    SceneType
-	lastMouseClick  bool
+	trains             []models.Train
+	stations           []*models.Station
+	lines              []models.Line
+	selectedTrain      *models.Train
+	selectedStation    *models.Station
+	currentScene       SceneType
+	lastMouseClick     bool
+	brain              *tenjin.Tenjin
+	scoreBreakdownOpen bool
 }
 
-func NewGame(trains []models.Train, stations []*models.Station, lines []models.Line) *Game {
+func NewGame(trains []models.Train, stations []*models.Station, lines []models.Line, brain *tenjin.Tenjin) *Game {
 	Init()
 	models.LineInit()
 	return &Game{
@@ -36,6 +39,7 @@ func NewGame(trains []models.Train, stations []*models.Station, lines []models.L
 		stations:     stations,
 		lines:        lines,
 		currentScene: SceneMap,
+		brain:        brain,
 	}
 }
 
@@ -70,6 +74,12 @@ func (g *Game) handleMouseClick() {
 			}
 		} else {
 			// In map scene
+			// Check if clicked on score panel to toggle breakdown
+			if g.isPointInScorePanel(mousePos) {
+				g.scoreBreakdownOpen = !g.scoreBreakdownOpen
+				return
+			}
+
 			// Clear previous train selection
 			g.selectedTrain = nil
 
@@ -100,6 +110,15 @@ func (g *Game) handleMouseClick() {
 func (g *Game) isPointInBackButton(point models.Vector) bool {
 	// Back button in top-left corner: 10, 10, 80x30
 	return point.X >= 10 && point.X <= 90 && point.Y >= 10 && point.Y <= 40
+}
+
+func (g *Game) isPointInScorePanel(point models.Vector) bool {
+	// Score panel in top-left corner: 10, 10, 180x100 (or 180x180 when expanded)
+	panelHeight := 100.0
+	if g.scoreBreakdownOpen {
+		panelHeight = 180.0
+	}
+	return point.X >= 10 && point.X <= 190 && point.Y >= 10 && point.Y <= 10+panelHeight
 }
 
 func (g *Game) isPointInBounds(point, objPos models.Vector, width, height int) bool {
@@ -151,6 +170,9 @@ func (g *Game) drawMapScene(screen *ebiten.Image) {
 	if g.selectedTrain != nil {
 		g.drawTrainDataPanel(screen)
 	}
+
+	// Draw score overlay (always visible)
+	g.drawScoreOverlay(screen)
 }
 
 func (g *Game) drawWaitingPassengers(screen *ebiten.Image, st *models.Station) {
@@ -299,6 +321,105 @@ func (g *Game) drawBackButton(screen *ebiten.Image) {
 
 	// Button text
 	DrawDataText(screen, "< Back", buttonX+10, buttonY+20, S_FONT_SIZE)
+}
+
+// drawScoreOverlay draws the system score in the top-left corner
+func (g *Game) drawScoreOverlay(screen *ebiten.Image) {
+	// Skip if Tenjin is not enabled or brain is nil
+	if g.brain == nil {
+		return
+	}
+
+	// Get current metrics with score
+	metrics := g.brain.GetMetrics()
+	score := metrics.Score
+
+	// Panel dimensions and position (top-left corner)
+	panelX := float32(10)
+	panelY := float32(10)
+	panelW := float32(180)
+	panelH := float32(100)
+
+	// Expand panel if breakdown is open
+	if g.scoreBreakdownOpen {
+		panelH = float32(180)
+	}
+
+	// Draw panel background
+	vector.DrawFilledRect(screen, panelX, panelY, panelW, panelH, color.RGBA{30, 30, 40, 230}, false)
+
+	// Get grade color
+	gradeColor := g.getGradeColorRGBA(score.Grade)
+
+	// Draw border with grade color
+	vector.StrokeRect(screen, panelX, panelY, panelW, panelH, 3, gradeColor, false)
+
+	// Draw score title
+	yPos := float32(25.0)
+	DrawDataText(screen, "SYSTEM SCORE", panelX+10, yPos, S_FONT_SIZE)
+	yPos += 20
+
+	// Draw overall score with grade color
+	scoreText := fmt.Sprintf("%.1f", score.Overall)
+	DrawDataText(screen, scoreText, panelX+10, yPos, L_FONT_SIZE)
+
+	// Draw grade next to score
+	gradeX := panelX + 130
+	DrawDataText(screen, score.Grade, gradeX, yPos-30, M_FONT_SIZE)
+	yPos += 25
+
+	if g.scoreBreakdownOpen {
+		// Draw detailed component scores
+		DrawDataText(screen, "--- Components ---", panelX+10, yPos, XS_FONT_SIZE)
+		yPos += 15
+
+		DrawDataText(screen, fmt.Sprintf("Satisfaction: %.1f", score.PassengerSatisfaction), panelX+10, yPos, S_FONT_SIZE)
+		yPos += 15
+
+		DrawDataText(screen, fmt.Sprintf("Efficiency: %.1f", score.ServiceEfficiency), panelX+10, yPos, S_FONT_SIZE)
+		yPos += 15
+
+		DrawDataText(screen, fmt.Sprintf("Capacity: %.1f", score.SystemCapacity), panelX+10, yPos, S_FONT_SIZE)
+		yPos += 15
+
+		DrawDataText(screen, fmt.Sprintf("Reliability: %.1f", score.Reliability), panelX+10, yPos, S_FONT_SIZE)
+		yPos += 15
+
+		// Draw hint
+		DrawDataText(screen, "(click to collapse)", panelX+10, yPos, XS_FONT_SIZE)
+	} else {
+		// Draw component scores (compact)
+		componentText := fmt.Sprintf("S:%.0f E:%.0f C:%.0f R:%.0f",
+			score.PassengerSatisfaction,
+			score.ServiceEfficiency,
+			score.SystemCapacity,
+			score.Reliability)
+		DrawDataText(screen, componentText, panelX+10, yPos, XS_FONT_SIZE)
+		yPos += 12
+
+		// Draw hint
+		DrawDataText(screen, "(click for details)", panelX+10, yPos, XS_FONT_SIZE)
+	}
+}
+
+// getGradeColorRGBA returns the color for a grade
+func (g *Game) getGradeColorRGBA(grade string) color.RGBA {
+	switch grade {
+	case "S":
+		return color.RGBA{255, 215, 0, 255} // Gold
+	case "A":
+		return color.RGBA{0, 255, 0, 255} // Green
+	case "B":
+		return color.RGBA{144, 238, 144, 255} // Light Green
+	case "C":
+		return color.RGBA{255, 255, 0, 255} // Yellow
+	case "D":
+		return color.RGBA{255, 165, 0, 255} // Orange
+	case "F":
+		return color.RGBA{255, 0, 0, 255} // Red
+	default:
+		return color.RGBA{255, 255, 255, 255} // White
+	}
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

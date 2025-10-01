@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"github.com/odin-software/metro/internal/models"
+	"github.com/odin-software/metro/internal/tenjin/scoring"
 )
 
 // Metrics holds the current state of system metrics
@@ -25,32 +26,45 @@ type Metrics struct {
 	PassengerBoardings      int
 	PassengerDisembarkments int
 	LastUpdated             time.Time
+	Score                   scoring.ScoreComponents // System score
 }
 
 // MetricsEngine calculates and maintains metrics from events
 type MetricsEngine struct {
-	current            Metrics
-	mu                 sync.RWMutex
-	trainSpeeds        map[string]float64 // Track individual train speeds for averaging
-	trainDistances     map[string]float64 // Track cumulative distance per train
-	passengerStates    map[string]string  // Track passenger states (waiting/riding/arrived)
-	passengerSentiment map[string]float64 // Track passenger sentiment
+	current                Metrics
+	mu                     sync.RWMutex
+	trainSpeeds            map[string]float64    // Track individual train speeds for averaging
+	trainDistances         map[string]float64    // Track cumulative distance per train
+	passengerStates        map[string]string     // Track passenger states (waiting/riding/arrived)
+	passengerSentiment     map[string]float64    // Track passenger sentiment
+	scoreHistory           *scoring.ScoreHistory // Score tracking
+	totalStations          int                   // Total stations in system
+	stationsWithPassengers map[int64]bool        // Stations that have served passengers
+	currentDay             time.Time             // Track current day for daily resets
 }
 
 // NewMetricsEngine creates a new metrics engine
 func NewMetricsEngine(totalTrains int) *MetricsEngine {
+	now := time.Now()
+	dayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+
 	return &MetricsEngine{
 		current: Metrics{
 			TotalTrains:          totalTrains,
 			ArrivalsPerStation:   make(map[int64]int),
 			DeparturesPerStation: make(map[int64]int),
 			TrainsPerLine:        make(map[string]int),
-			LastUpdated:          time.Now(),
+			LastUpdated:          now,
+			Score:                scoring.ScoreComponents{Overall: 100.0, Grade: "S"},
 		},
-		trainSpeeds:        make(map[string]float64),
-		trainDistances:     make(map[string]float64),
-		passengerStates:    make(map[string]string),
-		passengerSentiment: make(map[string]float64),
+		trainSpeeds:            make(map[string]float64),
+		trainDistances:         make(map[string]float64),
+		passengerStates:        make(map[string]string),
+		passengerSentiment:     make(map[string]float64),
+		scoreHistory:           scoring.NewScoreHistory(),
+		stationsWithPassengers: make(map[int64]bool),
+		totalStations:          0, // Will be set based on events
+		currentDay:             dayStart,
 	}
 }
 
@@ -116,6 +130,7 @@ func (m *MetricsEngine) ProcessEvents(events []interface{}) {
 		}); ok && e.Type == "passenger_spawn" {
 			m.passengerStates[e.PassengerID] = "waiting"
 			m.passengerSentiment[e.PassengerID] = 100.0
+			m.stationsWithPassengers[e.StationID] = true
 		} else if e, ok := event.(struct {
 			Type          string
 			PassengerID   string
@@ -151,8 +166,9 @@ func (m *MetricsEngine) ProcessEvents(events []interface{}) {
 			Sentiment       float64
 			Time            time.Time
 		}); ok && e.Type == "passenger_arrive" {
-			m.passengerStates[e.PassengerID] = "arrived"
-			m.passengerSentiment[e.PassengerID] = e.Sentiment
+			// Passenger has arrived - remove from tracking and increment counter
+			delete(m.passengerStates, e.PassengerID)
+			delete(m.passengerSentiment, e.PassengerID)
 			m.current.PassengersArrived++
 		} else if e, ok := event.(struct {
 			Type          string
@@ -218,6 +234,95 @@ func (m *MetricsEngine) calculateAverages() {
 	} else {
 		m.current.AverageSentiment = 0.0
 	}
+
+	// Calculate and update system score
+	m.calculateScore()
+}
+
+// calculateScore computes the overall system score based on current metrics
+func (m *MetricsEngine) calculateScore() {
+	// Check if we need to reset for a new day
+	now := time.Now()
+	dayStart := time.Date(now.Year(), now.Month(), now.Day(), 0, 0, 0, 0, now.Location())
+	if dayStart.After(m.currentDay) {
+		m.currentDay = dayStart
+		// Reset cumulative metrics for new day (without locking - already locked by caller)
+		m.current.ArrivalsPerStation = make(map[int64]int)
+		m.current.DeparturesPerStation = make(map[int64]int)
+		m.current.ErrorCount = 0
+		m.current.TotalDistanceTraveled = 0
+		m.current.PassengersArrived = 0
+		m.current.PassengerBoardings = 0
+		m.current.PassengerDisembarkments = 0
+		m.trainSpeeds = make(map[string]float64)
+		m.trainDistances = make(map[string]float64)
+		m.stationsWithPassengers = make(map[int64]bool)
+		// Note: Don't reset passengerStates/passengerSentiment - those track active passengers
+	}
+
+	// Count passengers with 0 sentiment
+	zeroSentimentCount := 0
+	for _, sentiment := range m.passengerSentiment {
+		if sentiment <= 0.0 {
+			zeroSentimentCount++
+		}
+	}
+
+	// Calculate train capacity metrics
+	totalCapacity := m.current.TotalTrains * 50 // Assuming 50 passenger capacity per train
+	averageOccupancy := 0.0
+	if totalCapacity > 0 {
+		averageOccupancy = (float64(m.current.PassengersRiding) / float64(totalCapacity)) * 100.0
+	}
+
+	// Find max station congestion (most waiting at any single station)
+	maxCongestion := 0
+	for _, count := range m.current.ArrivalsPerStation {
+		if count > maxCongestion {
+			maxCongestion = count
+		}
+	}
+
+	// Calculate average station wait (rough estimate based on waiting passengers)
+	avgStationWait := 0
+	if m.totalStations > 0 {
+		avgStationWait = m.current.PassengersWaiting / m.totalStations
+	}
+
+	// Set totalStations from arrivals map if not set
+	if m.totalStations == 0 {
+		m.totalStations = len(m.current.ArrivalsPerStation)
+	}
+
+	// Prepare scoring inputs
+	inputs := scoring.ScoreInputs{
+		TotalPassengers:        m.current.TotalPassengers,
+		WaitingPassengers:      m.current.PassengersWaiting,
+		RidingPassengers:       m.current.PassengersRiding,
+		ArrivedPassengers:      m.current.PassengersArrived,
+		AverageSentiment:       m.current.AverageSentiment,
+		ZeroSentimentCount:     zeroSentimentCount,
+		TotalBoardings:         m.current.PassengerBoardings,
+		TotalDisembarkments:    m.current.PassengerDisembarkments,
+		TotalTrains:            m.current.TotalTrains,
+		TotalTrainCapacity:     totalCapacity,
+		PassengersOnTrains:     m.current.PassengersRiding,
+		AverageTrainOccupancy:  averageOccupancy,
+		TotalStations:          m.totalStations,
+		StationsWithPassengers: len(m.stationsWithPassengers),
+		MaxStationCongestion:   maxCongestion,
+		AverageStationWait:     avgStationWait,
+		TrainErrors:            m.current.ErrorCount,
+	}
+
+	// Calculate score
+	score := scoring.CalculateScore(inputs)
+
+	// Update current score
+	m.current.Score = score
+
+	// Record in history
+	m.scoreHistory.Update(score)
 }
 
 // GetMetrics returns a copy of current metrics (thread-safe)
@@ -249,7 +354,17 @@ func (m *MetricsEngine) GetFormattedOutput() string {
 
 	output := fmt.Sprintf("\n=== TENJIN METRICS (Updated: %s) ===\n",
 		m.current.LastUpdated.Format("15:04:05"))
-	output += fmt.Sprintf("Total Trains: %d\n", m.current.TotalTrains)
+
+	// System Score (prominent display)
+	output += fmt.Sprintf("\n*** SYSTEM SCORE: %.1f (%s) ***\n",
+		m.current.Score.Overall, m.current.Score.Grade)
+	output += fmt.Sprintf("  Satisfaction: %.1f | Efficiency: %.1f | Capacity: %.1f | Reliability: %.1f\n",
+		m.current.Score.PassengerSatisfaction,
+		m.current.Score.ServiceEfficiency,
+		m.current.Score.SystemCapacity,
+		m.current.Score.Reliability)
+
+	output += fmt.Sprintf("\nTotal Trains: %d\n", m.current.TotalTrains)
 	output += fmt.Sprintf("Average Speed: %.2f\n", m.current.AverageSpeed)
 	output += fmt.Sprintf("Total Distance Traveled: %.2f\n", m.current.TotalDistanceTraveled)
 	output += fmt.Sprintf("Total Errors: %d\n", m.current.ErrorCount)
@@ -286,7 +401,12 @@ func (m *MetricsEngine) Reset() {
 	m.current.DeparturesPerStation = make(map[int64]int)
 	m.current.ErrorCount = 0
 	m.current.TotalDistanceTraveled = 0
+	m.current.PassengersArrived = 0
+	m.current.PassengerBoardings = 0
+	m.current.PassengerDisembarkments = 0
 	m.trainSpeeds = make(map[string]float64)
 	m.trainDistances = make(map[string]float64)
+	m.stationsWithPassengers = make(map[int64]bool)
 	m.current.LastUpdated = time.Now()
+	// Note: Don't reset passengerStates/passengerSentiment - those track active passengers
 }

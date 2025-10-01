@@ -103,7 +103,7 @@ func main() {
 		}
 	}()
 
-	game := display.NewGame(trains, stations, lines)
+	game := display.NewGame(trains, stations, lines, brain)
 	ebiten.SetWindowSize(
 		control.DefaultConfig.DisplayScreenWidth*2,
 		control.DefaultConfig.DisplayScreenHeight*2,
