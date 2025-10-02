@@ -2,6 +2,7 @@ package display
 
 import (
 	"fmt"
+	"image"
 	"image/color"
 	"math"
 
@@ -32,6 +33,11 @@ type Game struct {
 	scoreBreakdownOpen bool
 	clock              interface{ GetCurrentTime() string; GetCurrentTimeOfDay() int } // Simulation clock interface
 	scheduleDB         ScheduleDB                                                       // Schedule database access
+
+	// Camera controls
+	cameraZoom   float64 // Zoom level (1.0 = normal, 2.0 = 2x zoom)
+	cameraOffsetX float64 // Camera pan offset X
+	cameraOffsetY float64 // Camera pan offset Y
 }
 
 // ScheduleDB interface for accessing schedule data
@@ -60,6 +66,9 @@ func NewGame(trains []models.Train, stations []*models.Station, lines []models.L
 		scheduleDB:   scheduleDB,
 		brain:        brain,
 		clock:        clock,
+		cameraZoom:   1.0, // Start at 1x zoom
+		cameraOffsetX: 0,
+		cameraOffsetY: 0,
 	}
 }
 
@@ -69,6 +78,11 @@ func (g *Game) Update() error {
 	}
 	for i := range g.stations {
 		g.stations[i].Update()
+	}
+
+	// Handle camera controls (only in map scene)
+	if g.currentScene == SceneMap {
+		g.handleCameraControls()
 	}
 
 	// Handle mouse clicks
@@ -84,6 +98,81 @@ func (g *Game) formatTime(secondsSinceMidnight int) string {
 	return fmt.Sprintf("%02d:%02d", hours, minutes)
 }
 
+// handleCameraControls processes zoom and pan inputs
+func (g *Game) handleCameraControls() {
+	// Zoom controls: Mouse wheel or +/- keys
+	_, wheelY := ebiten.Wheel()
+	if wheelY != 0 {
+		zoomDelta := wheelY * 0.1 // 0.1 zoom per wheel notch
+		g.cameraZoom += zoomDelta
+	}
+
+	// Keyboard zoom controls
+	if ebiten.IsKeyPressed(ebiten.KeyEqual) || ebiten.IsKeyPressed(ebiten.KeyKPAdd) {
+		g.cameraZoom += 0.02 // Smooth zoom in
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyMinus) || ebiten.IsKeyPressed(ebiten.KeyKPSubtract) {
+		g.cameraZoom -= 0.02 // Smooth zoom out
+	}
+
+	// Clamp zoom between 0.5x and 10x
+	if g.cameraZoom < 0.5 {
+		g.cameraZoom = 0.5
+	}
+	if g.cameraZoom > 10.0 {
+		g.cameraZoom = 10.0
+	}
+
+	// Pan controls: Arrow keys or WASD
+	panSpeed := 5.0 / g.cameraZoom // Pan slower when zoomed in
+
+	if ebiten.IsKeyPressed(ebiten.KeyArrowLeft) || ebiten.IsKeyPressed(ebiten.KeyA) {
+		g.cameraOffsetX += panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyArrowRight) || ebiten.IsKeyPressed(ebiten.KeyD) {
+		g.cameraOffsetX -= panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyArrowUp) || ebiten.IsKeyPressed(ebiten.KeyW) {
+		g.cameraOffsetY += panSpeed
+	}
+	if ebiten.IsKeyPressed(ebiten.KeyArrowDown) || ebiten.IsKeyPressed(ebiten.KeyS) {
+		g.cameraOffsetY -= panSpeed
+	}
+
+	// Reset camera: R key
+	if ebiten.IsKeyPressed(ebiten.KeyR) {
+		g.cameraZoom = 1.0
+		g.cameraOffsetX = 0
+		g.cameraOffsetY = 0
+	}
+}
+
+// screenToWorld converts screen coordinates to world coordinates (accounting for camera)
+func (g *Game) screenToWorld(screenX, screenY float64) (float64, float64) {
+	// Center of screen
+	centerX := float64(control.DefaultConfig.DisplayScreenWidth) / 2.0
+	centerY := float64(control.DefaultConfig.DisplayScreenHeight) / 2.0
+
+	// Transform from screen space to world space
+	worldX := (screenX - centerX) / g.cameraZoom - g.cameraOffsetX + centerX
+	worldY := (screenY - centerY) / g.cameraZoom - g.cameraOffsetY + centerY
+
+	return worldX, worldY
+}
+
+// worldToScreen converts world coordinates to screen coordinates (accounting for camera)
+func (g *Game) worldToScreen(worldX, worldY float64) (float64, float64) {
+	// Center of screen
+	centerX := float64(control.DefaultConfig.DisplayScreenWidth) / 2.0
+	centerY := float64(control.DefaultConfig.DisplayScreenHeight) / 2.0
+
+	// Transform from world space to screen space
+	screenX := (worldX - centerX + g.cameraOffsetX) * g.cameraZoom + centerX
+	screenY := (worldY - centerY + g.cameraOffsetY) * g.cameraZoom + centerY
+
+	return screenX, screenY
+}
+
 func (g *Game) handleMouseClick() {
 	// Detect mouse button press (on the frame it's pressed)
 	mousePressed := ebiten.IsMouseButtonPressed(ebiten.MouseButtonLeft)
@@ -91,6 +180,7 @@ func (g *Game) handleMouseClick() {
 	// Only handle click on the frame the button was just pressed
 	if mousePressed && !g.lastMouseClick {
 		mx, my := ebiten.CursorPosition()
+		// Keep mouse position in screen space
 		mousePos := models.NewVector(float64(mx), float64(my))
 
 		if g.currentScene == SceneStation {
@@ -121,9 +211,13 @@ func (g *Game) handleMouseClick() {
 			// Clear previous train selection
 			g.selectedTrain = nil
 
-			// Check if clicked on a train
+			// Check if clicked on a train (compare in screen space)
 			for i := range g.trains {
-				if g.isPointInBounds(mousePos, g.trains[i].Position, g.trains[i].FrameWidth, g.trains[i].FrameHeight) {
+				// Convert train position to screen space
+				screenX, screenY := g.worldToScreen(g.trains[i].Position.X, g.trains[i].Position.Y)
+				screenPos := models.NewVector(screenX, screenY)
+
+				if g.isPointInBounds(mousePos, screenPos, g.trains[i].FrameWidth, g.trains[i].FrameHeight) {
 					g.selectedTrain = &g.trains[i]
 					break
 				}
@@ -132,7 +226,11 @@ func (g *Game) handleMouseClick() {
 			// If no train clicked, check stations (switch to station scene)
 			if g.selectedTrain == nil {
 				for _, st := range g.stations {
-					if g.isPointInBounds(mousePos, st.Position, st.FrameWidth, st.FrameHeight) {
+					// Convert station position to screen space
+					screenX, screenY := g.worldToScreen(st.Position.X, st.Position.Y)
+					screenPos := models.NewVector(screenX, screenY)
+
+					if g.isPointInBounds(mousePos, screenPos, st.FrameWidth, st.FrameHeight) {
 						g.selectedStation = st
 						g.currentScene = SceneStation
 						break
@@ -183,35 +281,92 @@ func (g *Game) Draw(screen *ebiten.Image) {
 }
 
 func (g *Game) drawMapScene(screen *ebiten.Image) {
-	// Draw stations
-	for _, st := range g.stations {
-		st.Draw(screen)
-		DrawTitle(screen, st.Name, st.Position, XS_FONT_SIZE, st.FrameWidth, st.FrameHeight, TITLE_BOT_SIDE)
+	// Draw lines first (background layer) - lines draw between stations
+	for _, line := range g.lines {
+		// Lines need to be drawn with transformed endpoints
+		// For now, we'll draw them normally since Line.Draw handles its own rendering
+		// TODO: Implement line drawing with camera transform
+		g.drawLineTransformed(screen, line)
+	}
 
-		// Draw waiting passengers as small dots around the station
-		g.drawWaitingPassengers(screen, st)
+	// Draw stations with camera transform
+	for _, st := range g.stations {
+		// Get screen position
+		screenX, screenY := g.worldToScreen(st.Position.X, st.Position.Y)
+
+		// Calculate current animation frame
+		i := (st.Counter / st.FrameCount) % st.FrameCount
+		sx, sy := 0+i*st.FrameWidth, 0
+		frame := st.Sprite.SubImage(image.Rect(sx, sy, sx+st.FrameWidth, sy+st.FrameHeight)).(*ebiten.Image)
+
+		// Draw station sprite at constant screen size (no zoom scaling)
+		op := &ebiten.DrawImageOptions{}
+		// Center the sprite on its screen position
+		op.GeoM.Translate(-float64(st.FrameWidth)/2, -float64(st.FrameHeight)/2)
+		op.GeoM.Translate(screenX, screenY)
+
+		screen.DrawImage(frame, op)
+
+		// Draw waiting passengers
+		g.drawWaitingPassengersTransformed(screen, st)
+	}
+
+	// Draw trains with camera transform
+	for i := range g.trains {
+		tr := &g.trains[i]
+		// Get screen position
+		screenX, screenY := g.worldToScreen(tr.Position.X, tr.Position.Y)
+
+		// Calculate current animation frame
+		frameIdx := (tr.Counter / tr.FrameCount) % tr.FrameCount
+		sx, sy := 0+frameIdx*tr.FrameWidth, 0
+		frame := tr.Sprite.SubImage(image.Rect(sx, sy, sx+tr.FrameWidth, sy+tr.FrameHeight)).(*ebiten.Image)
+
+		// Draw train sprite at constant screen size (no zoom scaling)
+		op := &ebiten.DrawImageOptions{}
+		// Center the sprite on its screen position
+		op.GeoM.Translate(-float64(tr.FrameWidth)/2, -float64(tr.FrameHeight)/2)
+		op.GeoM.Translate(screenX, screenY)
+
+		screen.DrawImage(frame, op)
+	}
+
+	// Draw text labels in screen space (crisp text regardless of zoom)
+	for _, st := range g.stations {
+		// Transform station position to screen space
+		screenX, screenY := g.worldToScreen(st.Position.X, st.Position.Y)
+		screenPos := models.NewVector(screenX, screenY)
+
+		// Draw station name
+		DrawTitle(screen, st.Name, screenPos, XS_FONT_SIZE, st.FrameWidth, st.FrameHeight, TITLE_BOT_SIDE)
 
 		// Draw passenger count
 		waitingCount := st.GetWaitingPassengersCount()
 		if waitingCount > 0 {
 			countText := fmt.Sprintf("%d", waitingCount)
-			DrawInfo(screen, countText, st.Position, S_FONT_SIZE, st.FrameWidth, st.FrameHeight)
+			DrawInfo(screen, countText, screenPos, S_FONT_SIZE, st.FrameWidth, st.FrameHeight)
 		}
 	}
 
-	// Draw trains
-	for _, tr := range g.trains {
-		tr.Draw(screen)
-		DrawTitle(screen, tr.Name, tr.Position, S_FONT_SIZE, tr.FrameWidth, tr.FrameHeight, TITLE_TOP_SIDE)
+	// Draw train labels in screen space
+	for i := range g.trains {
+		tr := &g.trains[i]
+		// Transform train position to screen space
+		screenX, screenY := g.worldToScreen(tr.Position.X, tr.Position.Y)
+		screenPos := models.NewVector(screenX, screenY)
 
-		// Draw passenger count on train
+		// Draw train name
+		DrawTitle(screen, tr.Name, screenPos, S_FONT_SIZE, tr.FrameWidth, tr.FrameHeight, TITLE_TOP_SIDE)
+
+		// Draw passenger count
 		passengerCount := tr.GetPassengerCount()
 		if passengerCount > 0 {
 			countText := fmt.Sprintf("%d", passengerCount)
-			DrawInfo(screen, countText, tr.Position, S_FONT_SIZE, tr.FrameWidth, tr.FrameHeight)
+			DrawInfo(screen, countText, screenPos, S_FONT_SIZE, tr.FrameWidth, tr.FrameHeight)
 		}
 	}
 
+	// Draw UI elements on top (unaffected by camera)
 	// Draw train data panel if train is selected
 	if g.selectedTrain != nil {
 		g.drawTrainDataPanel(screen)
@@ -225,6 +380,71 @@ func (g *Game) drawMapScene(screen *ebiten.Image) {
 
 	// Draw simulation clock (top-center)
 	g.drawSimulationClock(screen)
+
+	// Draw camera controls help (bottom-right)
+	g.drawCameraHelp(screen)
+}
+
+// drawLineTransformed draws a line with camera transform applied
+func (g *Game) drawLineTransformed(screen *ebiten.Image, line models.Line) {
+	// Get all stations for this line (already in correct order from DB via station_line.odr)
+	stations := line.Stations
+
+	if len(stations) < 2 {
+		return
+	}
+
+	// Use a subtle green color for metro lines
+	lineColor := color.RGBA{102, 255, 102, 200} // Semi-transparent green
+
+	// Draw thin line segments connecting consecutive stations in order
+	for i := 0; i < len(stations)-1; i++ {
+		st1 := stations[i]
+		st2 := stations[i+1]
+
+		// Transform both endpoints to screen space
+		x1, y1 := g.worldToScreen(st1.Position.X, st1.Position.Y)
+		x2, y2 := g.worldToScreen(st2.Position.X, st2.Position.Y)
+
+		// Draw thin line (2px at default zoom, scales with zoom for visibility)
+		width := 2.0 * g.cameraZoom
+		if width < 1.0 {
+			width = 1.0
+		}
+		if width > 3.0 {
+			width = 3.0 // Cap at 3px even when zoomed in
+		}
+		vector.StrokeLine(screen, float32(x1), float32(y1), float32(x2), float32(y2),
+			float32(width), lineColor, true)
+	}
+}
+
+// drawWaitingPassengersTransformed draws passenger dots with camera transform
+func (g *Game) drawWaitingPassengersTransformed(screen *ebiten.Image, st *models.Station) {
+	passengers := st.GetWaitingPassengers()
+	if len(passengers) == 0 {
+		return
+	}
+
+	// Draw max 10 passenger dots to avoid clutter
+	maxDots := 10
+	if len(passengers) < maxDots {
+		maxDots = len(passengers)
+	}
+
+	// Arrange dots in a circle around the station (constant screen-space radius)
+	radius := 20.0 // Screen pixels
+	stationScreenX, stationScreenY := g.worldToScreen(st.Position.X, st.Position.Y)
+
+	for i := 0; i < maxDots; i++ {
+		angle := float64(i) * (2.0 * math.Pi / float64(maxDots))
+		screenX := stationScreenX + radius*math.Cos(angle)
+		screenY := stationScreenY + radius*math.Sin(angle)
+
+		// Draw passenger as a small colored circle (constant screen size)
+		passengerColor := getPassengerColor(passengers[i].Sentiment)
+		vector.DrawFilledCircle(screen, float32(screenX), float32(screenY), 2.0, passengerColor, true)
+	}
 }
 
 func (g *Game) drawWaitingPassengers(screen *ebiten.Image, st *models.Station) {
@@ -677,6 +897,34 @@ func (g *Game) drawSimulationClock(screen *ebiten.Image) {
 	// Draw time
 	currentTime := g.clock.GetCurrentTime()
 	DrawDataText(screen, currentTime, panelX+15, panelY+25, L_FONT_SIZE)
+}
+
+// drawCameraHelp draws the camera control instructions in the bottom-right
+func (g *Game) drawCameraHelp(screen *ebiten.Image) {
+	// Panel in bottom-right corner
+	panelW := float32(180)
+	panelH := float32(90)
+	panelX := float32(control.DefaultConfig.DisplayScreenWidth) - panelW - 10
+	panelY := float32(control.DefaultConfig.DisplayScreenHeight) - panelH - 10
+
+	// Draw panel background (semi-transparent)
+	vector.DrawFilledRect(screen, panelX, panelY, panelW, panelH, color.RGBA{30, 30, 40, 200}, false)
+	vector.StrokeRect(screen, panelX, panelY, panelW, panelH, 1, color.RGBA{100, 150, 200, 255}, false)
+
+	// Draw controls text
+	textX := panelX + 10
+	textY := panelY + 15
+	lineHeight := float32(14)
+
+	DrawDataText(screen, "Camera Controls:", textX, textY, XS_FONT_SIZE)
+	textY += lineHeight
+	DrawDataText(screen, "Wheel/+/-: Zoom", textX, textY, XS_FONT_SIZE)
+	textY += lineHeight
+	DrawDataText(screen, "Arrows/WASD: Pan", textX, textY, XS_FONT_SIZE)
+	textY += lineHeight
+	DrawDataText(screen, "R: Reset", textX, textY, XS_FONT_SIZE)
+	textY += lineHeight
+	DrawDataText(screen, fmt.Sprintf("Zoom: %.1fx", g.cameraZoom), textX, textY, XS_FONT_SIZE)
 }
 
 func (g *Game) Layout(outsideWidth, outsideHeight int) (int, int) {

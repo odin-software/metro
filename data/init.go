@@ -32,11 +32,8 @@ func InitDatabase() error {
 	}
 	control.Log("Migrations completed successfully")
 
-	// Always run seeds (with no versioning)
-	if err := runSeeds(); err != nil {
-		return err
-	}
-	control.Log("Seeds completed successfully")
+	// Note: Seeds are NOT run automatically - use make seed_test_city or make seed_santo_domingo
+	// to choose which city to load before running the program
 
 	return nil
 }

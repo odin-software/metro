@@ -14,16 +14,51 @@ cd metro
 go mod download
 ```
 
-## Usage
+## Quick Start
 
-To run the project, you can use the following command:
+### 1. Setup Database
+
+Choose which city to simulate:
+
+**Test City** (12 stations, 4 lines, 5 trains):
+
+```bash
+make seed_test_city
+```
+
+**Santo Domingo** (19 stations, 2 lines, real coordinates):
+
+```bash
+make seed_santo_domingo
+```
+
+### 2. Run Simulation
 
 ```bash
 go build && ./metro
 ```
 
-This will start the report interface at `http://localhost:4440` and the simulation will
-start running in the background.
+This will start the visual simulation with Ebiten rendering.
+
+## City Selection
+
+The simulation supports multiple cities:
+
+- **Test City**: Synthetic network for development (70x50 km, unrealistic scale)
+- **Santo Domingo**: Real metro data from OpenStreetMap (~12x7 km, realistic scale)
+
+To switch cities, clean the database and reload:
+
+```bash
+make seed_santo_domingo  # or seed_test_city
+```
+
+To import fresh Santo Domingo data from OpenStreetMap:
+
+```bash
+make import_osm
+make seed_santo_domingo
+```
 
 ## Development
 
