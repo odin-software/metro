@@ -107,3 +107,4 @@ make run_data               # Setup DB (migrations + seeds)
 - Changes should be made incrementally.
 - Do not test the changes without asking me first.
 - Make comments when neccessary and only to clarify changes that can be confusing.
+- Do not use emojis.

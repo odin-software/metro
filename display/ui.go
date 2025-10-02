@@ -17,10 +17,11 @@ type FontSize int
 type TitleSide int
 
 const (
-	XS_FONT_SIZE FontSize = 6
-	S_FONT_SIZE  FontSize = 10
-	M_FONT_SIZE  FontSize = 24
-	L_FONT_SIZE  FontSize = 48
+	XS_FONT_SIZE  FontSize = 6
+	S_FONT_SIZE   FontSize = 10
+	M_FONT_SIZE   FontSize = 24
+	L_FONT_SIZE   FontSize = 48
+	XXL_FONT_SIZE FontSize = 64
 
 	TITLE_TOP_SIDE   TitleSide = 0
 	TITLE_BOT_SIDE   TitleSide = 1
@@ -74,5 +75,42 @@ func DrawTitle(screen *ebiten.Image, info string, position models.Vector, size F
 	op := &text.DrawOptions{}
 	op.GeoM.Translate(position.X-(w/2)+xOff, position.Y-(h/2)+yOff)
 	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, info, f, op)
+}
+
+func DrawInfo(screen *ebiten.Image, info string, position models.Vector, size FontSize, fw int, fh int) {
+	// Draw info text to the right of the object
+	f := &text.GoTextFace{
+		Source: TextFontSource,
+		Size:   float64(size),
+	}
+	op := &text.DrawOptions{}
+	// Position to the right and slightly down
+	op.GeoM.Translate(position.X+float64(fw)/2+5, position.Y+float64(fh)/2)
+	op.ColorScale.ScaleWithColor(color.RGBA{150, 200, 255, 255}) // Light blue
+	text.Draw(screen, info, f, op)
+}
+
+func DrawDataText(screen *ebiten.Image, info string, x, y float32, size FontSize) {
+	// Draw text at absolute position for data panels
+	f := &text.GoTextFace{
+		Source: TextFontSource,
+		Size:   float64(size),
+	}
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	op.ColorScale.ScaleWithColor(color.White)
+	text.Draw(screen, info, f, op)
+}
+
+func DrawColoredText(screen *ebiten.Image, info string, x, y float32, size FontSize, textColor color.Color) {
+	// Draw text at absolute position with custom color
+	f := &text.GoTextFace{
+		Source: TextFontSource,
+		Size:   float64(size),
+	}
+	op := &text.DrawOptions{}
+	op.GeoM.Translate(float64(x), float64(y))
+	op.ColorScale.ScaleWithColor(textColor)
 	text.Draw(screen, info, f, op)
 }

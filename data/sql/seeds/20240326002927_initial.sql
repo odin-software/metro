@@ -19,11 +19,14 @@ INSERT OR IGNORE INTO line (id, name, color) VALUES (1, 'Line 1', "#FFFF00");
 INSERT OR IGNORE INTO line (id, name, color) VALUES (2, 'Line 2', "#23FF00");
 INSERT OR IGNORE INTO line (id, name, color) VALUES (3, 'Line 3', "#D29100");
 INSERT OR IGNORE INTO line (id, name, color) VALUES (4, 'Line 4', "#F14900");
--- Make data
+-- Make data (Realistic metro speeds: ~60-70 km/h)
+-- Scale: 1 pixel = 100 meters, 60 ticks/second
+-- Make 1: 70 km/h = 0.0032 pixels/tick, accel = 0.0002 pixels/tick² (~1.2 m/s²)
+-- Make 2: 60 km/h = 0.0028 pixels/tick, accel = 0.0002 pixels/tick² (~1.2 m/s²)
 INSERT OR IGNORE INTO make (id, name, description, acceleration, top_speed, color)
-VALUES (1, '4-Legged-chu', 'A type of fast train.', 0.01, 0.2, "#0000DD");
+VALUES (1, '4-Legged-chu', 'Fast metro train (70 km/h)', 0.0002, 0.0032, "#0000DD");
 INSERT OR IGNORE INTO make (id, name, description, acceleration, top_speed, color)
-VALUES (2, '1-Legged-chu', 'Another type of fast train.', 0.02, 0.18, "#113298");
+VALUES (2, '1-Legged-chu', 'Standard metro train (60 km/h)', 0.0002, 0.0028, "#113298");
 -- Trains data
 INSERT OR IGNORE INTO train (id, name, x, y, z, makeId, currentId, lineId) VALUES (1, 'Cha', 50.0, 350.0, 0.0, 1, 1, 1);
 INSERT OR IGNORE INTO train (id, name, x, y, z, makeId, currentId, lineId) VALUES (2, 'Che', 500.0, 50.0, 0.0, 2, 4, 4);

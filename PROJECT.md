@@ -10,6 +10,7 @@ Metro is a simulation of a complex transport system. At its current state it onl
 - A model that can summarize the given actions of the system and make it into a newspaper somehow.
 - There should be a score of how the simulation is going based on how the people are feeling about the system.
 
+- The simulation should have the concept of time, meaning that trains need to be in X station by X time. Tenjin should work towards those times being as truth as possible. No later not that earlier arrivals, of course that part is for when tenjin will actually use a model.
 - Everything related to the UI/UX of the application, but that will be addressed later on.
 
 ### What the final deliverable looks like
@@ -20,3 +21,4 @@ The possible interactions are:
 - User can click on a train and check the trains current data (where its heading, the amount of passengers inside, current velocity)
 - User can click on a station and check the station data (people waiting inline for train, next train incoming, how many people has served)
 - User can check the newspaper to figure out a summary of that day's simulation, including the people's sentiments for example.
+- The simulation will be run in a Raspberry Zero or something like that very light so that it can be attached to the touch screen and sold as a whole product.

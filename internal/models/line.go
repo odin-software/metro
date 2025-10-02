@@ -11,7 +11,7 @@ import (
 type Line struct {
 	ID       int64
 	Name     string
-	Stations []Station
+	Stations []*Station // Pointers to share state across system
 }
 
 func LineInit() {

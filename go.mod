@@ -1,6 +1,6 @@
 module github.com/odin-software/metro
 
-go 1.23.0
+go 1.24.0
 
 toolchain go1.24.2
 
@@ -14,11 +14,14 @@ require (
 	github.com/ebitengine/hideconsole v1.0.0 // indirect
 	github.com/ebitengine/purego v0.8.0 // indirect
 	github.com/go-text/typesetting v0.2.0 // indirect
+	github.com/google/uuid v1.6.0 // indirect
 	github.com/jezek/xgb v1.1.1 // indirect
 	github.com/mfridman/interpolate v0.0.2 // indirect
+	github.com/ollama/ollama v0.12.3 // indirect
 	github.com/sethvargo/go-retry v0.3.0 // indirect
 	go.uber.org/multierr v1.11.0 // indirect
-	golang.org/x/image v0.20.0 // indirect
+	golang.org/x/crypto v0.40.0 // indirect
+	golang.org/x/image v0.22.0 // indirect
 	golang.org/x/sync v0.16.0 // indirect
 )
 
