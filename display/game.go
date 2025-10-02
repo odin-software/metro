@@ -394,10 +394,10 @@ func (g *Game) drawLineTransformed(screen *ebiten.Image, line models.Line) {
 		return
 	}
 
-	// Use a subtle green color for metro lines
-	lineColor := color.RGBA{102, 255, 102, 200} // Semi-transparent green
+	// Use a dark gray color that blends with the black background
+	lineColor := color.RGBA{60, 60, 60, 180} // Very dark gray, semi-transparent
 
-	// Draw thin line segments connecting consecutive stations in order
+	// Draw very thin dashed line segments connecting consecutive stations
 	for i := 0; i < len(stations)-1; i++ {
 		st1 := stations[i]
 		st2 := stations[i+1]
@@ -406,16 +406,52 @@ func (g *Game) drawLineTransformed(screen *ebiten.Image, line models.Line) {
 		x1, y1 := g.worldToScreen(st1.Position.X, st1.Position.Y)
 		x2, y2 := g.worldToScreen(st2.Position.X, st2.Position.Y)
 
-		// Draw thin line (2px at default zoom, scales with zoom for visibility)
-		width := 2.0 * g.cameraZoom
-		if width < 1.0 {
-			width = 1.0
+		// Draw as dashed line (draw short segments with gaps)
+		g.drawDashedLine(screen, x1, y1, x2, y2, lineColor)
+	}
+}
+
+// drawDashedLine draws a dashed line between two points
+func (g *Game) drawDashedLine(screen *ebiten.Image, x1, y1, x2, y2 float64, lineColor color.Color) {
+	// Calculate line length
+	dx := x2 - x1
+	dy := y2 - y1
+	length := math.Sqrt(dx*dx + dy*dy)
+
+	if length < 1 {
+		return
+	}
+
+	// Normalize direction
+	dirX := dx / length
+	dirY := dy / length
+
+	// Dash pattern: 5px dash, 3px gap
+	dashLength := 5.0
+	gapLength := 3.0
+	patternLength := dashLength + gapLength
+
+	// Draw dashes along the line
+	currentPos := 0.0
+	for currentPos < length {
+		// Start of dash
+		startX := x1 + dirX*currentPos
+		startY := y1 + dirY*currentPos
+
+		// End of dash (but not beyond line end)
+		endPos := currentPos + dashLength
+		if endPos > length {
+			endPos = length
 		}
-		if width > 3.0 {
-			width = 3.0 // Cap at 3px even when zoomed in
-		}
-		vector.StrokeLine(screen, float32(x1), float32(y1), float32(x2), float32(y2),
-			float32(width), lineColor, true)
+		endX := x1 + dirX*endPos
+		endY := y1 + dirY*endPos
+
+		// Draw this dash segment (very thin, constant 1px width)
+		vector.StrokeLine(screen, float32(startX), float32(startY), float32(endX), float32(endY),
+			1.0, lineColor, true)
+
+		// Move to next dash
+		currentPos += patternLength
 	}
 }
 
