@@ -69,23 +69,27 @@ type Line struct {
 func main() {
 	fmt.Println("=== Metro Santo Domingo OSM Importer ===\n")
 
-	// Try OSM first, fallback to hardcoded data
 	var stations []Station
 	var lines []Line
 
-	// Query Overpass API
-	fmt.Println("Querying Overpass API for Santo Domingo metro data...")
+	// Query Overpass API for real coordinates
+	fmt.Println("Querying Overpass API for station coordinates...")
 	query := buildOverpassQuery()
 	response, err := queryOverpass(query)
 
 	if err != nil {
 		fmt.Printf("Warning: Overpass API failed: %v\n", err)
-		fmt.Println("Falling back to curated data from OSM...\n")
+		fmt.Println("Falling back to curated data with estimated coordinates...\n")
 		stations, lines = getCuratedData()
 	} else {
-		fmt.Printf("Found %d elements from OSM API\n\n", len(response.Elements))
+		fmt.Printf("Found %d elements from OSM API\n", len(response.Elements))
+		fmt.Println("Using OSM coordinates with curated line ordering...\n")
+
+		// Get stations with real OSM coordinates
 		stations = parseStations(response)
-		lines = parseLines(response, stations)
+
+		// Apply curated line ordering (OSM relations have wrong order)
+		lines = applyCuratedLineOrdering(stations)
 	}
 
 	// Display parsed data
@@ -107,8 +111,7 @@ func main() {
 	timestamp := time.Now().Format("20060102150405")
 	filename := fmt.Sprintf("../data/sql/seeds/%s_santo_domingo.sql", timestamp)
 
-	err = generateSQL(filename, stations, lines)
-	if err != nil {
+	if err := generateSQL(filename, stations, lines); err != nil {
 		fmt.Printf("Error generating SQL: %v\n", err)
 		os.Exit(1)
 	}
@@ -122,13 +125,15 @@ func main() {
 func buildOverpassQuery() string {
 	// Simplified query for metro stations in Santo Domingo
 	return fmt.Sprintf(`[out:json][timeout:15];
+
+area["name"="Santo Domingo"]->.sd;
+area["name"="Distrito Nacional"]->.dn;
+
 (
-  node["railway"="station"]["station"="subway"](%.4f,%.4f,%.4f,%.4f);
-  node["railway"="station"]["subway"="yes"](%.4f,%.4f,%.4f,%.4f);
+  node["railway"="station"]["station"="subway"][!"opening_date"]["name"!="San Felipe"](area.sd);
+  node["railway"="station"]["subway"="yes"](area.dn);
 );
 out body;`,
-		MinLat, MinLon, MaxLat, MaxLon,
-		MinLat, MinLon, MaxLat, MaxLon,
 	)
 }
 
@@ -140,28 +145,43 @@ func getCuratedData() ([]Station, []Line) {
 		lon  float64
 		line string
 	}{
-		// Línea 1 (North to South)
-		{"Villa Mella", 18.5053, -69.9227, "1"},
-		{"Hermanas Mirabal", 18.4991, -69.9145, "1"},
-		{"Máximo Gómez", 18.4881, -69.9097, "1"},
-		{"Bartolomé Colón", 18.4786, -69.9052, "1"},
-		{"Mama Tingó", 18.4714, -69.9026, "1"},
-		{"Juan Pablo Duarte", 18.4672, -69.8992, "1"},
-		{"María Montez", 18.4614, -69.8965, "1"},
-		{"Casandra Damirón", 18.4549, -69.8935, "1"},
-		{"Francisco del Rosario Sánchez", 18.4485, -69.8908, "1"},
-		{"Pedro Livio Cedeño", 18.4433, -69.8888, "1"},
-		{"Los Taínos", 18.4368, -69.8862, "1"},
-		{"Centro de Los Héroes", 18.4741, -69.9310, "1"},
-		{"Joaquín Balaguer", 18.4826, -69.9353, "1"},
-		{"Eduardo Brito", 18.4907, -69.9392, "1"},
+		// Línea 1 (North to South) - 16 stations
+		{"Mamá Tingó", 18.5100, -69.8950, "1"},
+		{"Gregorio Urbano Gilbert", 18.5050, -69.8970, "1"},
+		{"Gregorio Luperón", 18.5000, -69.8990, "1"},
+		{"José Francisco Peña Gómez", 18.4950, -69.9010, "1"},
+		{"Hermanas Mirabal", 18.4900, -69.9030, "1"},
+		{"Máximo Gómez", 18.4850, -69.9050, "1"},
+		{"Los Taínos", 18.4800, -69.9070, "1"},
+		{"Pedro Livio Cedeño", 18.4750, -69.9090, "1"},
+		{"Manuel Arturo Peña Batlle", 18.4710, -69.9110, "1"},
+		{"Juan Pablo Duarte", 18.4670, -69.9130, "1"},
+		{"Profesor Juan Bosch", 18.4630, -69.9150, "1"},
+		{"Casandra Damirón", 18.4590, -69.9170, "1"},
+		{"Joaquín Balaguer", 18.4550, -69.9190, "1"},
+		{"Amín Abel Hasbún", 18.4510, -69.9210, "1"},
+		{"Francisco Alberto Caamaño Deñó", 18.4470, -69.9230, "1,2"}, // Transfer station
+		{"Centro de los Héroes", 18.4430, -69.9250, "1"},
 
-		// Línea 2 (East to West)
-		{"Francisco Alberto Caamaño Deñó", 18.4741, -69.9310, "2"}, // Transfer station
-		{"La Julia", 18.4713, -69.9456, "2"},
-		{"Antonio Duvergé", 18.4683, -69.9596, "2"},
-		{"Hermanas Mirabal 2", 18.4655, -69.9740, "2"},
-		{"Manuel María Valencia", 18.4625, -69.9885, "2"},
+		// Línea 2 (East to West) - 18 stations
+		{"María Montez", 18.4800, -69.8800, "2"},
+		{"Pedro Francisco Bonó", 18.4790, -69.8850, "2"},
+		{"Francisco Gregorio Billini", 18.4780, -69.8900, "2"},
+		{"Ulises Francisco Espaillat", 18.4770, -69.8950, "2"},
+		{"Pedro Mir", 18.4760, -69.9000, "2"},
+		{"Freddy Beras-Goico", 18.4750, -69.9050, "2"},
+		{"Juan Ulises García Saleta", 18.4740, -69.9100, "2"},
+		{"Juan Pablo Duarte", 18.4670, -69.9130, "2"}, // Transfer station with L1
+		{"Coronel Rafael Tomás Fernández Domínguez", 18.4700, -69.9180, "2"},
+		{"Mauricio Báez", 18.4690, -69.9230, "2"},
+		{"Ramón Cáceres", 18.4680, -69.9280, "2"},
+		{"Horacio Vásquez", 18.4670, -69.9330, "2"},
+		{"Manuel de Jesús Galván", 18.4660, -69.9380, "2"},
+		{"Eduardo Brito", 18.4650, -69.9430, "2"},
+		{"Ercilia Pepín", 18.4640, -69.9480, "2"},
+		{"Rosa Duarte", 18.4630, -69.9530, "2"},
+		{"Trina de Moya de Vásquez", 18.4620, -69.9580, "2"},
+		{"Concepción Bona", 18.4610, -69.9630, "2"},
 	}
 
 	stations := []Station{}
@@ -194,36 +214,141 @@ func getCuratedData() ([]Station, []Line) {
 			Name:  "Línea 1",
 			Color: "#E84B28",
 			Stations: []int64{
-				stationIDs["Villa Mella"],
+				stationIDs["Mamá Tingó"],
+				stationIDs["Gregorio Urbano Gilbert"],
+				stationIDs["Gregorio Luperón"],
+				stationIDs["José Francisco Peña Gómez"],
 				stationIDs["Hermanas Mirabal"],
 				stationIDs["Máximo Gómez"],
-				stationIDs["Bartolomé Colón"],
-				stationIDs["Mama Tingó"],
-				stationIDs["Juan Pablo Duarte"],
-				stationIDs["María Montez"],
-				stationIDs["Casandra Damirón"],
-				stationIDs["Francisco del Rosario Sánchez"],
-				stationIDs["Pedro Livio Cedeño"],
 				stationIDs["Los Taínos"],
-				stationIDs["Centro de Los Héroes"],
+				stationIDs["Pedro Livio Cedeño"],
+				stationIDs["Manuel Arturo Peña Batlle"],
+				stationIDs["Juan Pablo Duarte"],
+				stationIDs["Profesor Juan Bosch"],
+				stationIDs["Casandra Damirón"],
 				stationIDs["Joaquín Balaguer"],
-				stationIDs["Eduardo Brito"],
+				stationIDs["Amín Abel Hasbún"],
+				stationIDs["Francisco Alberto Caamaño Deñó"],
+				stationIDs["Centro de los Héroes"],
 			},
 		},
 		{
 			Name:  "Línea 2",
 			Color: "#0066B3",
 			Stations: []int64{
-				stationIDs["Francisco Alberto Caamaño Deñó"],
-				stationIDs["La Julia"],
-				stationIDs["Antonio Duvergé"],
-				stationIDs["Hermanas Mirabal 2"],
-				stationIDs["Manuel María Valencia"],
+				stationIDs["María Montez"],
+				stationIDs["Pedro Francisco Bonó"],
+				stationIDs["Francisco Gregorio Billini"],
+				stationIDs["Ulises Francisco Espaillat"],
+				stationIDs["Pedro Mir"],
+				stationIDs["Freddy Beras-Goico"],
+				stationIDs["Juan Ulises García Saleta"],
+				stationIDs["Juan Pablo Duarte"],
+				stationIDs["Coronel Rafael Tomás Fernández Domínguez"],
+				stationIDs["Mauricio Báez"],
+				stationIDs["Ramón Cáceres"],
+				stationIDs["Horacio Vásquez"],
+				stationIDs["Manuel de Jesús Galván"],
+				stationIDs["Eduardo Brito"],
+				stationIDs["Ercilia Pepín"],
+				stationIDs["Rosa Duarte"],
+				stationIDs["Trina de Moya de Vásquez"],
+				stationIDs["Concepción Bona"],
 			},
 		},
 	}
 
 	return stations, lines
+}
+
+// applyCuratedLineOrdering takes stations from OSM (with real coordinates)
+// and applies the correct line ordering as specified by local knowledge
+func applyCuratedLineOrdering(stations []Station) []Line {
+	// Build a map from station name to station
+	stationMap := make(map[string]*Station)
+	for i := range stations {
+		stationMap[stations[i].Name] = &stations[i]
+	}
+
+	// Define correct line ordering
+	linea1Order := []string{
+		"Mamá Tingó",
+		"Gregorio Urbano Gilbert",
+		"Gregorio Luperón",
+		"José Francisco Peña Gómez",
+		"Hermanas Mirabal",
+		"Máximo Gómez",
+		"Los Taínos",
+		"Pedro Livio Cedeño",
+		"Manuel Arturo Peña Batlle",
+		"Juan Pablo Duarte",
+		"Profesor Juan Bosch",
+		"Casandra Damirón",
+		"Joaquín Balaguer",
+		"Amín Abel Hasbún",
+		"Francisco Alberto Caamaño Deñó",
+		"Centro de los Héroes",
+	}
+
+	linea2Order := []string{
+		"María Montez",
+		"Pedro Francisco Bonó",
+		"Francisco Gregorio Billini",
+		"Ulises Francisco Espaillat",
+		"Pedro Mir",
+		"Freddy Beras-Goico",
+		"Juan Ulises García Saleta",
+		"Juan Pablo Duarte",
+		"Coronel Rafael Tomás Fernández Domínguez",
+		"Mauricio Báez",
+		"Ramón Cáceres",
+		"Horacio Vásquez",
+		"Manuel de Jesús Galván",
+		"Eduardo Brito",
+		"Ercilia Pepín",
+		"Rosa Duarte",
+		"Trina de Moya de Vásquez",
+		"Concepción Bona",
+	}
+
+	// Build lines with correct ordering
+	lines := []Line{}
+
+	// Línea 1
+	linea1Stations := []int64{}
+	for _, name := range linea1Order {
+		if st, ok := stationMap[name]; ok {
+			linea1Stations = append(linea1Stations, st.OSMID)
+		} else {
+			fmt.Printf("Warning: Station '%s' not found in OSM data for Línea 1\n", name)
+		}
+	}
+	if len(linea1Stations) > 0 {
+		lines = append(lines, Line{
+			Name:     "Línea 1",
+			Color:    "#E84B28",
+			Stations: linea1Stations,
+		})
+	}
+
+	// Línea 2
+	linea2Stations := []int64{}
+	for _, name := range linea2Order {
+		if st, ok := stationMap[name]; ok {
+			linea2Stations = append(linea2Stations, st.OSMID)
+		} else {
+			fmt.Printf("Warning: Station '%s' not found in OSM data for Línea 2\n", name)
+		}
+	}
+	if len(linea2Stations) > 0 {
+		lines = append(lines, Line{
+			Name:     "Línea 2",
+			Color:    "#0066B3",
+			Stations: linea2Stations,
+		})
+	}
+
+	return lines
 }
 
 func queryOverpass(query string) (*OverpassResponse, error) {
