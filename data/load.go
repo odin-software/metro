@@ -109,6 +109,7 @@ func LoadTrains(
 				models.NewVector(train.X, train.Y),
 				st,
 				line,
+				train.Forward,
 				central,
 				eventChannel,
 				clock,

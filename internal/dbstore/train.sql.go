@@ -125,6 +125,7 @@ SELECT
 	tr.x,
 	tr.y,
 	tr.z,
+	tr.forward,
 	mk.color,
 	st.id as stationId,
 	ln.name as lineName,
@@ -141,6 +142,7 @@ type GetAllTrainsFullRow struct {
 	X         float64
 	Y         float64
 	Z         float64
+	Forward   int64
 	Color     sql.NullString
 	Stationid int64
 	Linename  string
@@ -162,6 +164,7 @@ func (q *Queries) GetAllTrainsFull(ctx context.Context) ([]GetAllTrainsFullRow, 
 			&i.X,
 			&i.Y,
 			&i.Z,
+			&i.Forward,
 			&i.Color,
 			&i.Stationid,
 			&i.Linename,

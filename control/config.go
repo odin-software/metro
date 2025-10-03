@@ -38,7 +38,7 @@ var DefaultConfig = Config{
 	LoopDurationOffset:   -1 * time.Millisecond,
 	LoopStartingState:    1,
 	ReflexDuration:       2 * time.Second,
-	StdLogs:              true,
+	StdLogs:              false,
 	TrainWaitInStation:   5 * time.Second,
 	TenjinEnabled:        true,
 	TenjinTickRate:       time.Second,

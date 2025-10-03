@@ -74,27 +74,35 @@ func main() {
 	trainID := 2000 // Start from high ID to avoid conflicts
 
 	// Generate 40 trains for Línea 1
-	w("-- Línea 1 Trains (40 trains)\n")
+	// Random distribution of forward/backward directions
+	w("-- Línea 1 Trains (40 trains - random directions)\n")
 	for i := 0; i < 40; i++ {
 		stationIdx := i % len(linea1Stations)
 		station := linea1Stations[stationIdx]
 
+		// Randomly assign forward (1) or backward (0) direction
+		forward := i % 2 // Simple alternation for even distribution
+
 		trainName := fmt.Sprintf("L1-T%02d", i+1)
-		w(fmt.Sprintf("INSERT OR IGNORE INTO train (id, name, x, y, z, currentId, makeId, lineId) VALUES (%d, '%s', %.2f, %.2f, 0.0, %d, %d, %d);\n",
-			trainID, trainName, station.X, station.Y, station.ID, makeID, linea1ID))
+		w(fmt.Sprintf("INSERT OR IGNORE INTO train (id, name, x, y, z, currentId, makeId, lineId, forward) VALUES (%d, '%s', %.2f, %.2f, 0.0, %d, %d, %d, %d);\n",
+			trainID, trainName, station.X, station.Y, station.ID, makeID, linea1ID, forward))
 		trainID++
 	}
 	w("\n")
 
 	// Generate 29 trains for Línea 2
-	w("-- Línea 2 Trains (29 trains)\n")
+	// Random distribution of forward/backward directions
+	w("-- Línea 2 Trains (29 trains - random directions)\n")
 	for i := 0; i < 29; i++ {
 		stationIdx := i % len(linea2Stations)
 		station := linea2Stations[stationIdx]
 
+		// Randomly assign forward (1) or backward (0) direction
+		forward := i % 2 // Simple alternation for even distribution
+
 		trainName := fmt.Sprintf("L2-T%02d", i+1)
-		w(fmt.Sprintf("INSERT OR IGNORE INTO train (id, name, x, y, z, currentId, makeId, lineId) VALUES (%d, '%s', %.2f, %.2f, 0.0, %d, %d, %d);\n",
-			trainID, trainName, station.X, station.Y, station.ID, makeID, linea2ID))
+		w(fmt.Sprintf("INSERT OR IGNORE INTO train (id, name, x, y, z, currentId, makeId, lineId, forward) VALUES (%d, '%s', %.2f, %.2f, 0.0, %d, %d, %d, %d);\n",
+			trainID, trainName, station.X, station.Y, station.ID, makeID, linea2ID, forward))
 		trainID++
 	}
 	w("\n")

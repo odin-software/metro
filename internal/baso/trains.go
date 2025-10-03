@@ -13,6 +13,7 @@ type TrainsWithIds struct {
 	X                float64 `json:"x"`
 	Y                float64 `json:"y"`
 	Z                float64 `json:"z"`
+	Forward          bool    `json:"forward"`
 	CurrentStationId int64   `json:"currentId"`
 	LineName         string  `json:"line"`
 	MakeName         string  `json:"make"`
@@ -33,6 +34,7 @@ func (bs *Baso) ListTrainsFull() []TrainsWithIds {
 				X:                train.X,
 				Y:                train.Y,
 				Z:                train.Z,
+				Forward:          train.Forward != 0, // Convert integer to bool
 				CurrentStationId: train.Stationid,
 				LineName:         train.Linename,
 				MakeName:         train.Makename,

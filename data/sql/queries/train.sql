@@ -1,5 +1,5 @@
 -- name: GetAllTrains :many
-SELECT id, name, x, y, z FROM train 
+SELECT id, name, x, y, z FROM train
 ORDER BY id;
 
 -- name: GetAllTrainsFull :many
@@ -9,6 +9,7 @@ SELECT
 	tr.x,
 	tr.y,
 	tr.z,
+	tr.forward,
 	mk.color,
 	st.id as stationId,
 	ln.name as lineName,
@@ -40,7 +41,7 @@ WHERE name = ?
 RETURNING id;
 
 -- name: DeleteTrain :exec
-DELETE FROM train 
+DELETE FROM train
 WHERE id = ?;
 
 -- name: GetTrainLine :one

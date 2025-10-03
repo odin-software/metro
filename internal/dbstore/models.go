@@ -104,6 +104,7 @@ type Train struct {
 	Nextid    sql.NullInt64
 	Makeid    sql.NullInt64
 	Lineid    sql.NullInt64
+	Forward   int64
 	CreatedAt time.Time
 	UpdatedAt time.Time
 }
