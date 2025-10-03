@@ -17,4 +17,5 @@ sed -n '/-- +goose Up/,/-- +goose Down/p' data/sql/seeds/20240327153529_adding_e
 sed -n '/-- +goose Up/,/-- +goose Down/p' data/sql/seeds/20251001200000_schedules.sql | \
   sed '/-- +goose/d' | sqlite3 "$DB_PATH"
 
-echo "✓ Test city loaded (12 stations, 4 lines, 5 trains)"
+TRAIN_COUNT=$(sqlite3 "$DB_PATH" "SELECT COUNT(*) FROM train;")
+echo "✓ Test city loaded (12 stations, 4 lines, $TRAIN_COUNT trains with schedules)"

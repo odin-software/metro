@@ -1,97 +1,57 @@
-# Metro v0.0.5
+# Metro Simulation
 
-Metro is a simulation project of a transport system and the complex interactions between the different components of the system. The project is developed in Go, and has a web interface to interact with the system.
+Real-time metro train simulation with Go, Ebiten, and SQLite. Features realistic physics, passenger management, and AI performance monitoring.
 
-## Installation
+## Prerequisites
 
-To install the project, you need to have Go installed in your system. You can download it from the [official website](https://golang.org/).
+- Go 1.21+
+- SQLite3
+- Make
 
-Once you have Go installed, you can clone the repository and install the dependencies with the following commands:
+## Run
 
-```bash
-git clone https://github.com/odin-software/metro
-cd metro
-go mod download
-```
-
-## Quick Start
-
-### 1. Setup Database
-
-Choose which city to simulate:
-
-**Test City** (12 stations, 4 lines, 5 trains):
+**Test City:**
 
 ```bash
 make seed_test_city
-```
-
-**Santo Domingo** (19 stations, 2 lines, real coordinates):
-
-```bash
-make seed_santo_domingo
-```
-
-### 2. Run Simulation
-
-```bash
 go build && ./metro
 ```
 
-This will start the visual simulation with Ebiten rendering.
-
-## City Selection
-
-The simulation supports multiple cities:
-
-- **Test City**: Synthetic network for development (70x50 km, unrealistic scale)
-- **Santo Domingo**: Real metro data from OpenStreetMap (~12x7 km, realistic scale)
-
-To switch cities, clean the database and reload:
+**Santo Domingo (real-world data):**
 
 ```bash
-make seed_santo_domingo  # or seed_test_city
+make setup_santo_domingo
+go build && ./metro
 ```
 
-To import fresh Santo Domingo data from OpenStreetMap:
+## Controls
+
+- **Zoom:** Mouse wheel or `+`/`-`
+- **Pan:** Arrow keys or `WASD`
+- **Reset:** `R`
+- **Click:** Stations/trains for details, score panel for metrics, newspaper button for reports
+
+## Key Commands
 
 ```bash
-make import_osm
-make seed_santo_domingo
+make seed_test_city          # 12 stations, 5 trains
+make setup_santo_domingo     # 34 stations, 69 trains (from OSM)
+make clean_city_data         # Clear database
+make run_migrations          # Setup schema
 ```
 
-## Development
+## Features
 
-We use [goose](https://github.com/pressly/goose) to manage the database migrations. To install it, you can use the following command:
+- Real-time physics-based train movement
+- Passenger system with sentiment tracking
+- Schedule-based operation (8 AM - 10 PM)
+- Santo Domingo data from OpenStreetMap
+- Camera zoom and pan
+- AI monitoring (Tenjin) with performance metrics
+- Auto-generated daily newspaper
 
-```bash
-go get -u github.com/pressly/goose/cmd/goose
-```
+## Docs
 
-In order to take advantage of the pre-configured goose options you can set up the following environment variables:
-
-```bash
-export GOOSE_DRIVER=sqlite3
-export GOOSE_DBSTRING=metro.db
-export GOOSE_MIGRATIONS_DIR=migrations
-```
-
-To create a migration, you can use the following command:
-
-```bash
-goose -dir migrations create <migration_name> sql
-```
-
-To run the migrations, you can use the following command:
-
-```bash
-goose -dir migrations up
-```
-
-## Tools and libraries
-
-For the most part we want to use a minimal quantity of dependencies, but we do use some libraries and tools that we need to give credit to:
-
-- [Go](https://golang.org/): The programming language used to develop the project.
-- [echo](https://echo.labstack.com/): The web framework used to develop the web interface.
-- [goose](https://github.com/pressly/goose): The library used to manage the database migrations.
+- [`docs/CITY-SWITCHING.md`](docs/CITY-SWITCHING.md) - City management
+- [`docs/TENJIN-SUMMARY.md`](docs/TENJIN-SUMMARY.md) - AI architecture
+- [`docs/OSM-IMPORT.md`](docs/OSM-IMPORT.md) - OpenStreetMap integration

@@ -39,7 +39,7 @@ type ScheduleEntry struct {
 }
 
 func main() {
-	db, err := sql.Open("sqlite3", "metro.db")
+	db, err := sql.Open("sqlite3", "../data/metro.db")
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "Error opening database: %v\n", err)
 		os.Exit(1)
