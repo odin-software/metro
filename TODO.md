@@ -14,7 +14,7 @@ Tasks to do:
 
 - [] A way to run the simmulation for a lot of time and check results. No need for graphics.
 
-Todo in real life:
+Todo in real life
 
 - Medir velocidad maxima del tren.
 - Medir cuanto tiempo dura un tren en una estacion.
